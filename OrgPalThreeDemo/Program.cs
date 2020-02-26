@@ -10,6 +10,7 @@ using System.Security.Cryptography.X509Certificates;
 using uPLibrary.Networking.M2Mqtt.Messages;
 using Windows.Storage.Streams;
 using nanoFramework.Json;
+using System.Collections;
 
 namespace OrgPalThreeDemo
 {
@@ -26,10 +27,13 @@ namespace OrgPalThreeDemo
         private static string _deviceId;
 
 
-        private static string awsHost = ""; //make sure to add your AWS endpoint and region.
+        private static string awsHost = string.Empty; //make sure to add your AWS endpoint and region. Stored in mqttconfig.json (make sure it is stored on the root of the SD card)
+        //{"Url" : "<endpoint>-ats.iot.<region>.amazonaws.com"}
+
         private static readonly string clientId = Guid.NewGuid().ToString(); //This should really be persisted across reboots, but an auto generated GUID is fine for testing.
-        private static string clientRsaSha256Crt; //Device Certificate copied from AWS (make sure not uploaded!)
-        private static string clientRsaKey; //Device private key copied from AWS (make sure not uploaded!)
+        private static string clientRsaSha256Crt =string.Empty; //Device Certificate copied from AWS (make sure it is stored on the root of the SD card)
+        private static string clientRsaKey = string.Empty; //Device private key copied from AWS (make sure it is stored on the root of the SD card)
+        private static byte[] rootCA;
         private static MqttClient client;
 
 
@@ -132,7 +136,7 @@ namespace OrgPalThreeDemo
 
         static void SetupMqtt()
         {
-            X509Certificate caCert = new X509Certificate(Resources.GetBytes(Resources.BinaryResources.AwsCAroot)); //should this be in secure storage, or is it fine where it is?
+            X509Certificate caCert = new X509Certificate(rootCA); //commented out as MDP changes mean resources dont currently work//Resources.GetBytes(Resources.BinaryResources.AwsCAroot)); //should this be in secure storage, or is it fine where it is?
             X509Certificate2 clientCert = new X509Certificate2(clientRsaSha256Crt, clientRsaKey, ""); //make sure to add a correct pfx certificate
 
             try
@@ -144,8 +148,8 @@ namespace OrgPalThreeDemo
 
                 client.Connect(clientId);
 
-                // subscribe to the topic with QoS 2 
-                client.Subscribe(new string[] { "devices/nanoframework/sys" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
+                // subscribe to the topic with QoS 1
+                client.Subscribe(new string[] { "devices/nanoframework/sys" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
                 Thread telemetryThread = new Thread(new ThreadStart(TelemetryLoop));
                 telemetryThread.Start();
             }
@@ -182,7 +186,7 @@ namespace OrgPalThreeDemo
             // in nanoFramework the drive letters are fixed, being:
             // D: SD Card
             // E: USB Mass Storage Device
-            StorageFolder externalDevices = Windows.Storage.KnownFolders.RemovableDevices;
+            StorageFolder externalDevices = KnownFolders.RemovableDevices;
 
             // list all removable storage devices
             var removableDevices = externalDevices.GetFolders();
@@ -215,6 +219,15 @@ namespace OrgPalThreeDemo
                         
                         //Should load into secure storage (somewhere) and delete file on removable device?
                     }
+                    if (file.FileType == "der")
+                    {
+                        var buffer = FileIO.ReadBuffer(file);
+                        using (DataReader dataReader = DataReader.FromBuffer(buffer))
+                        {
+                            rootCA = new byte[buffer.Length];
+                            dataReader.ReadBytes(rootCA);
+                        }
+                    }
                     if (file.FileType == "key")
                     {
                         //clientRsaKey = FileIO.ReadText(f); //Currently doesnt work with nf!
@@ -230,12 +243,16 @@ namespace OrgPalThreeDemo
                     if (file.Name == "mqttconfig.json")
                     {
                         //awsHost = ""; //need to decode JSON!
-                        //var buffer = FileIO.ReadBuffer(file);
-                        //using (DataReader dataReader = DataReader.FromBuffer(buffer))
-                        //{
-                        //    var json = dataReader.ReadString(buffer.Length);
-                        //    var config = JsonSerializer.DeserializeString(json);
-                        //}
+                        var buffer = FileIO.ReadBuffer(file);
+                        using (DataReader dataReader = DataReader.FromBuffer(buffer))
+                        {
+                            var json = dataReader.ReadString(buffer.Length);
+                            Hashtable config = (Hashtable)JsonSerializer.DeserializeString(json); //(MqttConfig)
+                            awsHost = (string)config["Url"];
+                            //Console.WriteLine(json);
+
+
+                        }
 
                         //Should load into secure storage (somewhere) and delete file on removable device?
                     }

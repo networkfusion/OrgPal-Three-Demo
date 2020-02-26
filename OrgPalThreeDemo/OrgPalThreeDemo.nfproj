@@ -24,6 +24,7 @@
     <Compile Include="Drivers\PalHelper.cs" />
     <Compile Include="Drivers\PalThreePins.cs" />
     <Compile Include="Drivers\PCF85263.cs" />
+    <Compile Include="MqttConfig.cs" />
     <Compile Include="NetworkHelpers.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -32,6 +33,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="WindMasterPro.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib, Version=1.6.0.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">

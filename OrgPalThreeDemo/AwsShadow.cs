@@ -1,7 +1,12 @@
-﻿//https://github.com/aws/aws-sdk-net/blob/master/sdk/src/Services/IotData/Generated/_mobile/AmazonIotDataClient.cs
+﻿// https://github.com/aws/aws-sdk-net/blob/master/sdk/src/Services/IotData/Generated/_mobile/AmazonIotDataClient.cs
+// https://github.com/aws/aws-iot-device-sdk-embedded-C/tree/master/src
+// https://docs.aws.amazon.com/iot/latest/developerguide/device-shadow-mqtt.html
 
 using System;
 using System.Text;
+using System.Threading;
+using uPLibrary.Networking.M2Mqtt;
+using uPLibrary.Networking.M2Mqtt.Messages;
 
 namespace OrgPalThreeDemo
 {
@@ -15,8 +20,22 @@ namespace OrgPalThreeDemo
     /// is a persistent representation of your things and their state in the AWS cloud.
     /// </para>
     /// </summary>
-    public static class AwsShadow
+    public class AwsShadow
     {
+
+        public readonly string BaseTopic = "$aws/things/thingName/shadow";
+        public readonly MqttClient _client;
+
+        public ManualResetEvent UpdateAvailable = new ManualResetEvent(false);
+        public ManualResetEvent RejecteAvailable = new ManualResetEvent(false);
+
+        public AwsShadow(string thingName, MqttClient client)
+        {
+            BaseTopic = $"$aws/things/{thingName}/shadow";
+            _client = client;
+            _client.MqttMsgSubscribed += _client_MqttMsgSubscribed;
+        }
+
         /// <summary>
         /// Deletes the thing shadow for the specified thing.
         /// <para>
@@ -50,9 +69,12 @@ namespace OrgPalThreeDemo
         /// <exception cref="Amazon.IotData.Model.UnsupportedDocumentEncodingException">
         /// The document encoding is not supported.
         /// </exception>
-        public static void DeleteThingShadow()
+        public void DeleteThingShadow()
         {
-
+            var topic = $"{BaseTopic}/delete";
+            _client.Subscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
+            _client.Publish(topic, new byte[0], MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
+            _client.Unsubscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" });
         }
 
         /// <summary>
@@ -88,36 +110,42 @@ namespace OrgPalThreeDemo
         /// <exception cref="Amazon.IotData.Model.UnsupportedDocumentEncodingException">
         /// The document encoding is not supported.
         /// </exception>
-        public static string GetThingShadow()
+        public string GetThingShadow()
         {
+            
+
+            var topic = $"{BaseTopic}/get";
+            _client.Subscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
+            _client.Publish(topic, new byte[0], MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
+            _client.Unsubscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected"});
             return "";
         }
 
-        /// <summary>
-        /// Publishes state information.
-        /// <para>
-        /// For more information, see <a href="http://docs.aws.amazon.com/iot/latest/developerguide/protocols.html#http">HTTP
-        /// Protocol</a> in the <i>AWS IoT Developer Guide</i>.
-        /// </para>
-        /// </summary>
-        /// <param name="request">Container for the necessary parameters to execute the Publish service method.</param>
-        /// <returns>The response from the Publish service method, as returned by IotData.</returns>
-        /// <exception cref="Amazon.IotData.Model.InternalFailureException">
-        /// An unexpected error has occurred.
-        /// </exception>
-        /// <exception cref="Amazon.IotData.Model.InvalidRequestException">
-        /// The request is not valid.
-        /// </exception>
-        /// <exception cref="Amazon.IotData.Model.MethodNotAllowedException">
-        /// The specified combination of HTTP verb and URI is not supported.
-        /// </exception>
-        /// <exception cref="Amazon.IotData.Model.UnauthorizedException">
-        /// You are not authorized to perform this operation.
-        /// </exception>
-        public static void PublishThingShadow(string shadow)
-        {
-
-        }
+        ///// <summary>
+        ///// Publishes state information.
+        ///// <para>
+        ///// For more information, see <a href="http://docs.aws.amazon.com/iot/latest/developerguide/protocols.html#http">HTTP
+        ///// Protocol</a> in the <i>AWS IoT Developer Guide</i>.
+        ///// </para>
+        ///// </summary>
+        ///// <param name="request">Container for the necessary parameters to execute the Publish service method.</param>
+        ///// <returns>The response from the Publish service method, as returned by IotData.</returns>
+        ///// <exception cref="Amazon.IotData.Model.InternalFailureException">
+        ///// An unexpected error has occurred.
+        ///// </exception>
+        ///// <exception cref="Amazon.IotData.Model.InvalidRequestException">
+        ///// The request is not valid.
+        ///// </exception>
+        ///// <exception cref="Amazon.IotData.Model.MethodNotAllowedException">
+        ///// The specified combination of HTTP verb and URI is not supported.
+        ///// </exception>
+        ///// <exception cref="Amazon.IotData.Model.UnauthorizedException">
+        ///// You are not authorized to perform this operation.
+        ///// </exception>
+        //public void PublishThingShadow(string shadow)
+        //{
+        //    throw new SystemException("Not Implemented");
+        //}
 
         /// <summary>
         /// Updates the thing shadow for the specified thing.
@@ -155,11 +183,19 @@ namespace OrgPalThreeDemo
         /// <exception cref="Amazon.IotData.Model.UnsupportedDocumentEncodingException">
         /// The document encoding is not supported.
         /// </exception>
-        public static void UpdateThingShadow(string shadow)
+        public void UpdateThingShadow(string shadow)
         {
+            var topic = $"{BaseTopic}/update";
+            _client.Subscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected", $"{topic}/documents", $"{topic}/delta" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
+            _client.Publish(topic, Encoding.UTF8.GetBytes(shadow), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
+            _client.Unsubscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected", $"{topic}/documents", $"{topic}/delta" });
+
 
         }
 
-
+        private void _client_MqttMsgSubscribed(object sender, MqttMsgSubscribedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
