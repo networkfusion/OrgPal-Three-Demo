@@ -11,6 +11,7 @@ using uPLibrary.Networking.M2Mqtt.Messages;
 using Windows.Storage.Streams;
 using nanoFramework.Json;
 using System.Collections;
+using nanoFramework.Runtime.Native;
 
 namespace OrgPalThreeDemo
 {
@@ -25,6 +26,9 @@ namespace OrgPalThreeDemo
         private static LCD lcd;
 
         private static string _deviceId;
+
+        private static DateTime startTime = DateTime.UtcNow;
+        private static int messagesSent = 0;
 
 
         private static string awsHost = string.Empty; //make sure to add your AWS endpoint and region. Stored in mqttconfig.json (make sure it is stored on the root of the SD card)
@@ -167,8 +171,19 @@ namespace OrgPalThreeDemo
         {
             while (true)
             {
-                string SampleData = $"{{\"MQTT-on-nanoFramework-OrgPal3\" : \"{DateTime.UtcNow.ToString("u")}\"}}";
-                client.Publish($"devices/nanoframework/{_deviceId}/data", Encoding.UTF8.GetBytes(SampleData), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
+                messagesSent += 1;
+                string SampleData = $"\"target\" : \"nanoFramework-OrgPal3\"";
+                string SampleData1 = $"\"timestamp\" : \"{DateTime.UtcNow.ToString("u")}\"";
+                string SampleData2 = $"\"startTime\" : \"{startTime.ToString("u")}\"";
+                string SampleData3 = $"\"messagesSent\" : \"{messagesSent.ToString()}\"";
+                string SampleData4 = $"\"voltage\" : \"{palthree.GetBatteryUnregulatedVoltage().ToString("n2")}\"";
+                string SampleData5 = $"\"temperature\" : \"{palthree.GetTemperatureOnBoard().ToString("n2")}\"";
+                string SampleData6 = $"\"memoryFree\" : \"{Debug.GC(false).ToString("").PadLeft(6)}\"";
+
+                string message = $"{{ {SampleData},{SampleData1},{SampleData2},{SampleData3},{SampleData4},{SampleData5},{SampleData6} }}"; //should be using string builder!
+
+                client.Publish($"devices/nanoframework/{_deviceId}/data", Encoding.UTF8.GetBytes(message), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
+
                 System.Console.WriteLine("Message sent: " + SampleData);
                 Thread.Sleep(60000);
             }
