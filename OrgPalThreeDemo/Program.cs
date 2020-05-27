@@ -35,7 +35,7 @@ namespace OrgPalThreeDemo
         //{"Url" : "<endpoint>-ats.iot.<region>.amazonaws.com"}
 
         private static readonly string clientId = Guid.NewGuid().ToString(); //This should really be persisted across reboots, but an auto generated GUID is fine for testing.
-        private static string clientRsaSha256Crt =string.Empty; //Device Certificate copied from AWS (make sure it is stored on the root of the SD card)
+        private static string clientRsaSha256Crt = string.Empty; //Device Certificate copied from AWS (make sure it is stored on the root of the SD card)
         private static string clientRsaKey = string.Empty; //Device private key copied from AWS (make sure it is stored on the root of the SD card)
         private static byte[] rootCA;
         private static MqttClient client;
