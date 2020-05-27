@@ -43,7 +43,7 @@ namespace OrgPalThreeDemo
 
         public static void Main()
         {
-            Console.WriteLine("OrgPal Three Demo!");
+            Debug.WriteLine("OrgPal Three Demo!");
 
             palthree = new Drivers.OnboardDevices();
 
@@ -99,7 +99,7 @@ namespace OrgPalThreeDemo
 
         //private static void MuxFlowControl_ValueChanged(object sender, GpioPinValueChangedEventArgs e)
         //{
-        //    Console.WriteLine("Handle Mux Flow...!");
+        //    Debug.WriteLine("Handle Mux Flow...!");
         //}
 
         private static void WakeButton_ValueChanged(object sender, GpioPinValueChangedEventArgs e)
@@ -131,10 +131,10 @@ namespace OrgPalThreeDemo
             // if we are using TLS it requires valid date & time
             NetworkHelpers.SetupAndConnectNetwork(true);
 
-            Console.WriteLine("Waiting for network up and IP address...");
+            Debug.WriteLine("Waiting for network up and IP address...");
             NetworkHelpers.IpAddressAvailable.WaitOne();
 
-            Console.WriteLine("Waiting for valid Date & Time...");
+            Debug.WriteLine("Waiting for valid Date & Time...");
             NetworkHelpers.DateTimeAvailable.WaitOne();
         }
 
@@ -159,7 +159,7 @@ namespace OrgPalThreeDemo
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.Message.ToString());
+                Debug.WriteLine(e.Message.ToString());
             }
             
 
@@ -172,6 +172,19 @@ namespace OrgPalThreeDemo
             while (true)
             {
                 messagesSent += 1;
+
+
+                //var statusTelemetry = new StatusMessage();
+                //statusTelemetry.serialNumber = "nanoFramework - OrgPal3";
+                //statusTelemetry.sendTimestamp = DateTime.UtcNow;
+                //statusTelemetry.bootTimestamp = startTime;
+                //statusTelemetry.batteryVoltage = palthree.GetBatteryUnregulatedVoltage();
+                //statusTelemetry.enclosureTemperature = palthree.GetTemperatureOnBoard();
+                //statusTelemetry.memoryFree = Debug.GC(false);
+                //client.Publish($"devices/nanoframework/{_deviceId}/data", Encoding.UTF8.GetBytes((StatusMessage)JsonConvert.DeserializeObject(statusTelemetry, typeof(StatusMessage)), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
+
+
+
                 string SampleData = $"\"target\" : \"nanoFramework-OrgPal3\"";
                 string SampleData1 = $"\"timestamp\" : \"{DateTime.UtcNow.ToString("u")}\"";
                 string SampleData2 = $"\"startTime\" : \"{startTime.ToString("u")}\"";
@@ -184,7 +197,10 @@ namespace OrgPalThreeDemo
 
                 client.Publish($"devices/nanoframework/{_deviceId}/data", Encoding.UTF8.GetBytes(message), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
 
-                System.Console.WriteLine("Message sent: " + SampleData);
+
+
+
+                Debug.WriteLine("Message sent: " + SampleData);
                 Thread.Sleep(60000);
             }
         }
@@ -192,7 +208,7 @@ namespace OrgPalThreeDemo
         static void Client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
         {
             string Message = new string(Encoding.UTF8.GetChars(e.Message));
-            System.Console.WriteLine("Message received: " + Message);
+            Debug.WriteLine("Message received: " + Message);
         }
 
         private static void ReadStorage()
@@ -213,7 +229,7 @@ namespace OrgPalThreeDemo
 
                 foreach (var folder in foldersInDevice)
                 {
-                    Console.WriteLine(folder.DisplayName);
+                    Debug.WriteLine(folder.DisplayName);
                 }
 
                 // get files on the root of the 1st removable device
@@ -221,7 +237,7 @@ namespace OrgPalThreeDemo
 
                 foreach(var file in filesInDevice)
                 {
-                    Console.WriteLine(file.Name);
+                    Debug.WriteLine(file.Name);
                     if (file.FileType == "crt")
                     {
                         //clientRsaSha256Crt = FileIO.ReadText(f); //Currently doesnt work with nf!
@@ -261,10 +277,11 @@ namespace OrgPalThreeDemo
                         var buffer = FileIO.ReadBuffer(file);
                         using (DataReader dataReader = DataReader.FromBuffer(buffer))
                         {
+                            //todo: use new Json.Convert
                             var json = dataReader.ReadString(buffer.Length);
                             Hashtable config = (Hashtable)JsonSerializer.DeserializeString(json); //(MqttConfig)
                             awsHost = (string)config["Url"];
-                            //Console.WriteLine(json);
+                            //Debug.WriteLine(json);
 
 
                         }
@@ -279,12 +296,12 @@ namespace OrgPalThreeDemo
 
         private static void StorageEventManager_RemovableDeviceRemoved(object sender, RemovableDeviceEventArgs e)
         {
-            Console.WriteLine($"Removable Device @ \"{e.Path}\" removed.");
+            Debug.WriteLine($"Removable Device @ \"{e.Path}\" removed.");
         }
 
         private static void StorageEventManager_RemovableDeviceInserted(object sender, RemovableDeviceEventArgs e)
         {
-            Console.WriteLine($"Removable Device @ \"{e.Path}\" inserted.");
+            Debug.WriteLine($"Removable Device @ \"{e.Path}\" inserted.");
             ReadStorage();
         }
     }

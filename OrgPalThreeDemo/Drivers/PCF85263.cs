@@ -120,7 +120,7 @@
 
 //            ClearAlarmInterrupt();
 
-//            Console.WriteLine("Alarm set: " + alarmDateTime.ToString());
+//            Debug.WriteLine("Alarm set: " + alarmDateTime.ToString());
 
 //            byte[] sb = new byte[6] { ALARM1_SECONDS_08,  // start at location 1 for alarm seconds
 //                                   PalHelper.DecToBcd(alarmDateTime.Second),
@@ -215,7 +215,7 @@
 //            else
 //            {
 //                SetRegisterBit(REG_FUNC_28, INTA_PI_MINUTE_BIT);
-//                Console.WriteLine("Periodit INT per minute set: ");
+//                Debug.WriteLine("Periodit INT per minute set: ");
 //            }
 //        }
 
@@ -451,7 +451,7 @@
 //        public void PrintRegister(byte regAdd)
 //        {
 //            byte reg = ReadRegister(regAdd);
-//            Console.WriteLine("REG " + regAdd.ToString("X") + " " + PalHelper.ByteToBitsString(reg));
+//            Debug.WriteLine("REG " + regAdd.ToString("X") + " " + PalHelper.ByteToBitsString(reg));
 //        }
 
 //    }

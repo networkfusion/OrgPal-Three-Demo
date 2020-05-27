@@ -11,6 +11,6 @@ namespace OrgPalThreeDemo
         public float batteryVoltage { get; set; }
         public float enclosureTemperature { get; set; }
         public float mcuTemperature { get; set; }
-        public int memoryFree { get; set; }
+        public uint memoryFree { get; set; }
     }
 }
