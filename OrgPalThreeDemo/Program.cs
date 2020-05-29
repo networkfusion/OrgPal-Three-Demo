@@ -258,11 +258,8 @@ namespace OrgPalThreeDemo
                         var buffer = FileIO.ReadBuffer(file);
                         using (DataReader dataReader = DataReader.FromBuffer(buffer))
                         {
-                            var json = dataReader.ReadString(buffer.Length);
-                            MqttConfig config = (MqttConfig)JsonConvert.DeserializeObject(json, typeof(MqttConfig));
+                            MqttConfig config = (MqttConfig)JsonConvert.DeserializeObject(dataReader, typeof(MqttConfig));
                             awsHost = config.Url;
-
-
                         }
 
                         //Should load into secure storage (somewhere) and delete file on removable device?
