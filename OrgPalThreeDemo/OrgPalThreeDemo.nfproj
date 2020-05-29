@@ -57,8 +57,8 @@
       <Private>True</Private>
       <SpecificVersion>True</SpecificVersion>
     </Reference>
-    <Reference Include="nanoFramework.Json, Version=1.4.1.0, Culture=neutral, PublicKeyToken=null">
-      <HintPath>..\packages\nanoFramework.Json.1.4.1-preview.24\lib\nanoFramework.Json.dll</HintPath>
+    <Reference Include="nanoFramework.Json, Version=2.0.0.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
+      <HintPath>..\packages\nanoFramework.Json.2.0.0-preview.18\lib\nanoFramework.Json.dll</HintPath>
       <Private>True</Private>
       <SpecificVersion>True</SpecificVersion>
     </Reference>

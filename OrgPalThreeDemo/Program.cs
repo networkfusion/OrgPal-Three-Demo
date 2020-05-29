@@ -10,7 +10,6 @@ using System.Security.Cryptography.X509Certificates;
 using uPLibrary.Networking.M2Mqtt.Messages;
 using Windows.Storage.Streams;
 using nanoFramework.Json;
-using System.Collections;
 using nanoFramework.Runtime.Native;
 
 namespace OrgPalThreeDemo
@@ -171,36 +170,19 @@ namespace OrgPalThreeDemo
         {
             while (true)
             {
-                messagesSent += 1;
+                var statusTelemetry = new StatusMessage();
+                statusTelemetry.serialNumber = "nanoFramework - OrgPal3";
+                statusTelemetry.sendTimestamp = DateTime.UtcNow;
+                statusTelemetry.bootTimestamp = startTime;
+                statusTelemetry.messageNumber = messagesSent += 1;
+                statusTelemetry.batteryVoltage = palthree.GetBatteryUnregulatedVoltage();
+                statusTelemetry.enclosureTemperature = palthree.GetTemperatureOnBoard();
+                statusTelemetry.memoryFree = Debug.GC(false);
 
+                string sampleData = JsonConvert.SerializeObject(statusTelemetry);
+                client.Publish($"devices/nanoframework/{_deviceId}/data", Encoding.UTF8.GetBytes(sampleData), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
 
-                //var statusTelemetry = new StatusMessage();
-                //statusTelemetry.serialNumber = "nanoFramework - OrgPal3";
-                //statusTelemetry.sendTimestamp = DateTime.UtcNow;
-                //statusTelemetry.bootTimestamp = startTime;
-                //statusTelemetry.batteryVoltage = palthree.GetBatteryUnregulatedVoltage();
-                //statusTelemetry.enclosureTemperature = palthree.GetTemperatureOnBoard();
-                //statusTelemetry.memoryFree = Debug.GC(false);
-                //client.Publish($"devices/nanoframework/{_deviceId}/data", Encoding.UTF8.GetBytes((StatusMessage)JsonConvert.DeserializeObject(statusTelemetry, typeof(StatusMessage)), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
-
-
-
-                string SampleData = $"\"target\" : \"nanoFramework-OrgPal3\"";
-                string SampleData1 = $"\"timestamp\" : \"{DateTime.UtcNow.ToString("u")}\"";
-                string SampleData2 = $"\"startTime\" : \"{startTime.ToString("u")}\"";
-                string SampleData3 = $"\"messagesSent\" : \"{messagesSent.ToString()}\"";
-                string SampleData4 = $"\"voltage\" : \"{palthree.GetBatteryUnregulatedVoltage().ToString("n2")}\"";
-                string SampleData5 = $"\"temperature\" : \"{palthree.GetTemperatureOnBoard().ToString("n2")}\"";
-                string SampleData6 = $"\"memoryFree\" : \"{Debug.GC(false).ToString("").PadLeft(6)}\"";
-
-                string message = $"{{ {SampleData},{SampleData1},{SampleData2},{SampleData3},{SampleData4},{SampleData5},{SampleData6} }}"; //should be using string builder!
-
-                client.Publish($"devices/nanoframework/{_deviceId}/data", Encoding.UTF8.GetBytes(message), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
-
-
-
-
-                Debug.WriteLine("Message sent: " + SampleData);
+                Debug.WriteLine("Message sent: " + sampleData);
                 Thread.Sleep(60000);
             }
         }
@@ -273,15 +255,12 @@ namespace OrgPalThreeDemo
                     }
                     if (file.Name == "mqttconfig.json")
                     {
-                        //awsHost = ""; //need to decode JSON!
                         var buffer = FileIO.ReadBuffer(file);
                         using (DataReader dataReader = DataReader.FromBuffer(buffer))
                         {
-                            //todo: use new Json.Convert
                             var json = dataReader.ReadString(buffer.Length);
-                            Hashtable config = (Hashtable)JsonSerializer.DeserializeString(json); //(MqttConfig)
-                            awsHost = (string)config["Url"];
-                            //Debug.WriteLine(json);
+                            MqttConfig config = (MqttConfig)JsonConvert.DeserializeObject(json, typeof(MqttConfig));
+                            awsHost = config.Url;
 
 
                         }
