@@ -12,5 +12,6 @@ namespace OrgPalThreeDemo
         public float enclosureTemperature { get; set; }
         public float mcuTemperature { get; set; }
         public uint memoryFree { get; set; }
+        public float airTemperature { get; set; }
     }
 }

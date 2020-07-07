@@ -23,6 +23,7 @@ namespace OrgPalThreeDemo
         //private static GpioPin _userButton;
         private static Drivers.OnboardDevices palthree;
         private static LCD lcd;
+        private static MCP342x adcPalSensor;
 
         private static string _deviceId;
 
@@ -45,6 +46,7 @@ namespace OrgPalThreeDemo
             Debug.WriteLine("OrgPal Three Demo!");
 
             palthree = new Drivers.OnboardDevices();
+            adcPalSensor = new MCP342x();
 
             gpioController = GpioController.GetDefault();
 
@@ -183,6 +185,8 @@ namespace OrgPalThreeDemo
                 statusTelemetry.batteryVoltage = palthree.GetBatteryUnregulatedVoltage();
                 statusTelemetry.enclosureTemperature = palthree.GetTemperatureOnBoard();
                 //statusTelemetry.memoryFree = nanoFramework.Runtime.Native.GC();
+                //statusTelemetry.mcuTemperature = stm32temperature;
+                statusTelemetry.airTemperature = adcPalSensor.GetTemperatureFromPT100();
 
                 string sampleData = JsonConvert.SerializeObject(statusTelemetry);
                 client.Publish($"devices/nanoframework/{_deviceId}/data", Encoding.UTF8.GetBytes(sampleData), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
