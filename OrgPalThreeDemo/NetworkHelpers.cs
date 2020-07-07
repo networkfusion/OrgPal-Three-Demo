@@ -4,10 +4,10 @@
 //
 
 using nanoFramework.Runtime.Events;
-using nanoFramework.Runtime.Native;
 using System;
 using System.Net.NetworkInformation;
 using System.Threading;
+using System.Diagnostics;
 
 namespace nanoFramework.Networking
 {

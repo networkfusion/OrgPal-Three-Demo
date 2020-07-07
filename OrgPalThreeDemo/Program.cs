@@ -10,7 +10,7 @@ using System.Security.Cryptography.X509Certificates;
 using uPLibrary.Networking.M2Mqtt.Messages;
 using Windows.Storage.Streams;
 using nanoFramework.Json;
-using nanoFramework.Runtime.Native;
+using System.Diagnostics;
 
 namespace OrgPalThreeDemo
 {
@@ -33,7 +33,7 @@ namespace OrgPalThreeDemo
         private static string awsHost = string.Empty; //make sure to add your AWS endpoint and region. Stored in mqttconfig.json (make sure it is stored on the root of the SD card)
         //{"Url" : "<endpoint>-ats.iot.<region>.amazonaws.com"}
 
-        private static readonly string clientId = Guid.NewGuid().ToString(); //This should really be persisted across reboots, but an auto generated GUID is fine for testing.
+        //private static readonly string clientId = Guid.NewGuid().ToString(); //This should really be persisted across reboots, but an auto generated GUID is fine for testing.
         private static string clientRsaSha256Crt = string.Empty; //Device Certificate copied from AWS (make sure it is stored on the root of the SD card)
         private static string clientRsaKey = string.Empty; //Device private key copied from AWS (make sure it is stored on the root of the SD card)
         private static byte[] rootCA;
@@ -88,6 +88,11 @@ namespace OrgPalThreeDemo
             ReadStorage();
 
             SetupNetwork();
+
+            startTime = DateTime.UtcNow; //set now because the clock might have been wrong before ntp is checked.
+
+            Debug.WriteLine($"Start Time: {startTime}");
+
             SetupMqtt();
 
 
@@ -149,7 +154,7 @@ namespace OrgPalThreeDemo
                 // register to message received 
                 client.MqttMsgPublishReceived += Client_MqttMsgPublishReceived;
 
-                client.Connect(clientId);
+                client.Connect(_deviceId);
 
                 // subscribe to the topic with QoS 1
                 client.Subscribe(new string[] { "devices/nanoframework/sys" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
@@ -177,7 +182,7 @@ namespace OrgPalThreeDemo
                 statusTelemetry.messageNumber = messagesSent += 1;
                 statusTelemetry.batteryVoltage = palthree.GetBatteryUnregulatedVoltage();
                 statusTelemetry.enclosureTemperature = palthree.GetTemperatureOnBoard();
-                statusTelemetry.memoryFree = Debug.GC(false);
+                //statusTelemetry.memoryFree = nanoFramework.Runtime.Native.GC();
 
                 string sampleData = JsonConvert.SerializeObject(statusTelemetry);
                 client.Publish($"devices/nanoframework/{_deviceId}/data", Encoding.UTF8.GetBytes(sampleData), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
