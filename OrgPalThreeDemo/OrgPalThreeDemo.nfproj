@@ -20,7 +20,7 @@
   <ItemGroup>
     <Compile Include="AwsShadow.cs" />
     <Compile Include="Drivers\LCD.cs" />
-    <Compile Include="Drivers\MCP342X.cs" />
+    <Compile Include="Drivers\MCP342x.cs" />
     <Compile Include="Drivers\OnboardDevices.cs" />
     <Compile Include="Drivers\PalHelper.cs" />
     <Compile Include="Drivers\PalThreePins.cs" />

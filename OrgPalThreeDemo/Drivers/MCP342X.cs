@@ -20,108 +20,108 @@ namespace PalThree
         /// <summary>
         /// Resolution Selection affects convertion time (more bits, slower conversion)
         /// </summary>
-        public enum SampleRate : byte
-        {
-            /// <summary>
-            /// 240 SPS (By default on power-up)
-            /// </summary>
-            TwelveBits,
-            /// <summary>
-            /// 60 SPS
-            /// </summary>
-            FourteenBits,
-            /// <summary>
-            /// 15 SPS
-            /// </summary>
-            SixteenBits,
-            /// <summary>
-            /// 3.75 SPS
-            /// </summary>
-            EighteenBits
-        }
+        public enum MCP342xResolution : byte
+    {
+        /// <summary>
+        /// 240 SPS (By default on power-up)
+        /// </summary>
+        TwelveBits,
+        /// <summary>
+        /// 60 SPS
+        /// </summary>
+        FourteenBits,
+        /// <summary>
+        /// 15 SPS
+        /// </summary>
+        SixteenBits,
+        /// <summary>
+        /// 3.75 SPS
+        /// </summary>
+        EighteenBits
+    }
 
+    /// <summary>
+    /// Use One-Shot if very low power consuption is required
+    /// </summary>
+    public enum MCP342xConversionMode : byte
+    {
         /// <summary>
-        /// Use One-Shot if very low power consuption is required
+        /// The device performs a single conversion and enters a low current standby mode automatically until it
+        /// receives another conversion command. This reduces current consumption greatly during idle periods.
         /// </summary>
-        public enum ConversionMode : byte
-        {
-            /// <summary>
-            /// The device performs a single conversion and enters a low current standby mode automatically until it
-            /// receives another conversion command. This reduces current consumption greatly during idle periods.
-            /// </summary>
-            OneShot,
-            /// <summary>
-            /// The conversion takes place continuously at the set conversion speed. See Resolution. (By default on power-up)
-            /// </summary>
-            Continuous
-        }
+        OneShot,
         /// <summary>
-        /// MCP3422 and MCP3423 devices have two differential input channels and the MCP3424 has four differential input channels
+        /// The conversion takes place continuously at the set conversion speed. See Resolution. (By default on power-up)
         /// </summary>
-        public enum Channel : byte
-        {
-            /// <summary>
-            /// MCP3422/3/4 (By default on power-up)
-            /// </summary>
-            Ch1,
-            /// <summary>
-            /// MCP3422/3/4
-            /// </summary>
-            Ch2,
-            /// <summary>
-            /// MCP3424
-            /// </summary>
-            Ch3,
-            /// <summary>
-            /// MCP3424
-            /// </summary>
-            Ch4
-        }
+        Continuous
+    }
+    /// <summary>
+    /// MCP3422 and MCP3423 devices have two differential input channels and the MCP3424 has four differential input channels
+    /// </summary>
+    public enum MCP342xChannel : byte
+    {
         /// <summary>
-        /// Selects the gain factor for the input signal before the analog-to-digital conversion takes place
+        /// MCP3422/3/4 (By default on power-up)
         /// </summary>
-        public enum PGA_Gain : byte
-        {
-            /// <summary>
-            /// By default on power-up Gain = x1
-            /// </summary>
-            x1,
-            x2,
-            x4,
-            x8
-        }
+        One,
+        /// <summary>
+        /// MCP3422/3/4
+        /// </summary>
+        Two,
+        /// <summary>
+        /// MCP3424
+        /// </summary>
+        Three,
+        /// <summary>
+        /// MCP3424
+        /// </summary>
+        Four
+    }
+    /// <summary>
+    /// Selects the gain factor for the input signal before the analog-to-digital conversion takes place
+    /// </summary>
+    public enum MCP342xPGA_Gain : byte
+    {
+        /// <summary>
+        /// By default on power-up Gain = x1
+        /// </summary>
+        One,
+        Two,
+        Four,
+        Eight
+    }
 
         I2cDevice i2cBus = null;
 
-        ushort address;
+        readonly ushort address;
 
         // By default on power-up
-        PGA_Gain gain = PGA_Gain.x1;
-        Channel channel = Channel.Ch1;
-        ConversionMode conversionMode = ConversionMode.Continuous; // default
-        SampleRate resolution;
+        private MCP342xPGA_Gain gain = MCP342xPGA_Gain.One;
+        private MCP342xChannel channel = MCP342xChannel.One;
+        private MCP342xConversionMode conversionMode = MCP342xConversionMode.Continuous; // default
+        private MCP342xResolution resolution;
 
-        bool isConfigRegisterOk = true;
-        bool isEndOfConversion = false;
-        bool hasSampleError = false;
-        float[] lsbValues = new float[] { 0.001f, 0.00025f, 0.0000625f, 0.000015625f };
-        int[] conversionTimeMilliSecs = new int[] { 5, 20, 70, 270 };
-        float lsbVolts = 0.0000625f; // resolution = 16-bit 
-        float gainDivisor = 1.0f;
-        int maxADCValue;
+        private bool isConfigRegisterOk = true;
+        private bool isEndOfConversion = false;
+        private bool hasSampleError = false;
+        private readonly float[] lsbValues = new float[] { 0.001f, 0.00025f, 0.0000625f, 0.000015625f };
+        private readonly int[] conversionTimeMilliSecs = new int[] { 5, 20, 70, 270 };
+        private float lsbVolts = 0.0000625f; // resolution = 16-bit 
+        private float gainDivisor = 1.0f;
+        private int maxADCValue;
         //float ADCResolution = 65536.0f;//16 bit
         //float vRef = 2.048f;//2.048f for the default internal reference
 
         // Used to read raw data
         //int dataMask = 0x0fff; // resolution = 12-bit 
-        int dataMask = (1 << (12 + (int)SampleRate.SixteenBits * 2)) - 1; //resolution 16-bits
+        int dataMask = (1 << (12 + (int)MCP342xResolution.SixteenBits * 2)) - 1; //resolution 16-bits
         Timer timer = null;
 
         public MCP342x(string I2CId = PalThreePins.I2cBus.I2C2, ushort i2cAddress = 0x68)
         {
             address = i2cAddress;
 
-            Resolution = SampleRate.SixteenBits;
+            Resolution = MCP342xResolution.SixteenBits;
 
             var settings = new I2cConnectionSettings(address)// the slave's address
             {
@@ -135,7 +135,9 @@ namespace PalThree
             //    settings.SlaveAddress = (byte)i2cList[0];
 
             i2cBus = I2cDevice.FromId(I2CId, settings);
-            TemperatureCoefficient = 0.385f;// 0.00385 Ohms/Ohm/ºC
+
+            TemperatureCoefficient = 1.250f; //not sure why this is better... 0c correct 30c 0.5c off...
+            //TemperatureCoefficient = 0.385f;// 0.00385 Ohms/Ohm/ºC
         }
 
         public float NTC_A { get; set; }
@@ -158,12 +160,12 @@ namespace PalThree
         }
 
         /// <summary>
-        /// Get or Set Sample Rate Selection Bit
+        /// Get or Set Resolution Selection Bit
         /// </summary>
         /// <remarks>
         /// Get :  0 => 240 SPS (12 bits) (Default), 1 => 60 SPS (14 bits), 2 => 15 SPS (16 bits), 3 => 3.75 SPS (18 bits)
         /// </remarks>
-        public SampleRate Resolution
+        public MCP342xResolution Resolution
         {
             get
             {
@@ -186,7 +188,7 @@ namespace PalThree
         /// <remarks>
         /// Get :  0 => x1 (Default), 1 => x2, 2 => x4, 3 => x8
         /// </remarks>
-        public PGA_Gain Gain
+        public MCP342xPGA_Gain Gain
         {
             get
             {
@@ -195,7 +197,7 @@ namespace PalThree
             set
             {
                 gain = value;
-                gainDivisor = ((float)Math.Pow(2.0, (double)gain));
+                gainDivisor = ((float)Math.Pow(2.0, (float)gain));
                 isConfigRegisterOk = false;
             }
         }
@@ -207,7 +209,7 @@ namespace PalThree
         /// <remarks>
         /// MCP3422 and MCP3423 : CH1 or CH2 - MCP3424 : CH1, CH2, CH3 or CH4
         /// </remarks>
-        public Channel CHannel
+        public MCP342xChannel Channel
         {
             get
             {
@@ -227,7 +229,7 @@ namespace PalThree
         /// <remarks>
         /// One-Shot Conversion mode or Continuous Conversion mode
         /// </remarks>
-        public ConversionMode Mode
+        public MCP342xConversionMode Mode
         {
             get
             {
@@ -258,8 +260,8 @@ namespace PalThree
 
         public float GetTemperatureFromThermistorNTC1000()
         {
-            CHannel = Channel.Ch2;//NTC Thermistor is only avaialble on CH2+
-            Mode = ConversionMode.Continuous;
+            Channel = MCP342xChannel.Two;//NTC Thermistor is only avaialble on CH2+
+            Mode = MCP342xConversionMode.Continuous;
 
             //Vishay NTCALUG01A103F specs
             //B25/85-value  3435 to 4190 K 
@@ -296,25 +298,41 @@ namespace PalThree
         /// <returns></returns>
         public float GetTemperatureFromPT100()
         {
-            CHannel = Channel.Ch1;//pt100 is only avaialble on CH1+/CH1-
-            Mode = ConversionMode.Continuous;
+            Channel = MCP342xChannel.One;//pt100 is only avaialble on CH1+/CH1-
+
+            Mode = MCP342xConversionMode.Continuous;
+            ReadChannel();
+
+            Thread.Sleep(10); //let the ADC settle
 
             float tempValue = 0;
-            //do 2-3 readings just to make sure sampling is good
-            for (int i = 0; i < 3; i++)
-            {
-                tempValue = (GetResistance() - 100) / TemperatureCoefficient;
-                Thread.Sleep(100);
-            }
+            ////do 2-3 readings just to make sure sampling is good
+            //for (int i = 0; i < 2; i++)
+            //{
+            tempValue = GetTemperature() + TemperatureCoefficient;
+                
+            //}
             //put the IC in low power mode, thus set on OneShot and read to write config
-            Mode = ConversionMode.OneShot;
-            ReadChannel();
+            Mode = MCP342xConversionMode.OneShot;
+            ReadChannel(); //ensure we are back in oneshot mode.
 
             return tempValue;
         }
 
+        private float GetTemperature()
+        {
+            const float RTD_ALPHA = 3.9083e-3F;
+            const float RTD_BETA = -5.775e-7F;
+            const float a2 = 2.0F * RTD_BETA;
+            const float bSq = RTD_ALPHA * RTD_ALPHA;
 
-        int ReadChannel()
+            float c = 1.0F - GetResistance() / (int)100; //100 for PT100, 1000 for PT1000
+            float d = bSq - 2.0F * a2 * c;
+            return (-RTD_ALPHA + Math.Sqrt(d)) / a2;
+        }
+
+
+        private int ReadChannel()
         {
             float dataRaw = 0;
             byte value = 0x10;
@@ -329,7 +347,7 @@ namespace PalThree
                 isConfigRegisterOk = true;
             }
 
-            if (conversionMode == ConversionMode.OneShot)
+            if (conversionMode == MCP342xConversionMode.OneShot)
             {
                 value |= 0x80; // Start a single conversion
                 ConfigDevice(value);
@@ -340,7 +358,7 @@ namespace PalThree
                 timer = new Timer(new TimerCallback(NoSample), null, conversionTimeMilliSecs[(ushort)resolution], -1);
             }
 
-            if (resolution == SampleRate.EighteenBits)
+            if (resolution == MCP342xResolution.EighteenBits)
             {
                 do
                 {
@@ -371,7 +389,7 @@ namespace PalThree
         /// <summary>
         /// Reads the selected input channel and converts to voltage units
         /// </summary>
-        /// <returns>Voltage representated as a double-precision real</returns>
+        /// <returns>Voltage representated as a float</returns>
         public float ReadVolts()
         {
             float adcCount = ReadChannel();
@@ -382,13 +400,13 @@ namespace PalThree
 
             float volts = (adcCount * lsbVolts) / gainDivisor;
 
-            if (CHannel == MCP342x.Channel.Ch3)
+            if (channel == MCP342xChannel.Three)
             {
                 volts = volts * 2.5f;
                 if (volts > 3.9)
                     volts += 0.085f;//add offset for board
             }
-            else if (CHannel == MCP342x.Channel.Ch4)
+            else if (channel == MCP342xChannel.Four)
             {
                 volts = volts * 25;
                 if (volts > 3.9)
@@ -398,7 +416,7 @@ namespace PalThree
             return volts;
         }
 
-        void NoSample(object state)
+        private void NoSample(object state)
         {
             hasSampleError = true;
         }
@@ -408,7 +426,7 @@ namespace PalThree
         /// </summary>
         /// <param name="number">Number of bytes to read (four if 18-bit conversion else three) </param>
         /// <returns>Result of 12, 14, 16 or 18-bit conversion</returns>
-        float DataReadRaw(byte number)
+        private float DataReadRaw(byte number)
         {
             byte[] inbuffer = new byte[number];
             i2cBus.Read(inbuffer);
@@ -418,7 +436,7 @@ namespace PalThree
                 isEndOfConversion = true;
 
                 int data;
-                if (resolution == SampleRate.EighteenBits)
+                if (resolution == MCP342xResolution.EighteenBits)
                     data = ((inbuffer[0]) << 16) + ((inbuffer[1]) << 8) + inbuffer[2];
                 else
                     data = ((inbuffer[0]) << 8) + inbuffer[1];
@@ -432,7 +450,7 @@ namespace PalThree
             }
         }
 
-        void WriteConfRegister(byte value)
+        private void WriteConfRegister(byte value)
         {
             byte[] outbuffer = { value };
             i2cBus.Write(outbuffer);

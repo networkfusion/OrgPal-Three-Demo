@@ -316,7 +316,7 @@
 //        }
 
 //        // set load capacitance for quartz crystal in pF, valid values are 6, 7, or 12.5
-//        void SetLoadCapacitance(double capacitance)
+//        void SetLoadCapacitance(float capacitance)
 //        {
 //            // bit 1 - 0 = load capacitance, 00 = 7.0pF, 01 = 6.0pF, 10 and 11 = 12.5pF
 //            byte bits = 0x00;
