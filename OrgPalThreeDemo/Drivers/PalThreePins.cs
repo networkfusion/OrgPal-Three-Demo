@@ -123,7 +123,7 @@ namespace PalThree
             public static int ADC1_IN13_TEMP = 5;
 
             // this channel is mapped @ position 8 - internal MCU temperature
-            public static int ADC_CHANNEL_SENSOR = 8;
+            public static int ADC_CHANNEL_SENSOR = 9;
         }
 
         /// <summary>Uart port definition.</summary>

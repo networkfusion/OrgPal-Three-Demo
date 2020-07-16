@@ -1,16 +1,17 @@
-﻿using PalThree;
+﻿using nanoFramework.Json;
+using nanoFramework.Networking;
+using nanoFramework.Runtime.Native;
+using PalThree;
 using System;
+using System.Diagnostics;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Threading;
+using uPLibrary.Networking.M2Mqtt;
+using uPLibrary.Networking.M2Mqtt.Messages;
 using Windows.Devices.Gpio;
 using Windows.Storage;
-using nanoFramework.Networking;
-using uPLibrary.Networking.M2Mqtt;
-using System.Text;
-using System.Security.Cryptography.X509Certificates;
-using uPLibrary.Networking.M2Mqtt.Messages;
 using Windows.Storage.Streams;
-using nanoFramework.Json;
-using System.Diagnostics;
 
 namespace OrgPalThreeDemo
 {
@@ -178,20 +179,21 @@ namespace OrgPalThreeDemo
             while (true)
             {
                 var statusTelemetry = new StatusMessage();
-                statusTelemetry.serialNumber = "nanoFramework - OrgPal3";
+                statusTelemetry.serialNumber = $"nanoFramework-{SystemInfo.TargetName}-{SystemInfo.Platform}";
                 statusTelemetry.sendTimestamp = DateTime.UtcNow;
                 statusTelemetry.bootTimestamp = startTime;
                 statusTelemetry.messageNumber = messagesSent += 1;
                 statusTelemetry.batteryVoltage = palthree.GetBatteryUnregulatedVoltage();
                 statusTelemetry.enclosureTemperature = palthree.GetTemperatureOnBoard();
-                //statusTelemetry.memoryFree = nanoFramework.Runtime.Native.GC();
-                //statusTelemetry.mcuTemperature = stm32temperature;
+                statusTelemetry.memoryFree = nanoFramework.Runtime.Native.GC.Run(false);
+                statusTelemetry.mcuTemperature = palthree.GetMcuTemperature();
                 statusTelemetry.airTemperature = adcPalSensor.GetTemperatureFromPT100();
 
                 string sampleData = JsonConvert.SerializeObject(statusTelemetry);
                 client.Publish($"devices/nanoframework/{_deviceId}/data", Encoding.UTF8.GetBytes(sampleData), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
 
                 Debug.WriteLine("Message sent: " + sampleData);
+
                 Thread.Sleep(60000);
             }
         }

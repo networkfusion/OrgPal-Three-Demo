@@ -75,20 +75,40 @@ namespace OrgPalThreeDemo.Drivers
 
         }
 
+        public float GetMcuTemperature()
+        {
+            AdcController adc1 = AdcController.GetDefault();
+            adcTemp = adc1.OpenChannel(PalThreePins.AdcChannel.ADC_CHANNEL_SENSOR);
+            return adcTemp.ReadValue() / 100.00f;
+
+            //https://www.st.com/resource/en/datasheet/stm32f769ni.pdf
+            //https://electronics.stackexchange.com/questions/324321/reading-internal-temperature-sensor-stm32
+            //const int ADC_TEMP_3V3_30C = 0x1FF0F44C //0x1FFF7A2C;
+            //const int ADC_TEMP_3V3_110C = 0x1FF0 F44E //0x1FFF7A2E;
+            //const float CALIBRATION_REFERENCE_VOLTAGE = 3.3F;
+            //const float REFERENCE_VOLTAGE = 3.0F; // supplied with Vref+ or VDDA
+
+            // scale constants to current reference voltage
+            //float adcCalTemp30C = getRegisterValue(ADC_TEMP_3V3_30C) * (REFERENCE_VOLTAGE / CALIBRATION_REFERENCE_VOLTAGE);
+            //float adcCalTemp110C = getRegisterValue(ADC_TEMP_3V3_110C) * (REFERENCE_VOLTAGE / CALIBRATION_REFERENCE_VOLTAGE);
+
+            // return (adcTemp.ReadValue() - adcCalTemp30C)/(adcCalTemp110C - adcCalTemp30C) *(110.0F - 30.0F) + 30.0F);
+        }
 
 
-    //    RTCScheduller = new PCF85263();
-    //    startUp = RTCScheduller.GetDateTime();
-    //        IsUserWakeUP = !RTCScheduller.IsAlarmActive();
-    //        RTCScheduller.ClearAlarmInterrupt();//always clear interrupt to prevent random power issues
 
-    //        if (startUp.Year< 2019)//set date/time default 
-    //        {
-    //            startUp = new DateTime(2019, 11, 1);
-    //    RTCScheduller.SetDateTime(startUp);
-    //        }
+        //    RTCScheduler = new PCF85263();
+        //    startUp = RTCScheduler.GetDateTime();
+        //        IsUserWakeUP = !RTCScheduler.IsAlarmActive();
+        //        RTCScheduller.ClearAlarmInterrupt();//always clear interrupt to prevent random power issues
 
-    //RTCScheduller.Dispose();
-    //        RTCScheduller = null;
+        //        if (startUp.Year< 2019)//set date/time default 
+        //        {
+        //            startUp = new DateTime(2019, 11, 1);
+        //    RTCScheduler.SetDateTime(startUp);
+        //        }
+
+        //RTCScheduler.Dispose();
+        //        RTCScheduller = null;
     }
 }
