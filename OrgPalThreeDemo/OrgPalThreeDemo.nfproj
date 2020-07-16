@@ -25,6 +25,7 @@
     <Compile Include="Drivers\PalHelper.cs" />
     <Compile Include="Drivers\PalThreePins.cs" />
     <Compile Include="Drivers\PCF85263.cs" />
+    <Compile Include="HMT330.cs" />
     <Compile Include="MqttConfig.cs" />
     <Compile Include="NetworkHelpers.cs" />
     <Compile Include="Program.cs" />
@@ -34,6 +35,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="ShadowMessage.cs" />
     <Compile Include="StatusMessage.cs" />
     <Compile Include="WindMasterPro.cs" />
   </ItemGroup>

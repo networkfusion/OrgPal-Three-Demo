@@ -26,14 +26,17 @@ namespace OrgPalThreeDemo
         private static LCD lcd;
         private static MCP342x adcPalSensor;
 
-        private static string _deviceId;
+        private static string _serialNumber;
 
         private static DateTime startTime = DateTime.UtcNow;
         private static int messagesSent = 0;
 
 
-        private static string awsHost = string.Empty; //make sure to add your AWS endpoint and region. Stored in mqttconfig.json (make sure it is stored on the root of the SD card)
+        private static string _awsHost = string.Empty; //make sure to add your AWS endpoint and region. Stored in mqttconfig.json (make sure it is stored on the root of the SD card)
         //{"Url" : "<endpoint>-ats.iot.<region>.amazonaws.com"}
+        private static int _awsPort = 8883; //add your port to mqttconfig.json if different from the default
+                                            //{"Port" : "8883"}
+        private static string _thingName; ////add your "thing" to mqttconfig.json if different from the devices SerialNumber
 
         //private static readonly string clientId = Guid.NewGuid().ToString(); //This should really be persisted across reboots, but an auto generated GUID is fine for testing.
         private static string clientRsaSha256Crt = string.Empty; //Device Certificate copied from AWS (make sure it is stored on the root of the SD card)
@@ -82,7 +85,7 @@ namespace OrgPalThreeDemo
 
             foreach (byte b in nanoFramework.Hardware.Stm32.Utilities.UniqueDeviceId)
             {
-                _deviceId += b.ToString("X2");
+                _serialNumber += b.ToString("X2");
             }
 
             // add event handlers for Removable Device insertion and removal
@@ -152,12 +155,12 @@ namespace OrgPalThreeDemo
 
             try
             {
-                client = new MqttClient(awsHost, 8883, true, caCert, clientCert, MqttSslProtocols.TLSv1_2);
+                client = new MqttClient(_awsHost, _awsPort, true, caCert, clientCert, MqttSslProtocols.TLSv1_2);
 
                 // register to message received 
                 client.MqttMsgPublishReceived += Client_MqttMsgPublishReceived;
 
-                client.Connect(_deviceId);
+                client.Connect(_thingName);
 
                 // subscribe to the topic with QoS 1
                 client.Subscribe(new string[] { "devices/nanoframework/sys" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
@@ -176,12 +179,15 @@ namespace OrgPalThreeDemo
 
         static void TelemetryLoop()
         {
-            while (true)
+            for ( ; ; )
             {
                 var statusTelemetry = new StatusMessage();
-                statusTelemetry.serialNumber = $"nanoFramework-{SystemInfo.TargetName}-{SystemInfo.Platform}";
+                statusTelemetry.operatingSystem = "nanoFramework"; //move to shadow
+                statusTelemetry.platform = SystemInfo.TargetName; //move to shadow
+                statusTelemetry.cpu = SystemInfo.Platform; //move to shadow
+                statusTelemetry.serialNumber = _serialNumber;
                 statusTelemetry.sendTimestamp = DateTime.UtcNow;
-                statusTelemetry.bootTimestamp = startTime;
+                statusTelemetry.bootTimestamp = startTime; //move to shadow
                 statusTelemetry.messageNumber = messagesSent += 1;
                 statusTelemetry.batteryVoltage = palthree.GetBatteryUnregulatedVoltage();
                 statusTelemetry.enclosureTemperature = palthree.GetTemperatureOnBoard();
@@ -190,7 +196,7 @@ namespace OrgPalThreeDemo
                 statusTelemetry.airTemperature = adcPalSensor.GetTemperatureFromPT100();
 
                 string sampleData = JsonConvert.SerializeObject(statusTelemetry);
-                client.Publish($"devices/nanoframework/{_deviceId}/data", Encoding.UTF8.GetBytes(sampleData), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
+                client.Publish($"devices/nanoframework/{_thingName}/data", Encoding.UTF8.GetBytes(sampleData), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
 
                 Debug.WriteLine("Message sent: " + sampleData);
 
@@ -270,7 +276,16 @@ namespace OrgPalThreeDemo
                         using (DataReader dataReader = DataReader.FromBuffer(buffer))
                         {
                             MqttConfig config = (MqttConfig)JsonConvert.DeserializeObject(dataReader, typeof(MqttConfig));
-                            awsHost = config.Url;
+                            _awsHost = config.Url;
+                            //_awsPort = config.Port;
+                            if (config.ThingName != string.Empty || config.ThingName != null)
+                            {
+                                _thingName = config.ThingName;
+                            }
+                            else
+                            {
+                                _thingName = _serialNumber;
+                            }
                         }
 
                         //Should load into secure storage (somewhere) and delete file on removable device?
