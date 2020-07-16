@@ -43,6 +43,7 @@ namespace OrgPalThreeDemo
         private static string clientRsaKey = string.Empty; //Device private key copied from AWS (make sure it is stored on the root of the SD card)
         private static byte[] rootCA;
         private static MqttClient client;
+        private static AwsShadow shadow;
 
 
         public static void Main()
@@ -99,9 +100,11 @@ namespace OrgPalThreeDemo
 
             Debug.WriteLine($"Start Time: {startTime}");
 
-            SetupMqtt();
-
-
+            var connected = false;
+            while (!connected)
+            {
+                connected = SetupMqtt();
+            }
 
 
             Thread.Sleep(Timeout.Infinite);
@@ -148,7 +151,7 @@ namespace OrgPalThreeDemo
             NetworkHelpers.DateTimeAvailable.WaitOne();
         }
 
-        static void SetupMqtt()
+        static bool SetupMqtt()
         {
             X509Certificate caCert = new X509Certificate(rootCA); //commented out as MDP changes mean resources dont currently work//Resources.GetBytes(Resources.BinaryResources.AwsCAroot)); //should this be in secure storage, or is it fine where it is?
             X509Certificate2 clientCert = new X509Certificate2(clientRsaSha256Crt, clientRsaKey, ""); //make sure to add a correct pfx certificate
@@ -162,19 +165,44 @@ namespace OrgPalThreeDemo
 
                 client.Connect(_thingName);
 
+                //shadow = new AwsShadow(_thingName, ref client);
+                //Thread shadowThread = new Thread(new ThreadStart(ShadowLoop));
+                //shadowThread.Start();
+
                 // subscribe to the topic with QoS 1
                 client.Subscribe(new string[] { "devices/nanoframework/sys" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
                 Thread telemetryThread = new Thread(new ThreadStart(TelemetryLoop));
                 telemetryThread.Start();
+                return true;
             }
             catch (Exception e)
             {
                 Debug.WriteLine(e.Message.ToString());
+                return false;
             }
             
 
 
 
+        }
+
+        static void ShadowLoop()
+        {
+            for ( ; ; )
+            {
+                var shadowTelemetry = new StatusMessage();
+                shadowTelemetry.operatingSystem = "nanoFramework"; //move to shadow
+                shadowTelemetry.platform = SystemInfo.TargetName; //move to shadow
+                shadowTelemetry.cpu = SystemInfo.Platform; //move to shadow
+                shadowTelemetry.bootTimestamp = startTime; //move to shadow
+
+                string shadowData = JsonConvert.SerializeObject(shadowTelemetry);
+                shadow.UpdateThingShadow(shadowData);
+
+                Debug.WriteLine("Shadow sent: " + shadowData);
+
+                Thread.Sleep(600000); //1 hour
+            }
         }
 
         static void TelemetryLoop()
@@ -200,7 +228,7 @@ namespace OrgPalThreeDemo
 
                 Debug.WriteLine("Message sent: " + sampleData);
 
-                Thread.Sleep(60000);
+                Thread.Sleep(60000); //1 minute
             }
         }
 
