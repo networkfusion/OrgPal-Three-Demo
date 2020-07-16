@@ -228,7 +228,7 @@ namespace OrgPalThreeDemo
 
                 Debug.WriteLine("Message sent: " + sampleData);
 
-                Thread.Sleep(60000); //1 minute
+                Thread.Sleep(60000); //1 minute (TODO: this thread takes time and needs to account for it...)
             }
         }
 
@@ -305,7 +305,10 @@ namespace OrgPalThreeDemo
                         {
                             MqttConfig config = (MqttConfig)JsonConvert.DeserializeObject(dataReader, typeof(MqttConfig));
                             _awsHost = config.Url;
-                            //_awsPort = config.Port;
+                            if (config.Port != null)
+                            {
+                                _awsPort = int.Parse(config.Port);
+                            }
                             if (config.ThingName != string.Empty || config.ThingName != null)
                             {
                                 _thingName = config.ThingName;
