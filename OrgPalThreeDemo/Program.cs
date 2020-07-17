@@ -164,8 +164,8 @@ namespace OrgPalThreeDemo
 
 
 
-                //Thread shadowThread = new Thread(new ThreadStart(ShadowLoop)); //TODO: currently throws exception on send!
-                //shadowThread.Start();
+                Thread shadowThread = new Thread(new ThreadStart(ShadowLoop)); //TODO: currently throws exception on subscribe!
+                shadowThread.Start();
 
 
 

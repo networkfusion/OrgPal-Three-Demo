@@ -72,7 +72,7 @@ namespace AwsIoT
         public void DeleteThingShadow()
         {
             var topic = $"{BaseTopic}/delete";
-            AwsMqtt.Client.Subscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
+            AwsMqtt.Client.Subscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
             AwsMqtt.Client.Publish(topic, new byte[0], MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
             AwsMqtt.Client.Unsubscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" });
         }
@@ -115,7 +115,7 @@ namespace AwsIoT
             
 
             var topic = $"{BaseTopic}/get";
-            AwsMqtt.Client.Subscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
+            AwsMqtt.Client.Subscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
             AwsMqtt.Client.Publish(topic, new byte[0], MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
             AwsMqtt.Client.Unsubscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected"});
             return "";
@@ -186,7 +186,19 @@ namespace AwsIoT
         public void UpdateThingShadow(string shadow)
         {
             var topic = $"{BaseTopic}/update";
-            AwsMqtt.Client.Subscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected", $"{topic}/documents", $"{topic}/delta" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
+            AwsMqtt.Client.Subscribe(
+                new string[] { 
+                $"{topic}/accepted", 
+                $"{topic}/rejected", 
+                $"{topic}/documents", 
+                $"{topic}/delta" 
+                }, 
+                new byte[] { 
+                    MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, 
+                    MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, 
+                    MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, 
+                    MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE 
+                });
             AwsMqtt.Client.Publish(topic, Encoding.UTF8.GetBytes(shadow), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
             AwsMqtt.Client.Unsubscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected", $"{topic}/documents", $"{topic}/delta" });
 
