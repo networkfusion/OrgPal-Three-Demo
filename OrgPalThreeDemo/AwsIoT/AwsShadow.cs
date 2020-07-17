@@ -8,7 +8,7 @@ using System.Threading;
 using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Messages;
 
-namespace OrgPalThreeDemo
+namespace AwsIoT
 {
 
     /// <summary>
@@ -24,16 +24,16 @@ namespace OrgPalThreeDemo
     {
 
         public readonly string BaseTopic = "$aws/things/thingName/shadow";
-        public readonly MqttClient _client;
+        //public readonly MqttClient _client;
 
         public ManualResetEvent UpdateAvailable = new ManualResetEvent(false);
         public ManualResetEvent RejecteAvailable = new ManualResetEvent(false);
 
-        public AwsShadow(string thingName, MqttClient client)
+        public AwsShadow()
         {
-            BaseTopic = $"$aws/things/{thingName}/shadow";
-            _client = client;
-            _client.MqttMsgSubscribed += _client_MqttMsgSubscribed;
+            BaseTopic = $"$aws/things/{AwsMqtt.ThingName}/shadow";
+            //client = client;
+            //AwsMqtt.Client.MqttMsgSubscribed += _client_MqttMsgSubscribed;
         }
 
         /// <summary>
@@ -72,9 +72,9 @@ namespace OrgPalThreeDemo
         public void DeleteThingShadow()
         {
             var topic = $"{BaseTopic}/delete";
-            _client.Subscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
-            _client.Publish(topic, new byte[0], MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
-            _client.Unsubscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" });
+            AwsMqtt.Client.Subscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
+            AwsMqtt.Client.Publish(topic, new byte[0], MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
+            AwsMqtt.Client.Unsubscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" });
         }
 
         /// <summary>
@@ -115,9 +115,9 @@ namespace OrgPalThreeDemo
             
 
             var topic = $"{BaseTopic}/get";
-            _client.Subscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
-            _client.Publish(topic, new byte[0], MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
-            _client.Unsubscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected"});
+            AwsMqtt.Client.Subscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
+            AwsMqtt.Client.Publish(topic, new byte[0], MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
+            AwsMqtt.Client.Unsubscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected"});
             return "";
         }
 
@@ -186,16 +186,16 @@ namespace OrgPalThreeDemo
         public void UpdateThingShadow(string shadow)
         {
             var topic = $"{BaseTopic}/update";
-            _client.Subscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected", $"{topic}/documents", $"{topic}/delta" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
-            _client.Publish(topic, Encoding.UTF8.GetBytes(shadow), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
-            _client.Unsubscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected", $"{topic}/documents", $"{topic}/delta" });
+            AwsMqtt.Client.Subscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected", $"{topic}/documents", $"{topic}/delta" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
+            AwsMqtt.Client.Publish(topic, Encoding.UTF8.GetBytes(shadow), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
+            AwsMqtt.Client.Unsubscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected", $"{topic}/documents", $"{topic}/delta" });
 
 
         }
 
-        private void _client_MqttMsgSubscribed(object sender, MqttMsgSubscribedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
+        //private void _client_MqttMsgSubscribed(object sender, MqttMsgSubscribedEventArgs e)
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 }

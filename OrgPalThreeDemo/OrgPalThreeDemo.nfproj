@@ -18,7 +18,8 @@
   </PropertyGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
-    <Compile Include="AwsShadow.cs" />
+    <Compile Include="AwsIoT\AwsMqtt.cs" />
+    <Compile Include="AwsIoT\AwsShadow.cs" />
     <Compile Include="Drivers\LCD.cs" />
     <Compile Include="Drivers\MCP342x.cs" />
     <Compile Include="Drivers\OnboardDevices.cs" />

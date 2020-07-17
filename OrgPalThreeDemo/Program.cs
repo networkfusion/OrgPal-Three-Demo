@@ -12,6 +12,7 @@ using uPLibrary.Networking.M2Mqtt.Messages;
 using Windows.Devices.Gpio;
 using Windows.Storage;
 using Windows.Storage.Streams;
+using AwsIoT;
 
 namespace OrgPalThreeDemo
 {
@@ -31,19 +32,6 @@ namespace OrgPalThreeDemo
         private static DateTime startTime = DateTime.UtcNow;
         private static int messagesSent = 0;
 
-
-        private static string _awsHost = string.Empty; //make sure to add your AWS endpoint and region. Stored in mqttconfig.json (make sure it is stored on the root of the SD card)
-        //{"Url" : "<endpoint>-ats.iot.<region>.amazonaws.com"}
-        private static int _awsPort = 8883; //add your port to mqttconfig.json if different from the default
-                                            //{"Port" : "8883"}
-        private static string _thingName; ////add your "thing" to mqttconfig.json if different from the devices SerialNumber
-
-        //private static readonly string clientId = Guid.NewGuid().ToString(); //This should really be persisted across reboots, but an auto generated GUID is fine for testing.
-        private static string clientRsaSha256Crt = string.Empty; //Device Certificate copied from AWS (make sure it is stored on the root of the SD card)
-        private static string clientRsaKey = string.Empty; //Device private key copied from AWS (make sure it is stored on the root of the SD card)
-        private static byte[] rootCA;
-        private static MqttClient client;
-        private static AwsShadow shadow;
 
 
         public static void Main()
@@ -96,6 +84,10 @@ namespace OrgPalThreeDemo
 
             SetupNetwork();
 
+            while (DateTime.UtcNow.Year < 2020)
+            {
+                Thread.Sleep(100); //aparently setupnetwork is not returning the RTC quick enough?!
+            }
             startTime = DateTime.UtcNow; //set now because the clock might have been wrong before ntp is checked.
 
             Debug.WriteLine($"Start Time: {startTime}");
@@ -153,26 +145,30 @@ namespace OrgPalThreeDemo
 
         static bool SetupMqtt()
         {
-            X509Certificate caCert = new X509Certificate(rootCA); //commented out as MDP changes mean resources dont currently work//Resources.GetBytes(Resources.BinaryResources.AwsCAroot)); //should this be in secure storage, or is it fine where it is?
-            X509Certificate2 clientCert = new X509Certificate2(clientRsaSha256Crt, clientRsaKey, ""); //make sure to add a correct pfx certificate
+            X509Certificate caCert = new X509Certificate(AwsMqtt.RootCA); //commented out as MDP changes mean resources dont currently work//Resources.GetBytes(Resources.BinaryResources.AwsCAroot)); //should this be in secure storage, or is it fine where it is?
+            X509Certificate2 clientCert = new X509Certificate2(AwsMqtt.ClientRsaSha256Crt, AwsMqtt.ClientRsaKey, ""); //make sure to add a correct pfx certificate
 
             try
             {
-                client = new MqttClient(_awsHost, _awsPort, true, caCert, clientCert, MqttSslProtocols.TLSv1_2);
+                AwsMqtt.Client = new MqttClient(AwsMqtt.Host, AwsMqtt.Port, true, caCert, clientCert, MqttSslProtocols.TLSv1_2);
 
                 // register to message received 
-                client.MqttMsgPublishReceived += Client_MqttMsgPublishReceived;
+                AwsMqtt.Client.MqttMsgPublishReceived += Client_MqttMsgPublishReceived;
 
-                client.Connect(_thingName);
-
-                //shadow = new AwsShadow(_thingName, ref client);
-                //Thread shadowThread = new Thread(new ThreadStart(ShadowLoop));
-                //shadowThread.Start();
+                AwsMqtt.Client.Connect(AwsMqtt.ThingName);
 
                 // subscribe to the topic with QoS 1
-                client.Subscribe(new string[] { "devices/nanoframework/sys" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
+                AwsMqtt.Client.Subscribe(new string[] { $"{AwsMqtt.ThingName}/sys" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
                 Thread telemetryThread = new Thread(new ThreadStart(TelemetryLoop));
                 telemetryThread.Start();
+
+
+
+                //Thread shadowThread = new Thread(new ThreadStart(ShadowLoop)); //TODO: currently throws exception on send!
+                //shadowThread.Start();
+
+
+
                 return true;
             }
             catch (Exception e)
@@ -190,16 +186,25 @@ namespace OrgPalThreeDemo
         {
             for ( ; ; )
             {
-                var shadowTelemetry = new StatusMessage();
-                shadowTelemetry.operatingSystem = "nanoFramework"; //move to shadow
-                shadowTelemetry.platform = SystemInfo.TargetName; //move to shadow
-                shadowTelemetry.cpu = SystemInfo.Platform; //move to shadow
-                shadowTelemetry.bootTimestamp = startTime; //move to shadow
+                try
+                {
+                    var shadowTelemetry = new ShadowMessage();
+                    shadowTelemetry.operatingSystem = "nanoFramework";
+                    shadowTelemetry.platform = SystemInfo.TargetName;
+                    shadowTelemetry.cpu = SystemInfo.Platform;
+                    shadowTelemetry.bootTimestamp = startTime;
 
-                string shadowData = JsonConvert.SerializeObject(shadowTelemetry);
-                shadow.UpdateThingShadow(shadowData);
+                    string shadowData = JsonConvert.SerializeObject(shadowTelemetry);
+                    AwsMqtt.Shadow.UpdateThingShadow(shadowData);
 
-                Debug.WriteLine("Shadow sent: " + shadowData);
+                    Debug.WriteLine("Shadow sent: " + shadowData);
+                }
+                catch (Exception ex)
+                {
+
+                    Debug.WriteLine($"error sending shadow: {ex}");
+                }
+
 
                 Thread.Sleep(600000); //1 hour
             }
@@ -210,12 +215,8 @@ namespace OrgPalThreeDemo
             for ( ; ; )
             {
                 var statusTelemetry = new StatusMessage();
-                statusTelemetry.operatingSystem = "nanoFramework"; //move to shadow
-                statusTelemetry.platform = SystemInfo.TargetName; //move to shadow
-                statusTelemetry.cpu = SystemInfo.Platform; //move to shadow
                 statusTelemetry.serialNumber = _serialNumber;
                 statusTelemetry.sendTimestamp = DateTime.UtcNow;
-                statusTelemetry.bootTimestamp = startTime; //move to shadow
                 statusTelemetry.messageNumber = messagesSent += 1;
                 statusTelemetry.batteryVoltage = palthree.GetBatteryUnregulatedVoltage();
                 statusTelemetry.enclosureTemperature = palthree.GetTemperatureOnBoard();
@@ -224,7 +225,7 @@ namespace OrgPalThreeDemo
                 statusTelemetry.airTemperature = adcPalSensor.GetTemperatureFromPT100();
 
                 string sampleData = JsonConvert.SerializeObject(statusTelemetry);
-                client.Publish($"devices/nanoframework/{_thingName}/data", Encoding.UTF8.GetBytes(sampleData), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
+                AwsMqtt.Client.Publish($"{AwsMqtt.ThingName}/data", Encoding.UTF8.GetBytes(sampleData), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
 
                 Debug.WriteLine("Message sent: " + sampleData);
 
@@ -272,7 +273,7 @@ namespace OrgPalThreeDemo
                         var buffer = FileIO.ReadBuffer(file);
                         using (DataReader dataReader = DataReader.FromBuffer(buffer))
                         {
-                            clientRsaSha256Crt = dataReader.ReadString(buffer.Length);
+                            AwsMqtt.ClientRsaSha256Crt = dataReader.ReadString(buffer.Length);
                         }
                         
                         //Should load into secure storage (somewhere) and delete file on removable device?
@@ -282,8 +283,8 @@ namespace OrgPalThreeDemo
                         var buffer = FileIO.ReadBuffer(file);
                         using (DataReader dataReader = DataReader.FromBuffer(buffer))
                         {
-                            rootCA = new byte[buffer.Length];
-                            dataReader.ReadBytes(rootCA);
+                            AwsMqtt.RootCA = new byte[buffer.Length];
+                            dataReader.ReadBytes(AwsMqtt.RootCA);
                         }
                     }
                     if (file.FileType == "key")
@@ -293,7 +294,7 @@ namespace OrgPalThreeDemo
                         var buffer = FileIO.ReadBuffer(file);
                         using (DataReader dataReader = DataReader.FromBuffer(buffer))
                         {
-                            clientRsaKey = dataReader.ReadString(buffer.Length);
+                            AwsMqtt.ClientRsaKey = dataReader.ReadString(buffer.Length);
                         }
                         
                         //Should load into secure storage (somewhere) and delete file on removable device?
@@ -304,18 +305,18 @@ namespace OrgPalThreeDemo
                         using (DataReader dataReader = DataReader.FromBuffer(buffer))
                         {
                             MqttConfig config = (MqttConfig)JsonConvert.DeserializeObject(dataReader, typeof(MqttConfig));
-                            _awsHost = config.Url;
+                            AwsMqtt.Host = config.Url;
                             if (config.Port != null)
                             {
-                                _awsPort = int.Parse(config.Port);
+                                AwsMqtt.Port = int.Parse(config.Port);
                             }
                             if (config.ThingName != string.Empty || config.ThingName != null)
                             {
-                                _thingName = config.ThingName;
+                                AwsMqtt.ThingName = config.ThingName;
                             }
                             else
                             {
-                                _thingName = _serialNumber;
+                                AwsMqtt.ThingName = _serialNumber;
                             }
                         }
 
