@@ -23,7 +23,8 @@ namespace AwsIoT
     public class AwsShadow
     {
 
-        public readonly string BaseTopic = "$aws/things/thingName/shadow";
+        public const string ShadowTopicPrefix = "$aws/things/";
+        public const string shadowTopicPostFix = "/shadow";
         //public readonly MqttClient _client;
 
         public ManualResetEvent UpdateAvailable = new ManualResetEvent(false);
@@ -31,7 +32,10 @@ namespace AwsIoT
 
         public AwsShadow()
         {
-            BaseTopic = $"$aws/things/{AwsMqtt.ThingName}/shadow";
+        //    if (AwsMqtt.ThingName != string.Empty)
+        //        BaseTopic = $"$aws/things/{AwsMqtt.ThingName}/shadow";
+        //    else
+        //        throw new Exception("Thing Name must be populated for Shadow to work!");
             //client = client;
             //AwsMqtt.Client.MqttMsgSubscribed += _client_MqttMsgSubscribed;
         }
@@ -69,9 +73,9 @@ namespace AwsIoT
         /// <exception cref="Amazon.IotData.Model.UnsupportedDocumentEncodingException">
         /// The document encoding is not supported.
         /// </exception>
-        public void DeleteThingShadow()
+        public void DeleteThingShadow(string namedShadow = "")
         {
-            var topic = $"{BaseTopic}/delete";
+            var topic = $"{ShadowTopicPrefix}{AwsMqtt.ThingName}{shadowTopicPostFix}/delete";
             AwsMqtt.Client.Subscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
             AwsMqtt.Client.Publish(topic, new byte[0], MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
             AwsMqtt.Client.Unsubscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" });
@@ -110,11 +114,11 @@ namespace AwsIoT
         /// <exception cref="Amazon.IotData.Model.UnsupportedDocumentEncodingException">
         /// The document encoding is not supported.
         /// </exception>
-        public string GetThingShadow()
+        public string GetThingShadow(string namedShadow = "")
         {
             
 
-            var topic = $"{BaseTopic}/get";
+            var topic = $"{ShadowTopicPrefix}{AwsMqtt.ThingName}{shadowTopicPostFix}/get";
             AwsMqtt.Client.Subscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
             AwsMqtt.Client.Publish(topic, new byte[0], MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
             AwsMqtt.Client.Unsubscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected"});
@@ -183,9 +187,9 @@ namespace AwsIoT
         /// <exception cref="Amazon.IotData.Model.UnsupportedDocumentEncodingException">
         /// The document encoding is not supported.
         /// </exception>
-        public void UpdateThingShadow(string shadow)
+        public void UpdateThingShadow(string shadowData, string namedShadow = "")
         {
-            var topic = $"{BaseTopic}/update";
+            var topic = $"{ShadowTopicPrefix}{AwsMqtt.ThingName}{shadowTopicPostFix}/update";
             AwsMqtt.Client.Subscribe(
                 new string[] { 
                 $"{topic}/accepted", 
@@ -199,7 +203,7 @@ namespace AwsIoT
                     MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, 
                     MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE 
                 });
-            AwsMqtt.Client.Publish(topic, Encoding.UTF8.GetBytes(shadow), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
+            AwsMqtt.Client.Publish(topic, Encoding.UTF8.GetBytes(shadowData), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
             AwsMqtt.Client.Unsubscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected", $"{topic}/documents", $"{topic}/delta" });
 
 
