@@ -31,6 +31,7 @@ namespace OrgPalThreeDemo
 
         private static DateTime startTime = DateTime.UtcNow;
         private static int messagesSent = 0;
+        public const int shadowSendInterval = 600000; //10 minutes...  TODO: increase shadow interval to 3600000 for 1 hour when happy!
 
 
 
@@ -194,12 +195,8 @@ namespace OrgPalThreeDemo
                     shadowTelemetry.cpu = SystemInfo.Platform;
                     shadowTelemetry.bootTimestamp = startTime;
 
-                    const string shadowHeader = "{\"state\":{\"reported\":";
-                    const string shadowFooter = "}}";
-                    string shadowData = $"{shadowHeader}{JsonConvert.SerializeObject(shadowTelemetry)}{shadowFooter}";
-                    AwsMqtt.Shadow.UpdateThingShadow(shadowData);
+                    AwsMqtt.Shadow.UpdateThingShadow(JsonConvert.SerializeObject(shadowTelemetry));
 
-                    Debug.WriteLine("Shadow sent: " + shadowData);
                 }
                 catch (Exception ex)
                 {
@@ -208,7 +205,7 @@ namespace OrgPalThreeDemo
                 }
 
 
-                Thread.Sleep(600000); //1 hour
+                Thread.Sleep(shadowSendInterval);
             }
         }
 
@@ -239,6 +236,8 @@ namespace OrgPalThreeDemo
         {
             string Message = new string(Encoding.UTF8.GetChars(e.Message));
             Debug.WriteLine("Message received: " + Message);
+
+            //should we handle the shadow received messages here?!
         }
 
         private static void ReadStorage()
