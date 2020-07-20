@@ -194,7 +194,7 @@ namespace OrgPalThreeDemo
                     shadowTelemetry.cpu = SystemInfo.Platform;
                     shadowTelemetry.bootTimestamp = startTime;
 
-                    string shadowData = JsonConvert.SerializeObject(shadowTelemetry);
+                    string shadowData = $"{{ \"reported\" : {JsonConvert.SerializeObject(shadowTelemetry)} }}"; //find a better way to do this!
                     AwsMqtt.Shadow.UpdateThingShadow(shadowData);
 
                     Debug.WriteLine("Shadow sent: " + shadowData);
