@@ -193,6 +193,7 @@ namespace OrgPalThreeDemo
                     shadowTelemetry.operatingSystem = "nanoFramework";
                     shadowTelemetry.platform = SystemInfo.TargetName;
                     shadowTelemetry.cpu = SystemInfo.Platform;
+                    shadowTelemetry.serialNumber = _serialNumber;
                     shadowTelemetry.bootTimestamp = startTime;
 
                     AwsMqtt.Shadow.UpdateThingShadow(JsonConvert.SerializeObject(shadowTelemetry));
