@@ -4,7 +4,7 @@ using System;
 using System.Text;
 using System.Threading;
 using System.Device.Gpio;
-using Windows.Devices.I2c;
+using System.Device.I2c;
 
 namespace PalThree
 {
@@ -46,7 +46,6 @@ namespace PalThree
         const byte Rs = 0b00000001;  // Register select bit
 
         private readonly I2cDevice I2C;
-        private readonly I2cConnectionSettings config;
         private byte backlightval = LCD_NOBACKLIGHT;
         private GpioPin lcdPowerOnOff;
 
@@ -73,15 +72,10 @@ namespace PalThree
         }
 
 
-        public LCD(string I2CId = PalThreePins.I2cBus.I2C3)
+        public LCD(int busId = PalThreePins.I2cBus.I2C3)
         {
             lcdPowerOnOff = PalHelper.GpioPort(PalThreePins.GpioPin.POWER_LCD_ON_OFF, PinMode.Output, PinValue.High);
 
-            config = new I2cConnectionSettings(LCD_ADDRESS)// the slave's address
-            {
-                BusSpeed = I2cBusSpeed.FastMode,
-                SharingMode = I2cSharingMode.Shared
-            };
 
             // For PCF8574T chip, I2C address range: 0x20-0x27  (Dec:    32-38)
             // For PCF8574 chip, I2C address range: 0x38 - 0x3F (Dec:   56-63)
@@ -91,15 +85,12 @@ namespace PalThree
 
             // Thread.Sleep(250);//small break to make the LCD startup better in some cases helps boot up without sensor
 
-            I2C = I2cDevice.FromId(I2CId, config);
-
-            byte[] cmdBuffer = new byte[1] { 0 };
-            var result = I2C.WritePartial(cmdBuffer);
+            I2C = new I2cDevice(new I2cConnectionSettings(busId, LCD_ADDRESS, I2cBusSpeed.FastMode));
+            var result = I2C.WriteByte(0x00);
             if (result.Status == I2cTransferStatus.SlaveAddressNotAcknowledged)
             {
-                I2C.Dispose();
-                config.SlaveAddress = 0x27;// the other default address
-                I2C = I2cDevice.FromId(I2CId, config);
+                //I2C.Dispose();
+                I2C = new I2cDevice(new I2cConnectionSettings(busId, 0x27, I2cBusSpeed.FastMode));
             }
 
             //put the LCD into 4 bit mode

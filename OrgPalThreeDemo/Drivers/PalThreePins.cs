@@ -152,10 +152,10 @@ namespace PalThree
         public static class I2cBus
         {
             /// <summary>Socket definition.</summary>
-            public const string I2C2 = "I2C2";
+            public const int I2C2 = 2;
 
             /// <summary>Socket definition.</summary>
-            public const string I2C3 = "I2C3";
+            public const int I2C3 = 3;
         }
 
 
