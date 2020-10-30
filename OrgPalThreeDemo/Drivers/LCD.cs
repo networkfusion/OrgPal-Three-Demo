@@ -3,7 +3,7 @@
 using System;
 using System.Text;
 using System.Threading;
-using Windows.Devices.Gpio;
+using System.Device.Gpio;
 using Windows.Devices.I2c;
 
 namespace PalThree
@@ -59,12 +59,12 @@ namespace PalThree
             {
                 if (value)//turn it on
                 {
-                    lcdPowerOnOff.Write(GpioPinValue.High);
+                    lcdPowerOnOff.Write(PinValue.High);
                     backlightval = LCD_BACKLIGHT;
                 }
                 else //turn it off
                 {
-                    lcdPowerOnOff.Write(GpioPinValue.Low);
+                    lcdPowerOnOff.Write(PinValue.Low);
                     backlightval = LCD_NOBACKLIGHT;
                 }
 
@@ -75,7 +75,7 @@ namespace PalThree
 
         public LCD(string I2CId = PalThreePins.I2cBus.I2C3)
         {
-            lcdPowerOnOff = PalHelper.GpioPort(PalThreePins.GpioPin.POWER_LCD_ON_OFF, GpioPinDriveMode.Output, GpioPinValue.High);
+            lcdPowerOnOff = PalHelper.GpioPort(PalThreePins.GpioPin.POWER_LCD_ON_OFF, PinMode.Output, PinValue.High);
 
             config = new I2cConnectionSettings(LCD_ADDRESS)// the slave's address
             {
@@ -264,7 +264,7 @@ namespace PalThree
             if (I2C != null)
                 I2C.Dispose();
 
-            lcdPowerOnOff.Write(GpioPinValue.Low);
+            lcdPowerOnOff.Write(PinValue.Low);
             lcdPowerOnOff.Dispose();
             lcdPowerOnOff = null;
         }

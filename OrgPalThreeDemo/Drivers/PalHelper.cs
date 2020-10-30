@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Text;
-using Windows.Devices.Gpio;
+using System.Device.Gpio;
 using Windows.Devices.I2c;
 
 namespace PalThree
@@ -354,18 +354,18 @@ namespace PalThree
             return targetDate;
         }
 
-        public static GpioPin GpioPort(int piNumber, GpioPinDriveMode mode, GpioPinValue defaultPinValue)
+        public static GpioPin GpioPort(int piNumber, PinMode mode, PinValue defaultPinValue)
         {
             GpioPin temp = GpioPort(piNumber, mode);
             temp.Write(defaultPinValue);
             return temp;
         }
 
-        public static GpioPin GpioPort(int piNumber, GpioPinDriveMode mode)
+        public static GpioPin GpioPort(int piNumber, PinMode mode)
         {
-            GpioController GPIO = GpioController.GetDefault();
+            GpioController GPIO = new GpioController();
             GpioPin temp = GPIO.OpenPin(piNumber);
-            temp.SetDriveMode(mode);
+            temp.SetPinMode(mode);
             return temp;
         }
 

@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading;
 using uPLibrary.Networking.M2Mqtt;
 using uPLibrary.Networking.M2Mqtt.Messages;
-using Windows.Devices.Gpio;
+using System.Device.Gpio;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using AwsIoT;
@@ -42,7 +42,7 @@ namespace OrgPalThreeDemo
             palthree = new Drivers.OnboardDevices();
             adcPalSensor = new MCP342x();
 
-            gpioController = GpioController.GetDefault();
+            gpioController = new GpioController();
 
 
             //we have multiplexed these buttons so that the board can wake up by user, or by the RTC
@@ -57,7 +57,7 @@ namespace OrgPalThreeDemo
             //_userButton.ValueChanged += UserButton_ValueChanged;
 
             _wakeButton = gpioController.OpenPin(PalThreePins.GpioPin.BUTTON_WAKE_PA0);
-            _wakeButton.SetDriveMode(GpioPinDriveMode.Input);
+            _wakeButton.SetPinMode(PinMode.Input);
             _wakeButton.ValueChanged += WakeButton_ValueChanged;
 
             lcd = new LCD();
@@ -108,9 +108,9 @@ namespace OrgPalThreeDemo
         //    Debug.WriteLine("Handle Mux Flow...!");
         //}
 
-        private static void WakeButton_ValueChanged(object sender, GpioPinValueChangedEventArgs e)
+        private static void WakeButton_ValueChanged(object sender, PinValueChangedEventArgs e)
         {
-            if (e.Edge == GpioPinEdge.RisingEdge)
+            if (e.ChangeType == PinEventTypes.Rising)
             {
                 lcd.BacklightOn = true;
                 lcd.Display($"Voltage: {palthree.GetBatteryUnregulatedVoltage().ToString("n2")} \n Temp: {palthree.GetTemperatureOnBoard().ToString("n2")}", 0);
