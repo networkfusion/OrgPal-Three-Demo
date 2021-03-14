@@ -85,13 +85,13 @@ namespace OrgPalThreeDemo
 
             SetupNetwork();
 
-            while (DateTime.UtcNow.Year < 2020)
+            while (DateTime.UtcNow.Year < 2021)
             {
                 Thread.Sleep(100); //aparently setupnetwork is not returning the RTC quick enough?!
             }
             startTime = DateTime.UtcNow; //set now because the clock might have been wrong before ntp is checked.
 
-            Debug.WriteLine($"Start Time: {startTime}");
+            Debug.WriteLine($"Start Time: {startTime.ToString("yyyy-MM-dd HH:mm:ss")}");
 
             var connected = false;
             while (!connected)

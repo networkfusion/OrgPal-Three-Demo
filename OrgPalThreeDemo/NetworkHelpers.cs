@@ -5,16 +5,14 @@
 
 using nanoFramework.Runtime.Events;
 using System;
+using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Threading;
-using System.Diagnostics;
 
 namespace nanoFramework.Networking
 {
     internal class NetworkHelpers
     {
-        private const string c_SSID = "REPLACE-WITH-YOUR-SSID";
-        private const string c_AP_PASSWORD = "REPLACE-WITH-YOUR-WIFI-KEY";
 
         private static bool _requiresDateTime;
 
@@ -23,11 +21,16 @@ namespace nanoFramework.Networking
 
         internal static void SetupAndConnectNetwork(bool requiresDateTime = false)
         {
-            NetworkChange.NetworkAddressChanged += new NetworkAddressChangedEventHandler(AddressChangedCallback);
+            NetworkChange.NetworkAddressChanged += AddressChangedCallback;
+            NetworkChange.NetworkAvailabilityChanged += NetworkChange_NetworkAvailabilityChanged;
 
             _requiresDateTime = requiresDateTime;
-
             new Thread(WorkingThread).Start();
+        }
+
+        private static void NetworkChange_NetworkAvailabilityChanged(object sender, NetworkAvailabilityEventArgs e)
+        {
+            Debug.WriteLine("Network availability changed");
         }
 
         internal static void WorkingThread()
@@ -39,31 +42,8 @@ namespace nanoFramework.Networking
                 // get the first interface
                 NetworkInterface ni = nis[0];
 
-                if (ni.NetworkInterfaceType == NetworkInterfaceType.Wireless80211)
-                {
-                    // network interface is Wi-Fi
-                    Debug.WriteLine("Network connection is: Wi-Fi");
 
-                    Wireless80211Configuration wc = Wireless80211Configuration.GetAllWireless80211Configurations()[ni.SpecificConfigId];
-
-                    // note on checking the 802.11 configuration
-                    // on secure devices (like the TI CC3220SF) the password can't be read
-                    // so we can't use the code block bellow to automatically set the profile
-                    if ((wc.Ssid != c_SSID && wc.Password != c_AP_PASSWORD) &&
-                         (wc.Ssid != "" && wc.Password == ""))
-                    {
-                        // have to update Wi-Fi configuration
-                        wc.Ssid = c_SSID;
-                        wc.Password = c_AP_PASSWORD;
-                        wc.SaveConfiguration();
-                    }
-                    else
-                    {
-                        // Wi-Fi configuration matches
-                        // (or can't be validated)
-                    }
-                }
-                else
+                if (ni.NetworkInterfaceType != NetworkInterfaceType.Wireless80211)
                 {
                     // network interface is Ethernet
                     Debug.WriteLine("Network connection is: Ethernet");
@@ -90,32 +70,53 @@ namespace nanoFramework.Networking
 
         private static void SetDateTime()
         {
-            Debug.WriteLine("Setting up system clock...");
+            int retryCount = 30;
+
+            Debug.WriteLine("Waiting for a valid date & time...");
 
             // if SNTP is available and enabled on target device this can be skipped because we should have a valid date & time
-            while (DateTime.UtcNow.Year < 2018)
+            while (DateTime.UtcNow.Year < 2021)
             {
-                Debug.WriteLine("Waiting for valid date time...");
+                // force update if we haven't a valid time after 30 seconds
+                if (retryCount-- == 0)
+                {
+                    Debug.WriteLine("Forcing SNTP update...");
+                    Sntp.Server2 = "uk.pool.ntp.org";
+                    Sntp.UpdateNow();
+
+                    // reset counter
+                    retryCount = 30;
+                }
+
                 // wait for valid date & time
                 Thread.Sleep(1000);
             }
 
+            Debug.WriteLine($"We have valid date & time: {DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")}");
+
             DateTimeAvailable.Set();
         }
 
-        private static void CheckIP()
+        private static bool CheckIP()
         {
             Debug.WriteLine("Checking for IP");
 
-            NetworkInterface ni = NetworkInterface.GetAllNetworkInterfaces()[0];
+            var ni = NetworkInterface.GetAllNetworkInterfaces()[0];
+
             if (ni.IPv4Address != null && ni.IPv4Address.Length > 0)
             {
                 if (ni.IPv4Address[0] != '0')
                 {
                     Debug.WriteLine($"We have and IP: {ni.IPv4Address}");
                     IpAddressAvailable.Set();
+
+                    return true;
                 }
             }
+
+            Debug.WriteLine("NO IP");
+
+            return false;
         }
 
         static void AddressChangedCallback(object sender, EventArgs e)
