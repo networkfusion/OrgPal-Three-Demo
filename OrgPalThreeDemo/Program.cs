@@ -214,20 +214,27 @@ namespace OrgPalThreeDemo
         {
             for ( ; ; )
             {
-                var statusTelemetry = new StatusMessage();
-                statusTelemetry.serialNumber = _serialNumber;
-                statusTelemetry.sendTimestamp = DateTime.UtcNow;
-                statusTelemetry.messageNumber = messagesSent += 1;
-                statusTelemetry.batteryVoltage = palthree.GetBatteryUnregulatedVoltage();
-                statusTelemetry.enclosureTemperature = palthree.GetTemperatureOnBoard();
-                statusTelemetry.memoryFree = nanoFramework.Runtime.Native.GC.Run(false);
-                statusTelemetry.mcuTemperature = palthree.GetMcuTemperature();
-                statusTelemetry.airTemperature = adcPalSensor.GetTemperatureFromPT100();
+                try
+                {
+                    var statusTelemetry = new StatusMessage();
+                    statusTelemetry.serialNumber = _serialNumber;
+                    statusTelemetry.sendTimestamp = DateTime.UtcNow;
+                    statusTelemetry.messageNumber = messagesSent += 1;
+                    statusTelemetry.batteryVoltage = palthree.GetBatteryUnregulatedVoltage();
+                    statusTelemetry.enclosureTemperature = palthree.GetTemperatureOnBoard();
+                    statusTelemetry.memoryFree = nanoFramework.Runtime.Native.GC.Run(false);
+                    statusTelemetry.mcuTemperature = palthree.GetMcuTemperature();
+                    statusTelemetry.airTemperature = adcPalSensor.GetTemperatureFromPT100();
 
-                string sampleData = JsonConvert.SerializeObject(statusTelemetry);
-                AwsMqtt.Client.Publish($"{AwsMqtt.ThingName}/data", Encoding.UTF8.GetBytes(sampleData), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
+                    string sampleData = JsonConvert.SerializeObject(statusTelemetry);
+                    AwsMqtt.Client.Publish($"{AwsMqtt.ThingName}/data", Encoding.UTF8.GetBytes(sampleData), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
 
-                Debug.WriteLine("Message sent: " + sampleData);
+                    Debug.WriteLine("Message sent: " + sampleData);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine("Message sent ex: " + ex);
+                }
 
                 Thread.Sleep(60000); //1 minute (TODO: this thread takes time and needs to account for it...)
             }
@@ -235,8 +242,15 @@ namespace OrgPalThreeDemo
 
         static void Client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
         {
-            string Message = new string(Encoding.UTF8.GetChars(e.Message));
-            Debug.WriteLine("Message received: " + Message);
+            try
+            {
+                string Message = new string(Encoding.UTF8.GetChars(e.Message));
+                Debug.WriteLine("Message received: " + Message);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Message received ex: " + ex);
+            }
 
             //should we handle the shadow received messages here?!
         }
