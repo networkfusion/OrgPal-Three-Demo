@@ -13,6 +13,7 @@ using System.Device.Gpio;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using AwsIoT;
+using mqttTrace = uPLibrary.Networking.M2Mqtt.Utility.Trace;
 
 namespace OrgPalThreeDemo
 {
@@ -33,13 +34,11 @@ namespace OrgPalThreeDemo
         private static int messagesSent = 0;
         public const int shadowSendInterval = 600000; //10 minutes...  TODO: increase shadow interval to 3600000 for 1 hour when happy!
 
-        //uPLibrary.Networking.M2Mqtt.Utility.TraceLevel traceLevel = uPLibrary.Networking.M2Mqtt.Utility.TraceLevel.Verbose | uPLibrary.Networking.M2Mqtt.Utility.TraceLevel.Frame;
-        //uPLibrary.Networking.M2Mqtt.Utility.Trace = WriteTrace;
 
-        //static void WriteTrace(uPLibrary.Networking.M2Mqtt.Utility.TraceLevel level, string format, params object[] args)
-        //{
-        //    Debug.WriteLine(uPLibrary.Networking.M2Mqtt.Fx.Format(format, args));
-        //}
+        static void WriteTrace(string format, params object[] args)
+        {
+            Debug.WriteLine(string.Format(format, args));
+        }
 
         public static void Main()
         {
@@ -98,6 +97,12 @@ namespace OrgPalThreeDemo
             startTime = DateTime.UtcNow; //set now because the clock might have been wrong before ntp is checked.
 
             Debug.WriteLine($"Start Time: {startTime.ToString("yyyy-MM-dd HH:mm:ss")}");
+
+            // Setup MQTT connection.
+            // set trace level 
+            mqttTrace.TraceLevel = uPLibrary.Networking.M2Mqtt.Utility.TraceLevel.Verbose | uPLibrary.Networking.M2Mqtt.Utility.TraceLevel.Frame;
+            // enable trace
+            mqttTrace.TraceListener = WriteTrace;
 
             var connected = false;
             while (!connected)
