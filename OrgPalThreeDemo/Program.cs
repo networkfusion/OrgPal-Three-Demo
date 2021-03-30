@@ -33,7 +33,13 @@ namespace OrgPalThreeDemo
         private static int messagesSent = 0;
         public const int shadowSendInterval = 600000; //10 minutes...  TODO: increase shadow interval to 3600000 for 1 hour when happy!
 
+        //uPLibrary.Networking.M2Mqtt.Utility.TraceLevel traceLevel = uPLibrary.Networking.M2Mqtt.Utility.TraceLevel.Verbose | uPLibrary.Networking.M2Mqtt.Utility.TraceLevel.Frame;
+        //uPLibrary.Networking.M2Mqtt.Utility.Trace = WriteTrace;
 
+        //static void WriteTrace(uPLibrary.Networking.M2Mqtt.Utility.TraceLevel level, string format, params object[] args)
+        //{
+        //    Debug.WriteLine(uPLibrary.Networking.M2Mqtt.Fx.Format(format, args));
+        //}
 
         public static void Main()
         {
@@ -153,10 +159,10 @@ namespace OrgPalThreeDemo
             {
                 AwsMqtt.Client = new MqttClient(AwsMqtt.Host, AwsMqtt.Port, true, caCert, clientCert, MqttSslProtocols.TLSv1_2);
 
+                AwsMqtt.Client.Connect(AwsMqtt.ThingName);
+
                 // register to message received 
                 AwsMqtt.Client.MqttMsgPublishReceived += Client_MqttMsgPublishReceived;
-
-                AwsMqtt.Client.Connect(AwsMqtt.ThingName);
 
                 // subscribe to the topic with QoS 1
                 AwsMqtt.Client.Subscribe(new string[] { $"{AwsMqtt.ThingName}/sys" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
