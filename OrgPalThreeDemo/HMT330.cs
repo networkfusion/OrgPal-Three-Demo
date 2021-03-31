@@ -10,10 +10,10 @@ namespace OrgPalThreeDemo
     public class HMT330
     {
 
-        HMT330(string port)
-        {
-
-        }
+        //HMT330(string port)
+        //{
+        //    //get ready to implement.
+        //}
 
 
         /// <summary>

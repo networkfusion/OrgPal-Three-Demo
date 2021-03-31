@@ -65,9 +65,10 @@ namespace OrgPalThreeDemo
             _wakeButton.SetPinMode(PinMode.Input);
             _wakeButton.ValueChanged += WakeButton_ValueChanged;
 
-            lcd = new LCD();
-
-            lcd.BacklightOn = true;
+            lcd = new LCD
+            {
+                BacklightOn = true
+            };
             lcd.Display("Please Wait...");
 
             Thread.Sleep(1000);
@@ -100,7 +101,7 @@ namespace OrgPalThreeDemo
 
             // Setup MQTT connection.
             // set trace level 
-            mqttTrace.TraceLevel = uPLibrary.Networking.M2Mqtt.Utility.TraceLevel.Verbose | uPLibrary.Networking.M2Mqtt.Utility.TraceLevel.Frame;
+            mqttTrace.TraceLevel = uPLibrary.Networking.M2Mqtt.Utility.TraceLevel.Verbose | uPLibrary.Networking.M2Mqtt.Utility.TraceLevel.Error | uPLibrary.Networking.M2Mqtt.Utility.TraceLevel.Frame;
             // enable trace
             mqttTrace.TraceListener = WriteTrace;
 
@@ -200,12 +201,14 @@ namespace OrgPalThreeDemo
             {
                 try
                 {
-                    var shadowTelemetry = new ShadowMessage();
-                    shadowTelemetry.operatingSystem = "nanoFramework";
-                    shadowTelemetry.platform = SystemInfo.TargetName;
-                    shadowTelemetry.cpu = SystemInfo.Platform;
-                    shadowTelemetry.serialNumber = _serialNumber;
-                    shadowTelemetry.bootTimestamp = startTime;
+                    var shadowTelemetry = new ShadowMessage
+                    {
+                        operatingSystem = "nanoFramework",
+                        platform = SystemInfo.TargetName,
+                        cpu = SystemInfo.Platform,
+                        serialNumber = _serialNumber,
+                        bootTimestamp = startTime
+                    };
 
                     AwsMqtt.Shadow.UpdateThingShadow(JsonConvert.SerializeObject(shadowTelemetry));
 
@@ -227,15 +230,17 @@ namespace OrgPalThreeDemo
             {
                 try
                 {
-                    var statusTelemetry = new StatusMessage();
-                    statusTelemetry.serialNumber = _serialNumber;
-                    statusTelemetry.sendTimestamp = DateTime.UtcNow;
-                    statusTelemetry.messageNumber = messagesSent += 1;
-                    statusTelemetry.batteryVoltage = palthree.GetBatteryUnregulatedVoltage();
-                    statusTelemetry.enclosureTemperature = palthree.GetTemperatureOnBoard();
-                    statusTelemetry.memoryFree = nanoFramework.Runtime.Native.GC.Run(false);
-                    statusTelemetry.mcuTemperature = palthree.GetMcuTemperature();
-                    statusTelemetry.airTemperature = adcPalSensor.GetTemperatureFromPT100();
+                    var statusTelemetry = new StatusMessage
+                    {
+                        serialNumber = _serialNumber,
+                        sendTimestamp = DateTime.UtcNow,
+                        messageNumber = messagesSent += 1,
+                        batteryVoltage = palthree.GetBatteryUnregulatedVoltage(),
+                        enclosureTemperature = palthree.GetTemperatureOnBoard(),
+                        memoryFree = nanoFramework.Runtime.Native.GC.Run(false),
+                        mcuTemperature = palthree.GetMcuTemperature(),
+                        airTemperature = adcPalSensor.GetTemperatureFromPT100()
+                    };
 
                     string sampleData = JsonConvert.SerializeObject(statusTelemetry);
                     AwsMqtt.Client.Publish($"{AwsMqtt.ThingName}/data", Encoding.UTF8.GetBytes(sampleData), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
