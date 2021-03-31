@@ -2,7 +2,7 @@
 using System.Text;
 //using Windows.Devices.Uart;
 
-namespace OrgPalThreeDemo
+namespace OrgPalThreeDemo.Peripherals
 {
     /// <summary>
     /// https://www.vaisala.com/sites/default/files/documents/HMT330%20User%27s%20Guide%20in%20English%20M210566EN.pdf

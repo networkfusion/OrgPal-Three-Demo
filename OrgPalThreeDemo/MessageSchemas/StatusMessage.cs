@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace OrgPalThreeDemo
+namespace OrgPalThreeDemo.MessageSchemas
 {
     public class StatusMessage
     {
-#pragma warning disable IDE1006 // Naming Styles
+#pragma warning disable IDE1006 // Naming Styles, disabled due to being Json specific
         public string serialNumber { get; set; }
         public DateTime sendTimestamp { get; set; }
         public int messageNumber { get; set; }

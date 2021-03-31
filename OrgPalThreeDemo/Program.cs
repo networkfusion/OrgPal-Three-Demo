@@ -201,7 +201,7 @@ namespace OrgPalThreeDemo
             {
                 try
                 {
-                    var shadowTelemetry = new ShadowMessage
+                    var shadowTelemetry = new MessageSchemas.ShadowMessage
                     {
                         operatingSystem = "nanoFramework",
                         platform = SystemInfo.TargetName,
@@ -230,7 +230,7 @@ namespace OrgPalThreeDemo
             {
                 try
                 {
-                    var statusTelemetry = new StatusMessage
+                    var statusTelemetry = new MessageSchemas.StatusMessage
                     {
                         serialNumber = _serialNumber,
                         sendTimestamp = DateTime.UtcNow,

@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace OrgPalThreeDemo
+namespace OrgPalThreeDemo.MessageSchemas
 {
     public class ShadowMessage
     {
-#pragma warning disable IDE1006 // Naming Styles
+#pragma warning disable IDE1006 // Naming Styles, disabled due to being Json specific
         public string operatingSystem { get; set; }
         public string platform { get; set; }
         public string cpu { get; set; }
