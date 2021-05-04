@@ -17,7 +17,7 @@ namespace nanoFramework.Networking
 
         static public ManualResetEvent IpAddressAvailable = new ManualResetEvent(false);
         static public ManualResetEvent DateTimeAvailable = new ManualResetEvent(false);
-        static public ManualResetEvent NetworkChangeReady = new ManualResetEvent(false);
+        //static public ManualResetEvent NetworkChangeReady = new ManualResetEvent(false);
 
         internal static void SetupAndConnectNetwork(bool requiresDateTime = false)
         {
@@ -75,31 +75,31 @@ namespace nanoFramework.Networking
 
         private static void SetDateTime()
         {
-            int retryCount = 30;
+            //int retryCount = 30;
 
             Debug.WriteLine("Waiting for a valid date & time...");
 
             // if SNTP is available and enabled on target device this can be skipped because we "should" have a valid date & time
             while (DateTime.UtcNow.Year < 2021)
             {
-                try
-                {
-                    // force update if we haven't a valid time after 30 seconds
-                    if (retryCount-- == 0)
-                    {
-                        Debug.WriteLine("Forcing SNTP update...");
-                        Sntp.Server2 = "uk.pool.ntp.org";
-                        Sntp.UpdateNow();
+                //try
+                //{
+                //    // force update if we haven't a valid time after 30 seconds
+                //    if (retryCount-- == 0)
+                //    {
+                //        Debug.WriteLine("Forcing SNTP update...");
+                //        Sntp.Server2 = "uk.pool.ntp.org";
+                //        Sntp.UpdateNow();
 
-                        // reset counter
-                        retryCount = 30;
-                    }
-                }
-                catch (Exception)
-                {
+                //        // reset counter
+                //        retryCount = 30;
+                //    }
+                //}
+                //catch (Exception)
+                //{
 
-                    Debug.WriteLine("Unable to set datetime, retrying?!");
-                }
+                //    Debug.WriteLine("Unable to set datetime, retrying?!");
+                //}
 
 
                 // wait for valid date & time
@@ -135,9 +135,9 @@ namespace nanoFramework.Networking
 
         static void AddressChangedCallback(object sender, EventArgs e)
         {
-            _requiresDateTime = false; //we will now presume the correct datetime otherwise we are probably going to get stuck (since the SNTP lib does not like it)
-            new Thread(WorkingThread).Start();
-            NetworkChangeReady.Set();
+            //_requiresDateTime = false; //we will now presume the correct datetime otherwise we are probably going to get stuck (since the SNTP lib does not like it)
+            //new Thread(WorkingThread).Start();
+            //NetworkChangeReady.Set();
         }
     }
 }

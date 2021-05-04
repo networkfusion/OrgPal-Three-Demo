@@ -89,11 +89,13 @@ namespace OrgPalThreeDemo
             StorageEventManager.RemovableDeviceRemoved += StorageEventManager_RemovableDeviceRemoved;
             ReadStorage();
 
+            Debug.WriteLine($"Time before network available: {DateTime.UtcNow}");
+            
             SetupNetwork();
 
             while (DateTime.UtcNow.Year < 2021)
             {
-                Thread.Sleep(100); //aparently setupnetwork is not returning the RTC quick enough?!
+                Thread.Sleep(100); //give time for native SNTP to be retrived.
             }
             startTime = DateTime.UtcNow; //set now because the clock might have been wrong before ntp is checked.
 
@@ -122,10 +124,10 @@ namespace OrgPalThreeDemo
             Thread.Sleep(Timeout.Infinite);
         }
 
-        private static void MuxFlowControl_ValueChanged(object sender, PinValueChangedEventArgs e)
-        {
-            Debug.WriteLine("Handle Mux Flow...!");
-        }
+        //private static void MuxFlowControl_ValueChanged(object sender, PinValueChangedEventArgs e)
+        //{
+        //    Debug.WriteLine("Handle Mux Flow...!");
+        //}
 
         private static void WakeButton_ValueChanged(object sender, PinValueChangedEventArgs e)
         {
@@ -151,16 +153,16 @@ namespace OrgPalThreeDemo
 
         private static void SetupNetwork()
         {
-            // We are using TLS and it requires valid date & time (so set the option to true)
-            NetworkHelpers.SetupAndConnectNetwork(true);
+            // We are using TLS and it requires valid date & time (so we should set the option to true, but SNTP is run in the background, and setting it manually causes issues for the moment!!!)
+            NetworkHelpers.SetupAndConnectNetwork(false);
 
             Debug.WriteLine("Waiting for network up and IP address...");
             NetworkHelpers.IpAddressAvailable.WaitOne();
 
-            Debug.WriteLine("Waiting for valid Date & Time...");
-            NetworkHelpers.DateTimeAvailable.WaitOne();
+            //Debug.WriteLine("Waiting for valid Date & Time...");
+            //NetworkHelpers.DateTimeAvailable.WaitOne(); //This is handled natively as also using the managed implementation causes issues.
 
-            NetworkHelpers.NetworkChangeReady.WaitOne();
+            //NetworkHelpers.NetworkChangeReady.WaitOne();
         }
 
         static bool SetupMqtt()
@@ -174,7 +176,7 @@ namespace OrgPalThreeDemo
                 AwsMqtt.Client = new MqttClient(AwsMqtt.Host, AwsMqtt.Port, true, caCert, clientCert, MqttSslProtocols.TLSv1_2);
 
                 AwsMqtt.Client.Connect(AwsMqtt.ThingName);
-                //TODO: this does not always fail gracefully (although possibily not here:
+                //TODO: this does not always fail gracefully (although possibily not here) and likely caused by SNTP:
                 //  ++++Exception System.ObjectDisposedException - 0x00000000(4)++++
                 //  ++++ Message:
                 //  ++++System.Net.Security.SslStream::Read[IP: 0010]++++
@@ -375,7 +377,7 @@ namespace OrgPalThreeDemo
                             catch (Exception)
                             {
 
-                                goto readMqttConfig;
+                                goto readMqttConfig; //TODO: sometimes a json deserialize exception happens. For the moment, just try again.
                             }
 
                         }

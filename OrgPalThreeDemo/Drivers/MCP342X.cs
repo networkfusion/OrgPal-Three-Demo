@@ -398,13 +398,13 @@ namespace PalThree
 
             if (channel == MCP342xChannel.Three)
             {
-                volts = volts * 2.5f;
+                volts *= 2.5f;
                 if (volts > 3.9)
                     volts += 0.085f;//add offset for board
             }
             else if (channel == MCP342xChannel.Four)
             {
-                volts = volts * 25;
+                volts *= 25;
                 if (volts > 3.9)
                     volts += 0.085f;//add offset for board
             }
