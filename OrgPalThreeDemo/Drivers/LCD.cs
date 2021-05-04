@@ -11,10 +11,10 @@ namespace PalThree
 
     public class LCD : IDisposable
     {
-        //For PCF8574T chip, I2C address range: 0x20-0x27  (Dec:    32-38)
         // For PCF8574 chip, I2C address range: 0x38 - 0x3F (Dec:   56-63)
-
-        const byte LCD_ADDRESS = 0x3F;// 0X27 on other models depnding of soldered a0,a1,a2
+        // For PCF8574T chip, I2C address range: 0x20-0x27  (Dec:    32-38)
+        const byte LCD_ADDRESS_MAIN = 0x3F;
+        const byte LCD_ADDRESS_DEFAULT = 0x27; // 0X27 on other models depnding of soldered a0,a1,a2
 
         // commands
         const byte LCD_CLEARDISPLAY = 0x01;
@@ -73,29 +73,29 @@ namespace PalThree
         }
 
 
-        public LCD(int I2CId = PalThreePins.I2cBus.I2C3)
+        public LCD(int I2CId = PalThreePins.I2cBus.I2C3, byte mainAddress = LCD_ADDRESS_MAIN)
         {
             lcdPowerOnOff = PalHelper.GpioPort(PalThreePins.GpioPin.POWER_LCD_ON_OFF, PinMode.Output, PinValue.High);
 
-            config = new I2cConnectionSettings(I2CId, LCD_ADDRESS, I2cBusSpeed.FastMode);
+            config = new I2cConnectionSettings(I2CId, mainAddress, I2cBusSpeed.FastMode);
 
-            // For PCF8574T chip, I2C address range: 0x20-0x27  (Dec:    32-38)
-            // For PCF8574 chip, I2C address range: 0x38 - 0x3F (Dec:   56-63)
-            //var i2cList = PalHelper.FindDevices(I2CId, 0x20, 0x3F);
-            //if (i2cList.Count == 1)
-            //    config.SlaveAddress = (byte)i2cList[0];
 
             // Thread.Sleep(250);//small break to make the LCD startup better in some cases helps boot up without sensor
 
             I2C = I2cDevice.Create(config);
 
-            byte[] cmdBuffer = new byte[1] { 0 };
-            var result = I2C.Write(cmdBuffer);
+            var result = I2C.WriteByte(0); //Write command 0 and see if it is acknowledged.
             if (result.Status == I2cTransferStatus.SlaveAddressNotAcknowledged)
             {
                 I2C.Dispose();
-                config = new I2cConnectionSettings(I2CId, 0x27, I2cBusSpeed.FastMode);;// the other default address
+                config = new I2cConnectionSettings(I2CId, LCD_ADDRESS_DEFAULT, I2cBusSpeed.FastMode); ;// the other default address
                 I2C = I2cDevice.Create(config);
+
+                result = I2C.WriteByte(0); //Write command 0 and see if it is acknowledged.
+                if (result.Status == I2cTransferStatus.SlaveAddressNotAcknowledged)
+                {
+                    throw new Exception("No LCD found");
+                }
             }
 
             //put the LCD into 4 bit mode
