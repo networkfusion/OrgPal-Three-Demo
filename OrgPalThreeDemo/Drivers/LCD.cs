@@ -75,7 +75,9 @@ namespace PalThree
 
         public LCD(int I2CId = PalThreePins.I2cBus.I2C3, byte mainAddress = LCD_ADDRESS_MAIN)
         {
-            lcdPowerOnOff = PalHelper.GpioPort(PalThreePins.GpioPin.POWER_LCD_ON_OFF, PinMode.Output, PinValue.High);
+            //lcdPowerOnOff = PalHelper.GpioPort(PalThreePins.GpioPin.POWER_LCD_ON_OFF, PinMode.Output, PinValue.High);
+            lcdPowerOnOff = new GpioController().OpenPin(PalThreePins.GpioPin.POWER_LCD_ON_OFF, PinMode.Output);
+            lcdPowerOnOff.Write(PinValue.High);
 
             config = new I2cConnectionSettings(I2CId, mainAddress, I2cBusSpeed.FastMode);
 
