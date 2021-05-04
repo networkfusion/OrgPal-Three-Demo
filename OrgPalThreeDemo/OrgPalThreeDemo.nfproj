@@ -53,12 +53,12 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib, Version=1.10.3.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\packages\nanoFramework.CoreLibrary.1.10.3-preview.7\lib\mscorlib.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.CoreLibrary.1.10.3-preview.20\lib\mscorlib.dll</HintPath>
       <Private>True</Private>
       <SpecificVersion>True</SpecificVersion>
     </Reference>
     <Reference Include="nanoFramework.Hardware.Stm32, Version=1.8.1.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\packages\nanoFramework.Hardware.Stm32.1.8.1-preview.22\lib\nanoFramework.Hardware.Stm32.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.Hardware.Stm32.1.8.1-preview.32\lib\nanoFramework.Hardware.Stm32.dll</HintPath>
       <Private>True</Private>
       <SpecificVersion>True</SpecificVersion>
     </Reference>
@@ -73,7 +73,7 @@
       <SpecificVersion>True</SpecificVersion>
     </Reference>
     <Reference Include="nanoFramework.Networking.Sntp, Version=1.5.3.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\packages\nanoFramework.Networking.Sntp.1.5.3-preview.29\lib\nanoFramework.Networking.Sntp.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.Networking.Sntp.1.5.3-preview.33\lib\nanoFramework.Networking.Sntp.dll</HintPath>
       <Private>True</Private>
       <SpecificVersion>True</SpecificVersion>
     </Reference>
