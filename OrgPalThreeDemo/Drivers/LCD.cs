@@ -4,7 +4,7 @@ using System;
 using System.Text;
 using System.Threading;
 using System.Device.Gpio;
-using Windows.Devices.I2c;
+using System.Device.I2c;
 
 namespace PalThree
 {
@@ -73,15 +73,11 @@ namespace PalThree
         }
 
 
-        public LCD(string I2CId = PalThreePins.I2cBus.I2C3)
+        public LCD(int I2CId = PalThreePins.I2cBus.I2C3)
         {
             lcdPowerOnOff = PalHelper.GpioPort(PalThreePins.GpioPin.POWER_LCD_ON_OFF, PinMode.Output, PinValue.High);
 
-            config = new I2cConnectionSettings(LCD_ADDRESS)// the slave's address
-            {
-                BusSpeed = I2cBusSpeed.FastMode,
-                SharingMode = I2cSharingMode.Shared
-            };
+            config = new I2cConnectionSettings(I2CId, LCD_ADDRESS, I2cBusSpeed.FastMode);
 
             // For PCF8574T chip, I2C address range: 0x20-0x27  (Dec:    32-38)
             // For PCF8574 chip, I2C address range: 0x38 - 0x3F (Dec:   56-63)
@@ -91,15 +87,15 @@ namespace PalThree
 
             // Thread.Sleep(250);//small break to make the LCD startup better in some cases helps boot up without sensor
 
-            I2C = I2cDevice.FromId(I2CId, config);
+            I2C = I2cDevice.Create(config);
 
             byte[] cmdBuffer = new byte[1] { 0 };
-            var result = I2C.WritePartial(cmdBuffer);
+            var result = I2C.Write(cmdBuffer);
             if (result.Status == I2cTransferStatus.SlaveAddressNotAcknowledged)
             {
                 I2C.Dispose();
-                config.SlaveAddress = 0x27;// the other default address
-                I2C = I2cDevice.FromId(I2CId, config);
+                config = new I2cConnectionSettings(I2CId, 0x27, I2cBusSpeed.FastMode);;// the other default address
+                I2C = I2cDevice.Create(config);
             }
 
             //put the LCD into 4 bit mode

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading;
-using Windows.Devices.I2c;
+using System.Device.I2c;
 
 namespace PalThree
 {
@@ -117,24 +117,20 @@ namespace PalThree
         int dataMask = (1 << (12 + (int)MCP342xResolution.SixteenBits * 2)) - 1; //resolution 16-bits
         Timer timer = null;
 
-        public MCP342x(string I2CId = PalThreePins.I2cBus.I2C2, ushort i2cAddress = 0x68)
+        public MCP342x(int I2CId = PalThreePins.I2cBus.I2C2, ushort i2cAddress = 0x68)
         {
             address = i2cAddress;
 
             Resolution = MCP342xResolution.SixteenBits;
 
-            var settings = new I2cConnectionSettings(address)// the slave's address
-            {
-                BusSpeed = I2cBusSpeed.StandardMode,
-                SharingMode = I2cSharingMode.Shared
-            };
+            var settings = new I2cConnectionSettings(I2CId, address, I2cBusSpeed.StandardMode);// the slave's address
 
             // Adress Options 0x68, 0x6A, 0x6C or 0x6E
             //var i2cList = PalHelper.FindDevices(I2CId, 0x68, 0x6E);
             //if (i2cList.Count == 1)
             //    settings.SlaveAddress = (byte)i2cList[0];
 
-            i2cBus = I2cDevice.FromId(I2CId, settings);
+            i2cBus = I2cDevice.Create(settings);
 
             TemperatureCoefficient = 1.250f; //not sure why this is better... 0c correct 30c 0.5c off...
             //TemperatureCoefficient = 0.385f;// 0.00385 Ohms/Ohm/ºC

@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Text;
 using System.Device.Gpio;
-using Windows.Devices.I2c;
+using System.Device.I2c;
 
 namespace PalThree
 {
@@ -10,27 +10,23 @@ namespace PalThree
     public class PalHelper
     {
 
-        public static ArrayList FindDevices(string I2CId, byte minimumAddress = 0x08, byte maximumAddress = 0x77)
+        public static ArrayList FindDevices(int I2CId, byte minimumAddress = 0x08, byte maximumAddress = 0x77)
         {
             ArrayList returnValue = new ArrayList();
 
-            if (I2CId.Length > 0)
+            if (I2CId > 0)
             {
                 byte[] writeBuffer = new byte[1] { 0 };
 
                 for (byte address = minimumAddress; address <= maximumAddress; address++)
                 {
-                    var settings = new I2cConnectionSettings(address)
-                    {
-                        BusSpeed = I2cBusSpeed.StandardMode,
-                        SharingMode = I2cSharingMode.Shared
-                    };
+                    var settings = new I2cConnectionSettings(I2CId, address, I2cBusSpeed.StandardMode);
 
-                    using (I2cDevice device = I2cDevice.FromId(I2CId, settings))
+                    using (I2cDevice device = I2cDevice.Create(settings))
                     {
                         try
                         {
-                            var result = device.WritePartial(writeBuffer);
+                            var result = device.Write(writeBuffer);
                             if (result.Status == I2cTransferStatus.FullTransfer || result.Status == I2cTransferStatus.PartialTransfer)
                                 returnValue.Add(address);
                         }
