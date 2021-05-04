@@ -128,7 +128,7 @@ namespace PalThree
         public void Clear()
         {
             SendCommand(LCD_CLEARDISPLAY);// clear display, set cursor position to zero
-            Thread.Sleep(5);  // command needs time!
+            Thread.Sleep(250);  // command needs time! (but possibly less than this...)
         }
 
 

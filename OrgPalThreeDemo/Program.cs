@@ -50,15 +50,15 @@ namespace OrgPalThreeDemo
             gpioController = new GpioController();
 
 
-            //we have multiplexed these buttons so that the board can wake up by user, or by the RTC
+            //the buttons are multiplexed so that the board can wake up by user, or by the RTC
             //so to get that interrupt to fire you need to do this
             //_muxFlowControl = gpioController.OpenPin(PalThreePins.GpioPin.MUX_EXT_BUTTON_WAKE_PE4);
-            //_muxFlowControl.SetDriveMode(GpioPinDriveMode.Output);
-            //_muxFlowControl.Write(GpioPinValue.High);
+            //_muxFlowControl.SetPinMode(PinMode.Output);
+            //_muxFlowControl.Write(PinValue.High);
             //_muxFlowControl.ValueChanged += MuxFlowControl_ValueChanged;
 
             //_userButton = gpioController.OpenPin(PalThreePins.GpioPin.BUTTON_USER_WAKE_PE6);
-            //_userButton.SetDriveMode(GpioPinDriveMode.Input);
+            //_userButton.SetPinMode(PinMode.Input);
             //_userButton.ValueChanged += UserButton_ValueChanged;
 
             _wakeButton = gpioController.OpenPin(PalThreePins.GpioPin.BUTTON_WAKE_PA0);
@@ -115,33 +115,31 @@ namespace OrgPalThreeDemo
             Thread.Sleep(Timeout.Infinite);
         }
 
-        //private static void MuxFlowControl_ValueChanged(object sender, GpioPinValueChangedEventArgs e)
-        //{
-        //    Debug.WriteLine("Handle Mux Flow...!");
-        //}
+        private static void MuxFlowControl_ValueChanged(object sender, PinValueChangedEventArgs e)
+        {
+            Debug.WriteLine("Handle Mux Flow...!");
+        }
 
         private static void WakeButton_ValueChanged(object sender, PinValueChangedEventArgs e)
         {
-            if (e.ChangeType == PinEventTypes.Rising)
+            if (lcd.BacklightOn == false)
             {
-                lcd.BacklightOn = true;
-                lcd.Display($"Voltage: {palthree.GetBatteryUnregulatedVoltage().ToString("n2")} \n Temp: {palthree.GetTemperatureOnBoard().ToString("n2")}", 0);
+                //TODO: this has display corruption!!!
+                if (e.ChangeType == PinEventTypes.Rising)
+                {
+                    lcd.BacklightOn = true;
+                    lcd.Clear();
+                    lcd.Display($"Voltage: {palthree.GetBatteryUnregulatedVoltage().ToString("n2")} \n Temp: {palthree.GetTemperatureOnBoard().ToString("n2")}", 0);
 
-                Thread.Sleep(5000);
-                lcd.BacklightOn = false;
+                    Thread.Sleep(5000);
+                    lcd.BacklightOn = false;
+                }
             }
         }
 
         //private static void UserButton_ValueChanged(object sender, GpioPinValueChangedEventArgs e)
         //{
-        //    if (e.Edge == GpioPinEdge.RisingEdge)
-        //    {
-        //        lcd.BacklightOn = true;
-        //        lcd.Display($"Voltage: {palthree.GetBatteryUnregulatedVoltage().ToString("n2")} \n Status: {palthree.GetTemperatureOnBoard().ToString("n2")}", 0);
 
-        //        Thread.Sleep(5000);
-        //        lcd.BacklightOn = false;
-        //    }
         //}
 
         private static void SetupNetwork()
@@ -166,6 +164,13 @@ namespace OrgPalThreeDemo
                 AwsMqtt.Client = new MqttClient(AwsMqtt.Host, AwsMqtt.Port, true, caCert, clientCert, MqttSslProtocols.TLSv1_2);
 
                 AwsMqtt.Client.Connect(AwsMqtt.ThingName);
+                //TODO: this does not always fail gracefully (although possibily not here:
+                //  ++++Exception System.ObjectDisposedException - 0x00000000(4)++++
+                //  ++++ Message:
+                //  ++++System.Net.Security.SslStream::Read[IP: 0010]++++
+                //  ++++ uPLibrary.Networking.M2Mqtt.MqttNetworkChannel::Receive[IP: 001a]++++
+                //  ++++ uPLibrary.Networking.M2Mqtt.MqttClient::ReceiveThread[IP: 0013]++++
+                //  Exception occurred: System.ObjectDisposedException: Exception was thrown: System.ObjectDisposedException
 
                 // register to message received 
                 AwsMqtt.Client.MqttMsgPublishReceived += Client_MqttMsgPublishReceived;
