@@ -106,9 +106,16 @@ namespace OrgPalThreeDemo
             mqttTrace.TraceListener = WriteTrace;
 
             var connected = false;
+            int connectionAttempt = 0;
             while (!connected)
             {
+                Debug.WriteLine($"Connection Attempt {connectionAttempt}");
                 connected = SetupMqtt();
+                if (!connected)
+                {
+                    connectionAttempt += 1;
+                    Thread.Sleep(1000);
+                }
             }
 
 
@@ -144,7 +151,7 @@ namespace OrgPalThreeDemo
 
         private static void SetupNetwork()
         {
-            // if we are using TLS it requires valid date & time
+            // We are using TLS and it requires valid date & time (so set the option to true)
             NetworkHelpers.SetupAndConnectNetwork(true);
 
             Debug.WriteLine("Waiting for network up and IP address...");
@@ -152,15 +159,18 @@ namespace OrgPalThreeDemo
 
             Debug.WriteLine("Waiting for valid Date & Time...");
             NetworkHelpers.DateTimeAvailable.WaitOne();
+
+            NetworkHelpers.NetworkChangeReady.WaitOne();
         }
 
         static bool SetupMqtt()
         {
-            X509Certificate caCert = new X509Certificate(AwsMqtt.RootCA); //commented out as MDP changes mean resources dont currently work//Resources.GetBytes(Resources.BinaryResources.AwsCAroot)); //should this be in secure storage, or is it fine where it is?
-            X509Certificate2 clientCert = new X509Certificate2(AwsMqtt.ClientRsaSha256Crt, AwsMqtt.ClientRsaKey, ""); //make sure to add a correct pfx certificate
-
             try
             {
+                X509Certificate caCert = new X509Certificate(AwsMqtt.RootCA); //commented out as MDP changes mean resources dont currently work//Resources.GetBytes(Resources.BinaryResources.AwsCAroot)); //should this be in secure storage, or is it fine where it is?
+                X509Certificate2 clientCert = new X509Certificate2(AwsMqtt.ClientRsaSha256Crt, AwsMqtt.ClientRsaKey, ""); //make sure to add a correct pfx certificate
+
+
                 AwsMqtt.Client = new MqttClient(AwsMqtt.Host, AwsMqtt.Port, true, caCert, clientCert, MqttSslProtocols.TLSv1_2);
 
                 AwsMqtt.Client.Connect(AwsMqtt.ThingName);
@@ -222,6 +232,7 @@ namespace OrgPalThreeDemo
                 {
 
                     Debug.WriteLine($"error sending shadow: {ex}");
+                    SetupMqtt();
                 }
 
 
@@ -255,6 +266,7 @@ namespace OrgPalThreeDemo
                 catch (Exception ex)
                 {
                     Debug.WriteLine("Message sent ex: " + ex);
+                    SetupMqtt();
                 }
 
                 Thread.Sleep(60000); //1 minute (TODO: this thread takes time and needs to account for it...)
@@ -271,6 +283,7 @@ namespace OrgPalThreeDemo
             catch (Exception ex)
             {
                 Debug.WriteLine("Message received ex: " + ex);
+                SetupMqtt();
             }
 
             //should we handle the shadow received messages here?!
@@ -341,20 +354,30 @@ namespace OrgPalThreeDemo
                         var buffer = FileIO.ReadBuffer(file);
                         using (DataReader dataReader = DataReader.FromBuffer(buffer))
                         {
-                            MqttConfig config = (MqttConfig)JsonConvert.DeserializeObject(dataReader, typeof(MqttConfig));
-                            AwsMqtt.Host = config.Url;
-                            if (config.Port != null)
+                            readMqttConfig:
+                            try
                             {
-                                AwsMqtt.Port = int.Parse(config.Port);
+                                MqttConfig config = (MqttConfig)JsonConvert.DeserializeObject(dataReader, typeof(MqttConfig));
+                                AwsMqtt.Host = config.Url;
+                                if (config.Port != null)
+                                {
+                                    AwsMqtt.Port = int.Parse(config.Port);
+                                }
+                                if (config.ThingName != string.Empty || config.ThingName != null)
+                                {
+                                    AwsMqtt.ThingName = config.ThingName;
+                                }
+                                else
+                                {
+                                    AwsMqtt.ThingName = _serialNumber;
+                                }
                             }
-                            if (config.ThingName != string.Empty || config.ThingName != null)
+                            catch (Exception)
                             {
-                                AwsMqtt.ThingName = config.ThingName;
+
+                                goto readMqttConfig;
                             }
-                            else
-                            {
-                                AwsMqtt.ThingName = _serialNumber;
-                            }
+
                         }
 
                         //Should load into secure storage (somewhere) and delete file on removable device?

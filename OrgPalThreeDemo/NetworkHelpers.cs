@@ -17,6 +17,7 @@ namespace nanoFramework.Networking
 
         static public ManualResetEvent IpAddressAvailable = new ManualResetEvent(false);
         static public ManualResetEvent DateTimeAvailable = new ManualResetEvent(false);
+        static public ManualResetEvent NetworkChangeReady = new ManualResetEvent(false);
 
         internal static void SetupAndConnectNetwork(bool requiresDateTime = false)
         {
@@ -47,6 +48,11 @@ namespace nanoFramework.Networking
                     // network interface is Ethernet
                     Debug.WriteLine("Network connection is: Ethernet");
                 }
+                else
+                {
+                    // network interface is WiFi
+                    Debug.WriteLine("Network connection is: WiFi");
+                }
 
                 ni.EnableAutomaticDns();
                 ni.EnableDhcp();
@@ -73,25 +79,34 @@ namespace nanoFramework.Networking
 
             Debug.WriteLine("Waiting for a valid date & time...");
 
-            // if SNTP is available and enabled on target device this can be skipped because we should have a valid date & time
+            // if SNTP is available and enabled on target device this can be skipped because we "should" have a valid date & time
             while (DateTime.UtcNow.Year < 2021)
             {
-                // force update if we haven't a valid time after 30 seconds
-                if (retryCount-- == 0)
+                try
                 {
-                    Debug.WriteLine("Forcing SNTP update...");
-                    Sntp.Server2 = "uk.pool.ntp.org";
-                    Sntp.UpdateNow();
+                    // force update if we haven't a valid time after 30 seconds
+                    if (retryCount-- == 0)
+                    {
+                        Debug.WriteLine("Forcing SNTP update...");
+                        Sntp.Server2 = "uk.pool.ntp.org";
+                        Sntp.UpdateNow();
 
-                    // reset counter
-                    retryCount = 30;
+                        // reset counter
+                        retryCount = 30;
+                    }
                 }
+                catch (Exception)
+                {
+
+                    Debug.WriteLine("Unable to set datetime, retrying?!");
+                }
+
 
                 // wait for valid date & time
                 Thread.Sleep(1000);
             }
 
-            Debug.WriteLine($"We have valid date & time: {DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")}");
+            Debug.WriteLine($"We have received the date & time: {DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")}");
 
             DateTimeAvailable.Set();
         }
@@ -106,7 +121,7 @@ namespace nanoFramework.Networking
             {
                 if (ni.IPv4Address[0] != '0')
                 {
-                    Debug.WriteLine($"We have and IP: {ni.IPv4Address}");
+                    Debug.WriteLine($"We have received an IP: {ni.IPv4Address}");
                     IpAddressAvailable.Set();
 
                     return true;
@@ -120,7 +135,9 @@ namespace nanoFramework.Networking
 
         static void AddressChangedCallback(object sender, EventArgs e)
         {
-            CheckIP();
+            _requiresDateTime = false; //we will now presume the correct datetime otherwise we are probably going to get stuck (since the SNTP lib does not like it)
+            new Thread(WorkingThread).Start();
+            NetworkChangeReady.Set();
         }
     }
 }
