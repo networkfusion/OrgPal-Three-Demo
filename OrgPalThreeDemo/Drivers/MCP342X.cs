@@ -301,11 +301,11 @@ namespace PalThree
 
             Thread.Sleep(10); //let the ADC settle
 
-            float tempValue = 0;
+            //float tempValue = 0;
             ////do 2-3 readings just to make sure sampling is good
             //for (int i = 0; i < 2; i++)
             //{
-            tempValue = GetTemperature() + TemperatureCoefficient;
+            float tempValue = GetTemperature() + TemperatureCoefficient;
                 
             //}
             //put the IC in low power mode, thus set on OneShot and read to write config

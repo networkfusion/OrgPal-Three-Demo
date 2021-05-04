@@ -73,7 +73,7 @@ namespace OrgPalThreeDemo
 
             Thread.Sleep(1000);
 
-            lcd.Display($"Voltage: {palthree.GetBatteryUnregulatedVoltage().ToString("n2")} \n Temp: {palthree.GetTemperatureOnBoard().ToString("n2")}", 0);
+            lcd.Display($"Voltage: {palthree.GetBatteryUnregulatedVoltage().ToString("n2")} \n Temp: {palthree.GetTemperatureOnBoard().ToString("n2")}"); //, 0);
 
             Thread.Sleep(5000);
             lcd.BacklightOn = false;
@@ -138,7 +138,7 @@ namespace OrgPalThreeDemo
                 {
                     lcd.BacklightOn = true;
                     lcd.Clear();
-                    lcd.Display($"Voltage: {palthree.GetBatteryUnregulatedVoltage().ToString("n2")} \n Temp: {palthree.GetTemperatureOnBoard().ToString("n2")}", 0);
+                    lcd.Display($"Voltage: {palthree.GetBatteryUnregulatedVoltage().ToString("n2")} \n Temp: {palthree.GetTemperatureOnBoard().ToString("n2")}"); //, 0);
 
                     Thread.Sleep(5000);
                     lcd.BacklightOn = false;

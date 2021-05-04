@@ -1,4 +1,6 @@
 ﻿// Adapted from Micro Liquid Crystal Library http://microliquidcrystal.codeplex.com
+// Could likely be improved using https://github.com/dotnet/iot/blob/main/src/devices/CharacterLcd/samples/Pcf8574tSample.cs
+// and https://github.com/dotnet/iot/tree/main/src/devices/Pcx857x
 
 using System;
 using System.Text;
@@ -156,14 +158,14 @@ namespace PalThree
         }
 
 
-        public void Display(string text, byte line = 0)
+        public void Display(string text) //, byte line = 0)
         {
             int lines = text.Length > 16 ? 2 : 1;
             if (lines < 2)
             {
                 foreach (byte b in Encoding.UTF8.GetBytes(text))
                 {
-                    Send(b, Rs, true);
+                    Send(b, Rs); //, true);
                 }
             }
             else
@@ -176,14 +178,14 @@ namespace PalThree
                     {
                         foreach (byte b in Encoding.UTF8.GetBytes(text.Substring(0, 16)))
                         {
-                            Send(b, Rs, true);
+                            Send(b, Rs); //, true);
                         }
                     }
                     else
                     {
                         foreach (byte b in Encoding.UTF8.GetBytes(text.Substring(16)))
                         {
-                            Send(b, Rs, true);
+                            Send(b, Rs); //, true);
                         }
                     }
                 }
@@ -191,10 +193,10 @@ namespace PalThree
         }
 
 
-        public void ShowText(string text, byte line = 0)
+        public void ShowText(string text) //, byte line = 0)
         {
             this.Clear();
-            Display(text, line);
+            Display(text); //, line);
         }
 
 
@@ -209,7 +211,7 @@ namespace PalThree
             Send(value, Rs);
         }
 
-        void Send(byte value, byte mode, bool isData = false)
+        void Send(byte value, byte mode) //, bool isData = false)
         {
             byte highnib = (byte)(value & 0xf0);
             byte lownib = (byte)((value << (byte)4) & 0xf0);
@@ -232,10 +234,10 @@ namespace PalThree
             Thread.Sleep(1);      // commands need > 37us to settle
         }
 
-        void LoadCustomCharacter(byte char_num, byte[] rows)
-        {
-            CreateCustomChar(char_num, rows);
-        }
+        //void LoadCustomCharacter(byte char_num, byte[] rows)
+        //{
+        //    CreateCustomChar(char_num, rows);
+        //}
 
         void WriteByte(byte dat)
         {
@@ -272,25 +274,25 @@ namespace PalThree
         //    SendData(3);
         //}
 
-        void LoadDefaultCustomChars()
-        {
-            byte[] bell = { 0x4, 0xe, 0xe, 0xe, 0x1f, 0x0, 0x4 };
-            byte[] note = { 0x2, 0x3, 0x2, 0xe, 0x1e, 0xc, 0x0 };
-            byte[] clock = { 0x0, 0xe, 0x15, 0x17, 0x11, 0xe, 0x0 };
-            byte[] heart = { 0x0, 0xa, 0x1f, 0x1f, 0xe, 0x4, 0x0 };
-            byte[] duck = { 0x0, 0xc, 0x1d, 0xf, 0xf, 0x6, 0x0 };
-            byte[] check = { 0x0, 0x1, 0x3, 0x16, 0x1c, 0x8, 0x0 };
-            byte[] cross = { 0x0, 0x1b, 0xe, 0x4, 0xe, 0x1b, 0x0 };
-            byte[] retarrow = { 0x1, 0x1, 0x5, 0x9, 0x1f, 0x8, 0x4 };
+        //void LoadDefaultCustomChars()
+        //{
+        //    byte[] bell = { 0x4, 0xe, 0xe, 0xe, 0x1f, 0x0, 0x4 };
+        //    byte[] note = { 0x2, 0x3, 0x2, 0xe, 0x1e, 0xc, 0x0 };
+        //    byte[] clock = { 0x0, 0xe, 0x15, 0x17, 0x11, 0xe, 0x0 };
+        //    byte[] heart = { 0x0, 0xa, 0x1f, 0x1f, 0xe, 0x4, 0x0 };
+        //    byte[] duck = { 0x0, 0xc, 0x1d, 0xf, 0xf, 0x6, 0x0 };
+        //    byte[] check = { 0x0, 0x1, 0x3, 0x16, 0x1c, 0x8, 0x0 };
+        //    byte[] cross = { 0x0, 0x1b, 0xe, 0x4, 0xe, 0x1b, 0x0 };
+        //    byte[] retarrow = { 0x1, 0x1, 0x5, 0x9, 0x1f, 0x8, 0x4 };
 
-            CreateCustomChar(0, bell);
-            CreateCustomChar(1, note);
-            CreateCustomChar(2, clock);
-            CreateCustomChar(3, heart);
-            CreateCustomChar(4, duck);
-            CreateCustomChar(5, check);
-            CreateCustomChar(6, cross);
-            CreateCustomChar(7, retarrow);
-        }
+        //    CreateCustomChar(0, bell);
+        //    CreateCustomChar(1, note);
+        //    CreateCustomChar(2, clock);
+        //    CreateCustomChar(3, heart);
+        //    CreateCustomChar(4, duck);
+        //    CreateCustomChar(5, check);
+        //    CreateCustomChar(6, cross);
+        //    CreateCustomChar(7, retarrow);
+        //}
     }
 }
