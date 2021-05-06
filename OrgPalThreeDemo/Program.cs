@@ -95,7 +95,7 @@ namespace OrgPalThreeDemo
 
             while (DateTime.UtcNow.Year < 2021)
             {
-                Thread.Sleep(100); //give time for native SNTP to be retrived.
+                Thread.Sleep(100); //give time for native SNTP to be retrieved.
             }
             startTime = DateTime.UtcNow; //set now because the clock might have been wrong before ntp is checked.
 
