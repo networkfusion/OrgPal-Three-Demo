@@ -16,7 +16,7 @@ namespace OrgPalThreeDemo.Drivers
         /// Returns the value of the 12V battery voltage coming in the system 
         /// </summary>
         /// <returns></returns>
-        public float GetBatteryUnregulatedVoltage()
+        public double GetBatteryUnregulatedVoltage()
         {
             float voltage = 0;
 
@@ -26,7 +26,7 @@ namespace OrgPalThreeDemo.Drivers
                 adcVBAT = adc1.OpenChannel(PalThreePins.AdcChannel.ADC1_IN8_VBAT);
             }
 
-            int average = 0;
+            var average = 0;
             for (byte i = 0; i < 5; i++)
             {
                 average += adcVBAT.ReadValue();
@@ -54,20 +54,20 @@ namespace OrgPalThreeDemo.Drivers
             return voltage;
         }
 
-        public float GetTemperatureOnBoard()
+        public double GetTemperatureOnBoard()
         {
             AdcController adc1 = AdcController.GetDefault();
             adcTemp = adc1.OpenChannel(PalThreePins.AdcChannel.ADC1_IN13_TEMP);
 
-            float tempInCent = 0;
+            double tempInCent = 0;
 
             try
             {
                 var maximumValue = 4095;
                 var analogReference = 3300;
-                float adcTempCalcValue = (analogReference * adcTemp.ReadValue()) / maximumValue;
+                double adcTempCalcValue = (analogReference * adcTemp.ReadValue()) / maximumValue;
                 tempInCent = ((13.582f - Math.Sqrt(184.470724f + (0.01732f * (2230.8f - adcTempCalcValue)))) / (-0.00866f)) + 30;
-                // float tempInF = ((9f / 5f) * tempInCent) + 32f;
+                // double tempInF = ((9f / 5f) * tempInCent) + 32f;
             }
             catch { }
 

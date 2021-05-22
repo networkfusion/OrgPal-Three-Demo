@@ -253,11 +253,11 @@ namespace OrgPalThreeDemo
                         serialNumber = _serialNumber,
                         sendTimestamp = DateTime.UtcNow,
                         messageNumber = messagesSent += 1,
-                        batteryVoltage = palthree.GetBatteryUnregulatedVoltage(),
-                        enclosureTemperature = palthree.GetTemperatureOnBoard(),
+                        batteryVoltage = (float)palthree.GetBatteryUnregulatedVoltage(),
+                        enclosureTemperature = (float)palthree.GetTemperatureOnBoard(),
                         memoryFree = nanoFramework.Runtime.Native.GC.Run(false),
                         mcuTemperature = palthree.GetMcuTemperature(),
-                        airTemperature = adcPalSensor.GetTemperatureFromPT100()
+                        airTemperature = (float)adcPalSensor.GetTemperatureFromPT100()
                     };
 
                     string sampleData = JsonConvert.SerializeObject(statusTelemetry);

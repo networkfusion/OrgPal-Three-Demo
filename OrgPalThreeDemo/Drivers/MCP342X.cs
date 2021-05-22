@@ -254,7 +254,7 @@ namespace PalThree
         }
 
 
-        public float GetTemperatureFromThermistorNTC1000()
+        public double GetTemperatureFromThermistorNTC1000()
         {
             Channel = MCP342xChannel.Two;//NTC Thermistor is only avaialble on CH2+
             Mode = MCP342xConversionMode.Continuous;
@@ -266,7 +266,7 @@ namespace PalThree
             NTC_C = 9.520031026040015e-8f;
 
             //calculate temperature from resistance
-            float volts = 0;
+            double volts = 0;
             //do 3 readings just to make sure sampling is good
             for (int i = 0; i < 3; i++)
             {
@@ -274,10 +274,10 @@ namespace PalThree
                 Thread.Sleep(100);
             }
 
-            float thermistorResistance = volts * 10000f / (3.3f - volts);//3.3 V for thermistor, 10K resistor/thermistor
-            float lnR = Math.Log(thermistorResistance);
-            float Tk = 1 / (NTC_A + NTC_B * lnR + NTC_C * (lnR * lnR * lnR));
-            float tempC = Tk - 273.15f;
+            double thermistorResistance = volts * 10000f / (3.3f - volts);//3.3 V for thermistor, 10K resistor/thermistor
+            double lnR = Math.Log(thermistorResistance);
+            double Tk = 1 / (NTC_A + NTC_B * lnR + NTC_C * (lnR * lnR * lnR));
+            double tempC = Tk - 273.15f;
             return tempC;
 
         }
@@ -292,7 +292,7 @@ namespace PalThree
         /// Connect the 2 same color wires to the EX- and SIG- individually
         /// </remarks>
         /// <returns></returns>
-        public float GetTemperatureFromPT100()
+        public double GetTemperatureFromPT100()
         {
             Channel = MCP342xChannel.One;//pt100 is only avaialble on CH1+/CH1-
 
@@ -305,7 +305,7 @@ namespace PalThree
             ////do 2-3 readings just to make sure sampling is good
             //for (int i = 0; i < 2; i++)
             //{
-            float tempValue = GetTemperature() + TemperatureCoefficient;
+            double tempValue = GetTemperature() + TemperatureCoefficient;
                 
             //}
             //put the IC in low power mode, thus set on OneShot and read to write config
@@ -315,7 +315,7 @@ namespace PalThree
             return tempValue;
         }
 
-        private float GetTemperature()
+        private double GetTemperature()
         {
             const float RTD_ALPHA = 3.9083e-3F;
             const float RTD_BETA = -5.775e-7F;
