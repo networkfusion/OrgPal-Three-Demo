@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO.Ports;
 
 namespace OrgPalThreeDemo.Peripherals
 {
@@ -37,7 +38,7 @@ namespace OrgPalThreeDemo.Peripherals
                     WIND_SPEED_CURRENT_KTS = 415, //0xF0 + 0x19; //dec 415 (little endian)
                     WIND_DIRECTION_CURRENT_DEG = 500, //0xF4 + 0x01; // dec 500 (little endian)
                     WIND_GUST_3S_KTS = 458, // 0xCA + 0x10; //dec 458 (little endian)
-            }
+                }
 
                 public byte ProtocolVersion { get; set; } = UMB_PROTOCOL_VERSION_V1_0;
                 public SensorType ToAddress { get; set; } = SensorType.VENTUS; //this should allow different sensors!
@@ -65,7 +66,7 @@ namespace OrgPalThreeDemo.Peripherals
                         CHAR_ETX,
                         (UMB_CHKSUM_TEST & 255), //high byte
                         (UMB_CHKSUM_TEST >> 8), //low byte
-                        CHAR_EOT 
+                        CHAR_EOT
                     };
 
                     Debug.WriteLine($"BytesToSend: {BytesToSend}");
@@ -141,6 +142,39 @@ namespace OrgPalThreeDemo.Peripherals
         private class NmeaMessage
         {
 
+        }
+
+        LufftVentus()
+        {
+            var ports = SerialPort.GetPortNames();
+            Debug.WriteLine("Available ports:");
+            foreach (string port in ports)
+            {
+                Debug.WriteLine($"  {port}");
+            }
+
+            //var _serOne = new SerialPort("COM2");
+
+            //if (!_serOne.IsOpen)
+            //{
+            //_serOne.Open();
+            //}
+
+            //_serOne.WriteTimeout = 1000;
+            //_serOne.ReadTimeout = 1000;
+            //_serTwo.WriteTimeout = 1000;
+            //_serTwo.ReadTimeout = 1000;
+
+            //for ( ; ; )
+            //{
+            //_serOne.Write(toSend, 0, toSend.Length);
+            // Give some time for the first com to send the data
+            //Thread.Sleep(100);
+            //_serTwo.Read(toReceive, 0, toReceive.Length);
+            //Debug.WriteLine(toReceive);
+            //Thread.Sleep(900);
+            //}
+            //_serOne.Close();
         }
     }
 }

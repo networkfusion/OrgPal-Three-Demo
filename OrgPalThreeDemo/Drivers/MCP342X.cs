@@ -317,13 +317,13 @@ namespace PalThree
 
         private double GetTemperature()
         {
-            const float RTD_ALPHA = 3.9083e-3F;
-            const float RTD_BETA = -5.775e-7F;
-            const float a2 = 2.0F * RTD_BETA;
-            const float bSq = RTD_ALPHA * RTD_ALPHA;
+            const double RTD_ALPHA = 3.9083e-3F;
+            const double RTD_BETA = -5.775e-7F;
+            const double a2 = 2.0F * RTD_BETA;
+            const double bSq = RTD_ALPHA * RTD_ALPHA;
 
-            float c = 1.0F - GetResistance() / (int)100; //100 for PT100, 1000 for PT1000
-            float d = bSq - 2.0F * a2 * c;
+            double c = 1.0F - GetResistance() / (int)100; //100 for PT100, 1000 for PT1000
+            double d = bSq - 2.0F * a2 * c;
             return (-RTD_ALPHA + Math.Sqrt(d)) / a2;
         }
 
