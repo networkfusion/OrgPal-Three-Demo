@@ -153,28 +153,26 @@ namespace OrgPalThreeDemo.Peripherals
                 Debug.WriteLine($"  {port}");
             }
 
-            //var _serOne = new SerialPort("COM2");
+            //var _serialPort = new SerialPort("COM2");
 
-            //if (!_serOne.IsOpen)
+            //if (!_serialPort.IsOpen)
             //{
-            //_serOne.Open();
+            //_serialPort.Open();
             //}
 
-            //_serOne.WriteTimeout = 1000;
-            //_serOne.ReadTimeout = 1000;
-            //_serTwo.WriteTimeout = 1000;
-            //_serTwo.ReadTimeout = 1000;
+            //_serialPort.WriteTimeout = 1000;
+            //_serialPort.ReadTimeout = 1000;
 
             //for ( ; ; )
             //{
-            //_serOne.Write(toSend, 0, toSend.Length);
+            //_serialPort.Write(toSend, 0, toSend.Length);
             // Give some time for the first com to send the data
             //Thread.Sleep(100);
-            //_serTwo.Read(toReceive, 0, toReceive.Length);
+            //_serialPort.Read(toReceive, 0, toReceive.Length);
             //Debug.WriteLine(toReceive);
             //Thread.Sleep(900);
             //}
-            //_serOne.Close();
+            //_serialPort.Close();
         }
     }
 }
