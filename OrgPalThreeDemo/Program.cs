@@ -7,13 +7,13 @@ using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
-using uPLibrary.Networking.M2Mqtt;
-using uPLibrary.Networking.M2Mqtt.Messages;
+using nanoFramework.M2Mqtt;
+using nanoFramework.M2Mqtt.Messages;
 using System.Device.Gpio;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using AwsIoT;
-using mqttTrace = uPLibrary.Networking.M2Mqtt.Utility.Trace;
+using mqttTrace = nanoFramework.M2Mqtt.Utility.Trace;
 
 namespace OrgPalThreeDemo
 {
@@ -103,7 +103,7 @@ namespace OrgPalThreeDemo
 
             // Setup MQTT connection.
             // set trace level 
-            mqttTrace.TraceLevel = uPLibrary.Networking.M2Mqtt.Utility.TraceLevel.Verbose | uPLibrary.Networking.M2Mqtt.Utility.TraceLevel.Error | uPLibrary.Networking.M2Mqtt.Utility.TraceLevel.Frame;
+            mqttTrace.TraceLevel = nanoFramework.M2Mqtt.Utility.TraceLevel.Verbose | nanoFramework.M2Mqtt.Utility.TraceLevel.Error | nanoFramework.M2Mqtt.Utility.TraceLevel.Frame;
             // enable trace
             mqttTrace.TraceListener = WriteTrace;
 
@@ -153,16 +153,30 @@ namespace OrgPalThreeDemo
 
         private static void SetupNetwork()
         {
+            CancellationTokenSource cs = new(60000); //60 seconds.
             // We are using TLS and it requires valid date & time (so we should set the option to true, but SNTP is run in the background, and setting it manually causes issues for the moment!!!)
-            NetworkHelpers.SetupAndConnectNetwork(false);
-
             Debug.WriteLine("Waiting for network up and IP address...");
-            NetworkHelpers.IpAddressAvailable.WaitOne();
+            var success = NetworkHelper.WaitForValidIPAndDate(false, System.Net.NetworkInformation.NetworkInterfaceType.Ethernet, cs.Token);
 
-            //Debug.WriteLine("Waiting for valid Date & Time...");
-            //NetworkHelpers.DateTimeAvailable.WaitOne(); //This is handled natively as also using the managed implementation causes issues.
+            if (!success)
+            {
+                Debug.WriteLine($"Can't get a proper IP address and DateTime, error: {NetworkHelper.ConnectionError.Error}.");
+                if (NetworkHelper.ConnectionError.Exception != null)
+                {
+                    Debug.WriteLine($"Exception: {NetworkHelper.ConnectionError.Exception}");
+                }
+                success = Rtc.SetSystemTime(ManagedSNTP.NtpClient.GetNetworkTime());
+                if (success)
+                {
+                    Debug.WriteLine("retrived managed NTP");
+                }
+                else
+                {
+                    Debug.WriteLine("failed to retrived managed NTP");
+                }
+                Debug.WriteLine($"RTC = {DateTime.UtcNow}");
+            }
 
-            //NetworkHelpers.NetworkChangeReady.WaitOne();
         }
 
         static bool SetupMqtt()
@@ -188,7 +202,7 @@ namespace OrgPalThreeDemo
                 AwsMqtt.Client.MqttMsgPublishReceived += Client_MqttMsgPublishReceived;
 
                 // subscribe to the topic with QoS 1
-                AwsMqtt.Client.Subscribe(new string[] { $"{AwsMqtt.ThingName}/sys" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_LEAST_ONCE });
+                AwsMqtt.Client.Subscribe(new string[] { $"{AwsMqtt.ThingName}/sys" }, new MqttQoSLevel[] { MqttQoSLevel.AtMostOnce });
                 Thread telemetryThread = new Thread(new ThreadStart(TelemetryLoop));
                 telemetryThread.Start();
 
@@ -261,7 +275,7 @@ namespace OrgPalThreeDemo
                     };
 
                     string sampleData = JsonConvert.SerializeObject(statusTelemetry);
-                    AwsMqtt.Client.Publish($"{AwsMqtt.ThingName}/data", Encoding.UTF8.GetBytes(sampleData), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
+                    AwsMqtt.Client.Publish($"{AwsMqtt.ThingName}/data", Encoding.UTF8.GetBytes(sampleData), MqttQoSLevel.AtMostOnce, false);
 
                     Debug.WriteLine("Message sent: " + sampleData);
                 }

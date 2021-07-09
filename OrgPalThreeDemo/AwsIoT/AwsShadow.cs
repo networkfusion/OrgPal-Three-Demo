@@ -6,7 +6,7 @@ using System;
 using System.Diagnostics;
 using System.Text;
 using System.Threading;
-using uPLibrary.Networking.M2Mqtt.Messages;
+using nanoFramework.M2Mqtt.Messages;
 
 namespace AwsIoT
 {
@@ -75,8 +75,8 @@ namespace AwsIoT
             {
                 topic = $"{ShadowTopicPrefix}{AwsMqtt.ThingName}{shadowTopicPostFix}/name/{namedShadow}/update";
             }
-            AwsMqtt.Client.Subscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
-            AwsMqtt.Client.Publish(topic, new byte[0], MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
+            AwsMqtt.Client.Subscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" }, new MqttQoSLevel[] { MqttQoSLevel.AtMostOnce, MqttQoSLevel.AtMostOnce });
+            AwsMqtt.Client.Publish(topic, new byte[0], MqttQoSLevel.AtMostOnce, false);
             AwsMqtt.Client.Unsubscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" });
         }
 
@@ -122,8 +122,8 @@ namespace AwsIoT
             {
                 topic = $"{ShadowTopicPrefix}{AwsMqtt.ThingName}{shadowTopicPostFix}/name/{namedShadow}/update";
             }
-            AwsMqtt.Client.Subscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" }, new byte[] { MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE });
-            AwsMqtt.Client.Publish(topic, new byte[0], MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
+            AwsMqtt.Client.Subscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" }, new MqttQoSLevel[] { MqttQoSLevel.AtMostOnce, MqttQoSLevel.AtMostOnce });
+            AwsMqtt.Client.Publish(topic, new byte[0], MqttQoSLevel.AtMostOnce, false);
             AwsMqtt.Client.Unsubscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected"});
             return "";
         }
@@ -207,13 +207,13 @@ namespace AwsIoT
                 $"{topic}/documents", 
                 $"{topic}/delta" 
                 }, 
-                new byte[] { 
-                    MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, 
-                    MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, 
-                    MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, 
-                    MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE 
+                new MqttQoSLevel[] {
+                    MqttQoSLevel.AtMostOnce,
+                    MqttQoSLevel.AtMostOnce,
+                    MqttQoSLevel.AtMostOnce,
+                    MqttQoSLevel.AtMostOnce
                 });
-            AwsMqtt.Client.Publish(topic, Encoding.UTF8.GetBytes(shadowJson), MqttMsgBase.QOS_LEVEL_AT_MOST_ONCE, false);
+            AwsMqtt.Client.Publish(topic, Encoding.UTF8.GetBytes(shadowJson), MqttQoSLevel.AtMostOnce, false);
 
             Debug.WriteLine($"Sent: {shadowJson} on topic: {topic}");
 

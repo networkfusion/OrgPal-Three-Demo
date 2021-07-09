@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
-using uPLibrary.Networking.M2Mqtt;
-using uPLibrary.Networking.M2Mqtt.Messages;
+using nanoFramework.M2Mqtt;
+using nanoFramework.M2Mqtt.Messages;
 
 namespace AwsIoT
 {
