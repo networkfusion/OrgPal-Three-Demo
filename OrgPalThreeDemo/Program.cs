@@ -13,7 +13,7 @@ using System.Device.Gpio;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using AwsIoT;
-using mqttTrace = nanoFramework.M2Mqtt.Utility.Trace;
+//using mqttTrace = nanoFramework.M2Mqtt.Utility.Trace; //superseeded in lib by just using Debug.WriteLine (when in debug - rather than release mode).
 
 namespace OrgPalThreeDemo
 {
@@ -102,10 +102,10 @@ namespace OrgPalThreeDemo
             Debug.WriteLine($"Start Time: {startTime.ToString("yyyy-MM-dd HH:mm:ss")}");
 
             // Setup MQTT connection.
-            // set trace level 
-            mqttTrace.TraceLevel = nanoFramework.M2Mqtt.Utility.TraceLevel.Verbose | nanoFramework.M2Mqtt.Utility.TraceLevel.Error | nanoFramework.M2Mqtt.Utility.TraceLevel.Frame;
+            // set trace level (this is now using Debug.WriteLine instead of trace in the original lib!)
+            //mqttTrace.TraceLevel = nanoFramework.M2Mqtt.Utility.TraceLevel.Verbose | nanoFramework.M2Mqtt.Utility.TraceLevel.Error | nanoFramework.M2Mqtt.Utility.TraceLevel.Frame;
             // enable trace
-            mqttTrace.TraceListener = WriteTrace;
+            //mqttTrace.TraceListener = WriteTrace;
 
             var connected = false;
             int connectionAttempt = 0;
