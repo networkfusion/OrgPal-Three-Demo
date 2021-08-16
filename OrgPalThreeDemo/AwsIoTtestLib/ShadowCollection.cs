@@ -23,7 +23,7 @@ namespace nanoFramework.AwsIoT.Devices.Shared
         /// <summary>
         /// Creates a <see cref="ShadowCollection"/> using the given JSON fragments for the body.
         /// </summary>
-        /// <param name="twinJson">JSON fragment containing the twin data.</param>        
+        /// <param name="shadowJson">JSON fragment containing the shadow data.</param>        
         public ShadowCollection(string shadowJson)
         {
             _shadow = string.IsNullOrEmpty(shadowJson) ? new() : (Hashtable)JsonConvert.DeserializeObject(shadowJson, typeof(Hashtable));
@@ -32,7 +32,7 @@ namespace nanoFramework.AwsIoT.Devices.Shared
         /// <summary>
         /// Creates a <see cref="ShadowCollection"/> using the given JSON fragments for the body.
         /// </summary>
-        /// <param name="twin">The JSON hashtable.</param>
+        /// <param name="shadow">The JSON hashtable.</param>
         public ShadowCollection(Hashtable shadow)
         {
             _shadow = shadow ?? new();
@@ -104,7 +104,7 @@ namespace nanoFramework.AwsIoT.Devices.Shared
         }
 
         /// <summary>
-        /// Gets the TwinProperties as a JSON string.
+        /// Gets the ShadowProperties as a JSON string.
         /// </summary>
         /// <returns>JSON string</returns>
         public string ToJson() => ToString();

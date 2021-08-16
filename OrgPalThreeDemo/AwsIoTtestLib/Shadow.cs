@@ -7,12 +7,12 @@ using nanoFramework.Json;
 namespace nanoFramework.AwsIoT.Devices.Shared
 {
     /// <summary>
-    /// Twin Representation.
+    /// Shadow Representation.
     /// </summary>
     public class Shadow
     {
         /// <summary>
-        /// Creates an instance of <see cref="Twin"/>.
+        /// Creates an instance of <see cref="Shadow"/>.
         /// </summary>
         public Shadow()
         {
@@ -20,7 +20,7 @@ namespace nanoFramework.AwsIoT.Devices.Shared
         }
 
         /// <summary>
-        /// Creates an instance of <see cref="Twin"/>.
+        /// Creates an instance of <see cref="Shadow"/>.
         /// </summary>
         /// <param name="deviceId">Device Id</param>
         public Shadow(string deviceId) : this()
@@ -29,10 +29,10 @@ namespace nanoFramework.AwsIoT.Devices.Shared
         }
 
         /// <summary>
-        /// Creates an instance of <see cref="Twin"/>.
+        /// Creates an instance of <see cref="Shadow"/>.
         /// </summary>
         /// <param name="deviceId">Device Id.</param>
-        /// <param name="jsonTwin">The json twin.</param>
+        /// <param name="jsonShadow">The json shadow.</param>
         public Shadow(string deviceId, string jsonShadow)
         {
             DeviceId = deviceId;
@@ -41,16 +41,16 @@ namespace nanoFramework.AwsIoT.Devices.Shared
         }
 
         /// <summary>
-        /// Creates an instance of <see cref="Twin"/>.
+        /// Creates an instance of <see cref="Shadow"/>.
         /// </summary>
-        /// <param name="twinProperties">The twin properties.</param>
+        /// <param name="shadowProperties">The shadow properties.</param>
         public Shadow(ShadowProperties shadowProperties)
         {
             Properties = shadowProperties;
         }
 
         /// <summary>
-        /// Gets and sets the <see cref="Twin"/> Id.
+        /// Gets and sets the <see cref="Shadow"/> Id.
         /// </summary>
         public string DeviceId { get; set; }
 
@@ -64,17 +64,17 @@ namespace nanoFramework.AwsIoT.Devices.Shared
         public string ModelId { get; set; }
 
         /// <summary>
-        /// Gets and sets the <see cref="Twin"/> properties.
+        /// Gets and sets the <see cref="Shadow"/> properties.
         /// </summary>
         public ShadowProperties Properties { get; set; }
 
         /// <summary>
-        /// Twin's Version
+        /// Shadow's Version
         /// </summary>
         public long Version { get; set; }
 
         /// <summary>
-        /// Gets the Twin as a JSON string.
+        /// Gets the Shadow as a JSON string.
         /// </summary>
         /// <returns>JSON string</returns>
         public string ToJson()

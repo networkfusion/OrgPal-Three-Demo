@@ -11,7 +11,7 @@ namespace nanoFramework.AwsIoT.Devices.Shared
     public class ShadowProperties
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="TwinProperties"/>
+        /// Initializes a new instance of <see cref="ShadowProperties"/>
         /// </summary>
         public ShadowProperties()
         {
@@ -36,7 +36,7 @@ namespace nanoFramework.AwsIoT.Devices.Shared
         public ShadowCollection Desired { get; set; }
 
         /// <summary>
-        /// Gets and sets the <see cref="Twin"/> reported properties.
+        /// Gets and sets the <see cref="Shadow"/> reported properties.
         /// </summary>
         public ShadowCollection Reported { get; set; }
     }

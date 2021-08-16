@@ -18,8 +18,8 @@ namespace nanoFramework.AwsIoT.Devices.Client
     /// </summary>
     public class DeviceClient : IDisposable
     {
-        const string ShadowReportedPropertiesTopic = "$iothub/twin/PATCH/properties/reported/";
-        const string ShadowDesiredPropertiesTopic = "$iothub/twin/GET/";
+        const string ShadowReportedPropertiesTopic = "$iothub/shadow/PATCH/properties/reported/";
+        const string ShadowDesiredPropertiesTopic = "$iothub/shadow/GET/";
         const string DirectMethodTopic = "$iothub/methods/POST/";
 
         private readonly string _iotCoreName;
@@ -40,7 +40,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
         private readonly X509Certificate _awsRootCACert;
 
         /// <summary>
-        /// Device twin updated event.
+        /// Device shadow updated event.
         /// </summary>
         public event ShadowUpdated ShadowUpated;
 
@@ -101,7 +101,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
         }
 
         /// <summary>
-        /// The latest Twin received.
+        /// The latest Shadow received.
         /// </summary>
         public Shadow LastShadow => _shadow;
 
@@ -150,7 +150,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
                 key,
                 false,
                 MqttQoSLevel.ExactlyOnce,
-                false, "$iothub/twin/GET/?$rid=999",
+                false, "$iothub/shadow/GET/?$rid=999",
                 "Disconnected",
                 true,
                 60
@@ -161,7 +161,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
                 _mqttc.Subscribe(
                     new[] {
                         $"devices/{_deviceId}/messages/devicebound/#",
-                        "$iothub/twin/#",
+                        "$iothub/shadow/#",
                         "$iothub/methods/POST/#"
                     },
                     new[] {
@@ -205,7 +205,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
             {
                 _mqttc.Unsubscribe(new[] {
                     $"devices/{_deviceId}/messages/devicebound/#",
-                    "$iothub/twin/#",
+                    "$iothub/shadow/#",
                     "$iothub/methods/POST/#"
                     });
                 _mqttc.Disconnect();
@@ -217,10 +217,10 @@ namespace nanoFramework.AwsIoT.Devices.Client
         }
 
         /// <summary>
-        /// Gets the twin.
+        /// Gets the shadow.
         /// </summary>
         /// <param name="cancellationToken">A cancellation token</param>
-        /// <returns>The twin.</returns>
+        /// <returns>The shadow.</returns>
         /// <remarks>It is strongly recommended to use a cancellation token that can be canceled and manage this on the 
         /// caller code level. A reasonable time of few seconds is recommended with a retry mechanism.</remarks>
         public Shadow GetShadow(CancellationToken cancellationToken = default)
@@ -237,16 +237,16 @@ namespace nanoFramework.AwsIoT.Devices.Client
         }
 
         /// <summary>
-        /// Update the twin reported properties.
+        /// Update the shadow reported properties.
         /// </summary>
         /// <param name="reported">The reported properties.</param>
         /// <param name="cancellationToken">A cancellation token. If you use the default one, the confirmation of delivery will not be awaited.</param>
         /// <returns>True for successful message delivery.</returns>
         public bool UpdateReportedProperties(ShadowCollection reported, CancellationToken cancellationToken = default)
         {
-            string twin = reported.ToJson();
-            Debug.WriteLine($"update twin: {twin}");
-            var rid = _mqttc.Publish($"{ShadowReportedPropertiesTopic}?$rid={Guid.NewGuid()}", Encoding.UTF8.GetBytes(twin), MqttQoSLevel.AtLeastOnce, false);
+            string shadow = reported.ToJson();
+            Debug.WriteLine($"update shadow: {shadow}");
+            var rid = _mqttc.Publish($"{ShadowReportedPropertiesTopic}?$rid={Guid.NewGuid()}", Encoding.UTF8.GetBytes(shadow), MqttQoSLevel.AtLeastOnce, false);
             _ioTCoreStatus.Status = Status.ShadowUpdated;
             _ioTCoreStatus.Message = string.Empty;
             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
@@ -318,13 +318,13 @@ namespace nanoFramework.AwsIoT.Devices.Client
             {
                 string message = Encoding.UTF8.GetString(e.Message, 0, e.Message.Length);
 
-                if (e.Topic.StartsWith("$iothub/twin/res/204"))
+                if (e.Topic.StartsWith("$iothub/shadow/res/204"))
                 {
                     _ioTCoreStatus.Status = Status.ShadowUpdateReceived;
                     _ioTCoreStatus.Message = string.Empty;
                     StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
                 }
-                else if (e.Topic.StartsWith("$iothub/twin/"))
+                else if (e.Topic.StartsWith("$iothub/shadow/"))
                 {
                     if (e.Topic.IndexOf("res/400/") > 0 || e.Topic.IndexOf("res/404/") > 0 || e.Topic.IndexOf("res/500/") > 0)
                     {
@@ -332,7 +332,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
                         _ioTCoreStatus.Message = string.Empty;
                         StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
                     }
-                    else if (e.Topic.StartsWith("$iothub/twin/PATCH/properties/desired/"))
+                    else if (e.Topic.StartsWith("$iothub/shadow/PATCH/properties/desired/"))
                     {
                         ShadowUpated?.Invoke(this, new ShadowUpdateEventArgs(new ShadowCollection(message)));
                         _ioTCoreStatus.Status = Status.ShadowUpdateReceived;
@@ -354,7 +354,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
                             }
                             catch (Exception ex)
                             {
-                                Debug.WriteLine($"Exception receiving the twins: {ex}");
+                                Debug.WriteLine($"Exception receiving the shadows: {ex}");
                                 _ioTCoreStatus.Status = Status.InternalError;
                                 _ioTCoreStatus.Message = ex.ToString();
                                 StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));

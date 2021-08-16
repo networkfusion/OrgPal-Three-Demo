@@ -19,22 +19,22 @@ namespace nanoFramework.AwsIoT.Devices.Client
         Disconnected,
 
         /// <summary>
-        /// Twin has been updated.
+        /// Shadow has been updated.
         /// </summary>
         ShadowUpdated,
 
         /// <summary>
-        /// Error updating the twins.
+        /// Error updating the shadows.
         /// </summary>
         ShadowUpdateError,
 
         /// <summary>
-        /// Twin received.
+        /// Shadow received.
         /// </summary>
         ShadowReceived,
 
         /// <summary>
-        /// Twin update received.
+        /// Shadow update received.
         /// </summary>
         ShadowUpdateReceived,
 
