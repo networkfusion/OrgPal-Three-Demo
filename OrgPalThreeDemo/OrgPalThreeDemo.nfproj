@@ -18,8 +18,18 @@
   </PropertyGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
+    <Compile Include="AwsIoTtestLib\Shadow.cs" />
+    <Compile Include="AwsIoTtestLib\ShadowProperties.cs" />
     <Compile Include="AwsIoT\AwsMqtt.cs" />
     <Compile Include="AwsIoT\AwsShadow.cs" />
+    <Compile Include="AwsIoTtestLib\ConfirmationStatus.cs" />
+    <Compile Include="AwsIoTtestLib\DeviceClient.cs" />
+    <Compile Include="AwsIoTtestLib\IoTCoreStatus.cs" />
+    <Compile Include="AwsIoTtestLib\MethodCallback.cs" />
+    <Compile Include="AwsIoTtestLib\ShadowCollection.cs" />
+    <Compile Include="AwsIoTtestLib\ShadowUpdatedEventArgs.cs" />
+    <Compile Include="AwsIoTtestLib\Status.cs" />
+    <Compile Include="AwsIoTtestLib\StatusUpdatedEventArgs.cs" />
     <Compile Include="Drivers\LCD.cs" />
     <Compile Include="Drivers\MCP342x.cs" />
     <Compile Include="Drivers\OnboardDevices.cs" />
