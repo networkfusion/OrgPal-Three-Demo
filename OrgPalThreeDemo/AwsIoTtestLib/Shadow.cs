@@ -73,6 +73,11 @@ namespace nanoFramework.AwsIoT.Devices.Shared
         /// </summary>
         public long Version { get; set; }
 
+        ///// <summary>
+        ///// Shadow's Client Token
+        ///// </summary>
+        //public long ClientToken { get; set; }
+
         /// <summary>
         /// Gets the Shadow as a JSON string.
         /// </summary>
@@ -82,19 +87,24 @@ namespace nanoFramework.AwsIoT.Devices.Shared
             Hashtable ser = new();
             ser.Add("properties", Properties);
 
-            if (!string.IsNullOrEmpty(ModelId))
-            {
-                ser.Add("modelid", ModelId);
-            }
+            //if (!string.IsNullOrEmpty(ModelId))
+            //{
+            //    ser.Add("modelid", ModelId);
+            //}
 
-            if (!string.IsNullOrEmpty(DeviceId))
-            {
-                ser.Add("deviceid", DeviceId);
-            }
+            //if (!string.IsNullOrEmpty(DeviceId))
+            //{
+            //    ser.Add("deviceid", DeviceId);
+            //}
+
+            //if (!string.IsNullOrEmpty(ClientToken))
+            //{
+            //    ser.Add("clientToken", ClientToken);
+            //}
 
             if (Version != 0)
             {
-                ser.Add("$version", Version);
+                ser.Add("version", Version);
             }
 
             return JsonConvert.SerializeObject(ser);

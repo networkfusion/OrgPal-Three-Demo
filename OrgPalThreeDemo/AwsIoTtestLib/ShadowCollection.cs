@@ -11,7 +11,8 @@ namespace nanoFramework.AwsIoT.Devices.Shared
     /// </summary>
     public class ShadowCollection : IEnumerable
     {
-        internal const string VersionName = "$version";
+        internal const string VersionName = "version";
+        //internal const string ClientToken = "clientToken";
         private readonly Hashtable _shadow;
 
         /// <summary>
@@ -56,6 +57,25 @@ namespace nanoFramework.AwsIoT.Devices.Shared
                 }
             }
         }
+
+        ///// <summary>
+        ///// Gets the client Token of the <see cref="ShadowCollection"/>.
+        ///// </summary>
+        //public long ClientToken
+        //{
+        //    get
+        //    {
+        //        try
+        //        {
+        //            int token = (int)_shadow[ClientToken];
+        //            return token;
+        //        }
+        //        catch
+        //        {
+        //            return default(long);
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// Gets the count of properties in the Collection.

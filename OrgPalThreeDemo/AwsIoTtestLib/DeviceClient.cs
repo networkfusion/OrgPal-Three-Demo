@@ -14,22 +14,22 @@ using System.Threading;
 namespace nanoFramework.AwsIoT.Devices.Client
 {
     /// <summary>
-    /// Azure IoT Client SDK for .NET nanoFramework using MQTT
+    /// AWS IoT Core Client SDK for .NET nanoFramework using MQTT
     /// </summary>
     public class DeviceClient : IDisposable
     {
         const string ShadowTopicPrefix = "$aws/things/";
         const string shadowTopicPostFix = "/shadow";
 
-        const string ShadowReportedPropertiesTopic = "$iothub/shadow/PATCH/properties/reported/";
-        const string ShadowDesiredPropertiesTopic = "$iothub/shadow/GET/";
-        const string DirectMethodTopic = "$iothub/methods/POST/";
+        //const string ShadowReportedPropertiesTopic = "$iothub/shadow/PATCH/properties/reported/";
+        //const string ShadowDesiredPropertiesTopic = "$iothub/shadow/GET/";
+        //const string DirectMethodTopic = "$iothub/methods/POST/";
 
         private readonly string _iotCoreName;
         private readonly string _deviceId;
-        const int _port = 8883; //Default MQTTS port.
+        const int _mqttsPort = 8883; //Default MQTTS port.
         private readonly X509Certificate2 _clientCert;
-        private readonly string _privateKey;
+        //private readonly string _privateKey;
 
         private MqttClient _mqttc;
         private readonly IoTCoreStatus _ioTCoreStatus = new IoTCoreStatus();
@@ -64,7 +64,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
         ///// <summary>
         ///// Creates an <see cref="DeviceClient"/> class.
         ///// </summary>
-        ///// <param name="iotHubName">The Azure IoT name fully qualified (ex: youriothub.azure-devices.net)</param>
+        ///// <param name="iotCoreName">The AWS IoT Core fully quilified domain name (example: <instance>.<region>.<domain>)</param>
         ///// <param name="deviceId">The device ID which is the name of your device.</param>
         ///// <param name="sasKey">One of the SAS Key either primary, either secondary.</param>
         ///// <param name="qosLevel">The default quality level delivery for the MQTT messages, default to the lower quality</param>
@@ -87,21 +87,21 @@ namespace nanoFramework.AwsIoT.Devices.Client
         /// <summary>
         /// Creates an <see cref="DeviceClient"/> class.
         /// </summary>
-        /// <param name="iotHubName">The Aws IoT Core domainname fully qualified (ex: youriotinstance.azure-devices.net)</param>
+        /// <param name="iotCoreName">The AWS IoT Core broker fully quilified domain name (example: <instance>.<region>.<domain>)</param>
         /// <param name="deviceId">The device ID which is the unique name of your device.</param>
-        /// <param name="clientCert">The certificate to connect the device containing both public and private key.</param>
-        /// <param name="qosLevel">The default quality level for the delivery of MQTT messages, default to the lowest quality</param>
+        /// <param name="clientCert">The certificate used to connect the device containing both the public and private key.</param>
+        /// <param name="qosLevel">The default quality level for the delivery of MQTT messages, (defaults to the lowest quality)</param>
         /// /// <param name="awsRootCert">AWS Root certificate for the connection to AWS IoT Core</param>
         public DeviceClient(string iotCoreName, string deviceId, X509Certificate2 clientCert, MqttQoSLevel qosLevel = MqttQoSLevel.AtMostOnce, X509Certificate awsRootCert = null)
         {
             _clientCert = clientCert;
-            _privateKey = Convert.ToBase64String(clientCert.PrivateKey);
+            //_privateKey = Convert.ToBase64String(clientCert.PrivateKey);
             _iotCoreName = iotCoreName;
             _deviceId = deviceId;
-            _telemetryTopic = $"devices/{_deviceId}/messages/events/";
+            _telemetryTopic = $"devices/{_deviceId}/messages/events/"; //TODO: should we make this configurable?!
             _ioTCoreStatus.Status = Status.Disconnected;
             _ioTCoreStatus.Message = string.Empty;
-            _deviceMessageTopic = $"devices/{_deviceId}/messages/devicebound/";
+            _deviceMessageTopic = $"devices/{_deviceId}/messages/devicebound/"; //TODO: should we make this configurable?!
             QosLevel = qosLevel;
             _awsRootCACert = awsRootCert; //TODO: Should override the default one in resources?!
         }
@@ -135,7 +135,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
             // Creates an MQTT Client with default port 8883 using TLS 1.2 protocol
             _mqttc = new MqttClient(
                 _iotCoreName,
-                _port,
+                _mqttsPort,
                 true,
                 _awsRootCACert,
                 _clientCert,
@@ -225,13 +225,21 @@ namespace nanoFramework.AwsIoT.Devices.Client
         /// Gets the shadow.
         /// </summary>
         /// <param name="cancellationToken">A cancellation token</param>
+        /// <param name="namedShadow">A named shadow</param>
         /// <returns>The shadow.</returns>
         /// <remarks>It is strongly recommended to use a cancellation token that can be canceled and manage this on the 
         /// caller code level. A reasonable time of few seconds is recommended with a retry mechanism.</remarks>
-        public Shadow GetShadow(CancellationToken cancellationToken = default)
+        public Shadow GetShadow(CancellationToken cancellationToken = default, string namedShadow = "")
         {
             _shadowReceived = false;
-            _mqttc.Publish($"{ShadowDesiredPropertiesTopic}?$rid={Guid.NewGuid()}", Encoding.UTF8.GetBytes(""), MqttQoSLevel.AtLeastOnce, false);
+
+            var topic = $"{ShadowTopicPrefix}{_deviceId}{shadowTopicPostFix}/get";
+            if (namedShadow != string.Empty)
+            {
+                topic = $"{ShadowTopicPrefix}{_deviceId}{shadowTopicPostFix}/name/{namedShadow}/get";
+            }
+
+            _mqttc.Publish(topic, Encoding.UTF8.GetBytes(""), MqttQoSLevel.AtLeastOnce, false);
 
             while (!_shadowReceived && !cancellationToken.IsCancellationRequested)
             {
@@ -247,11 +255,17 @@ namespace nanoFramework.AwsIoT.Devices.Client
         /// <param name="reported">The reported properties.</param>
         /// <param name="cancellationToken">A cancellation token. If you use the default one, the confirmation of delivery will not be awaited.</param>
         /// <returns>True for successful message delivery.</returns>
-        public bool UpdateReportedProperties(ShadowCollection reported, CancellationToken cancellationToken = default)
+        public bool UpdateReportedProperties(ShadowCollection reported, CancellationToken cancellationToken = default, string namedShadow = "")
         {
+            var topic = $"{ShadowTopicPrefix}{_deviceId}{shadowTopicPostFix}/update";
+            if (namedShadow != string.Empty)
+            {
+                topic = $"{ShadowTopicPrefix}{_deviceId}{shadowTopicPostFix}/name/{namedShadow}/update";
+            }
+
             string shadow = reported.ToJson();
             Debug.WriteLine($"update shadow: {shadow}");
-            var rid = _mqttc.Publish($"{ShadowReportedPropertiesTopic}?$rid={Guid.NewGuid()}", Encoding.UTF8.GetBytes(shadow), MqttQoSLevel.AtLeastOnce, false);
+            var rid = _mqttc.Publish(topic, Encoding.UTF8.GetBytes(shadow), MqttQoSLevel.AtLeastOnce, false);
             _ioTCoreStatus.Status = Status.ShadowUpdated;
             _ioTCoreStatus.Message = string.Empty;
             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
@@ -320,24 +334,24 @@ namespace nanoFramework.AwsIoT.Devices.Client
         private void ClientMqttMsgReceived(object sender, MqttMsgPublishEventArgs e)
         {
             try
-            {
+            { //TODO: need to revisit this https://docs.aws.amazon.com/iot/latest/developerguide/device-shadow-mqtt.html#update-documents-pub-sub-topic to understand the full implementation!
                 string message = Encoding.UTF8.GetString(e.Message, 0, e.Message.Length);
 
-                if (e.Topic.StartsWith($"{ShadowTopicPrefix}{_deviceId}{shadowTopicPostFix}"))  //($"$iothub/shadow/res/204"))
+                if (e.Topic.StartsWith($"{ShadowTopicPrefix}{_deviceId}{shadowTopicPostFix}/update/accepted"))  //($"$iothub/shadow/res/204"))
                 {
                     _ioTCoreStatus.Status = Status.ShadowUpdateReceived;
                     _ioTCoreStatus.Message = string.Empty;
                     StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
                 }
-                else if (e.Topic.StartsWith("$iothub/shadow/"))
+                else if (e.Topic.StartsWith($"{ShadowTopicPrefix}{_deviceId}{shadowTopicPostFix}/update/")) //("$iothub/shadow/"))
                 {
-                    if (e.Topic.IndexOf("res/400/") > 0 || e.Topic.IndexOf("res/404/") > 0 || e.Topic.IndexOf("res/500/") > 0)
+                    if (e.Topic.IndexOf("rejected/") > 0) //if (e.Topic.IndexOf("res/400/") > 0 || e.Topic.IndexOf("res/404/") > 0 || e.Topic.IndexOf("res/500/") > 0)
                     {
                         _ioTCoreStatus.Status = Status.ShadowUpdateError;
                         _ioTCoreStatus.Message = string.Empty;
                         StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
                     }
-                    else if (e.Topic.StartsWith("$iothub/shadow/PATCH/properties/desired/"))
+                    else if (e.Topic.IndexOf("delta/") > 0) //(e.Topic.StartsWith("$iothub/shadow/PATCH/properties/desired/")) //Or should this be "document"?!
                     {
                         ShadowUpated?.Invoke(this, new ShadowUpdateEventArgs(new ShadowCollection(message)));
                         _ioTCoreStatus.Status = Status.ShadowUpdateReceived;
@@ -367,37 +381,37 @@ namespace nanoFramework.AwsIoT.Devices.Client
                         }
                     }
                 }
-                else if (e.Topic.StartsWith(DirectMethodTopic))
-                {
-                    const string C9PatternMainStyle = "<<Main>$>g__";
-                    string method = e.Topic.Substring(DirectMethodTopic.Length);
-                    string methodName = method.Substring(0, method.IndexOf('/'));
-                    int rid = Convert.ToInt32(method.Substring(method.IndexOf('=') + 1));
-                    _ioTCoreStatus.Status = Status.DirectMethodCalled;
-                    _ioTCoreStatus.Message = $"{method}/{message}";
-                    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
-                    foreach (MethodCallback mt in _methodCallback)
-                    {
-                        string mtName = mt.Method.Name;
-                        if (mtName.Contains(C9PatternMainStyle))
-                        {
-                            mtName = mtName.Substring(C9PatternMainStyle.Length);
-                            mtName = mtName.Substring(0, mtName.IndexOf('|'));
-                        }
-                        if (mtName == methodName)
-                        {
-                            try
-                            {
-                                var res = mt.Invoke(rid, message);
-                                _mqttc.Publish($"$iothub/methods/res/200/?$rid={rid}", Encoding.UTF8.GetBytes(res), MqttQoSLevel.AtLeastOnce, false);
-                            }
-                            catch (Exception ex)
-                            {
-                                _mqttc.Publish($"$iothub/methods/res/504/?$rid={rid}", Encoding.UTF8.GetBytes($"{{\"Exception:\":\"{ex}\"}}"), MqttQoSLevel.AtLeastOnce, false);
-                            }
-                        }
-                    }
-                }
+                //else if (e.Topic.StartsWith(DirectMethodTopic))
+                //{
+                //    const string C9PatternMainStyle = "<<Main>$>g__";
+                //    string method = e.Topic.Substring(DirectMethodTopic.Length);
+                //    string methodName = method.Substring(0, method.IndexOf('/'));
+                //    int rid = Convert.ToInt32(method.Substring(method.IndexOf('=') + 1));
+                //    _ioTCoreStatus.Status = Status.DirectMethodCalled;
+                //    _ioTCoreStatus.Message = $"{method}/{message}";
+                //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                //    foreach (MethodCallback mt in _methodCallback)
+                //    {
+                //        string mtName = mt.Method.Name;
+                //        if (mtName.Contains(C9PatternMainStyle))
+                //        {
+                //            mtName = mtName.Substring(C9PatternMainStyle.Length);
+                //            mtName = mtName.Substring(0, mtName.IndexOf('|'));
+                //        }
+                //        if (mtName == methodName)
+                //        {
+                //            try
+                //            {
+                //                var res = mt.Invoke(rid, message);
+                //                _mqttc.Publish($"$iothub/methods/res/200/?$rid={rid}", Encoding.UTF8.GetBytes(res), MqttQoSLevel.AtLeastOnce, false);
+                //            }
+                //            catch (Exception ex)
+                //            {
+                //                _mqttc.Publish($"$iothub/methods/res/504/?$rid={rid}", Encoding.UTF8.GetBytes($"{{\"Exception:\":\"{ex}\"}}"), MqttQoSLevel.AtLeastOnce, false);
+                //            }
+                //        }
+                //    }
+                //}
                 else if (e.Topic.StartsWith(_deviceMessageTopic))
                 {
                     string messageTopic = e.Topic.Substring(_deviceMessageTopic.Length);
@@ -406,36 +420,41 @@ namespace nanoFramework.AwsIoT.Devices.Client
                     StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
                     //CloudToDeviceMessage?.Invoke(this, new CloudToDeviceMessageEventArgs(message, messageTopic));
                 }
-                else if (e.Topic.StartsWith("$iothub/clientproxy/"))
-                {
-                    _ioTCoreStatus.Status = Status.Disconnected;
-                    _ioTCoreStatus.Message = message;
-                    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
-                }
-                else if (e.Topic.StartsWith("$iothub/logmessage/Info"))
-                {
-                    _ioTCoreStatus.Status = Status.IoTCoreInformation;
-                    _ioTCoreStatus.Message = message;
-                    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
-                }
-                else if (e.Topic.StartsWith("$iothub/logmessage/HighlightInfo"))
-                {
-                    _ioTCoreStatus.Status = Status.IoTCoreHighlightInformation;
-                    _ioTCoreStatus.Message = message;
-                    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
-                }
-                else if (e.Topic.StartsWith("$iothub/logmessage/Error"))
-                {
-                    _ioTCoreStatus.Status = Status.IoTCoreError;
-                    _ioTCoreStatus.Message = message;
-                    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
-                }
-                else if (e.Topic.StartsWith("$iothub/logmessage/Warning"))
-                {
-                    _ioTCoreStatus.Status = Status.IoTCoreWarning;
-                    _ioTCoreStatus.Message = message;
-                    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
-                }
+
+                //TODO: Other message type callback or throw?!
+
+
+                //else if (e.Topic.StartsWith("$iothub/clientproxy/"))
+                //{
+                //    _ioTCoreStatus.Status = Status.Disconnected;
+                //    _ioTCoreStatus.Message = message;
+                //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                //}
+                //else if (e.Topic.StartsWith("$iothub/logmessage/Info"))
+                //{
+                //    _ioTCoreStatus.Status = Status.IoTCoreInformation;
+                //    _ioTCoreStatus.Message = message;
+                //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                //}
+                //else if (e.Topic.StartsWith("$iothub/logmessage/HighlightInfo"))
+                //{
+                //    _ioTCoreStatus.Status = Status.IoTCoreHighlightInformation;
+                //    _ioTCoreStatus.Message = message;
+                //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                //}
+                //else if (e.Topic.StartsWith("$iothub/logmessage/Error"))
+                //{
+                //    _ioTCoreStatus.Status = Status.IoTCoreError;
+                //    _ioTCoreStatus.Message = message;
+                //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                //}
+                //else if (e.Topic.StartsWith("$iothub/logmessage/Warning"))
+                //{
+                //    _ioTCoreStatus.Status = Status.IoTCoreWarning;
+                //    _ioTCoreStatus.Message = message;
+                //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                //}
+
             }
             catch (Exception ex)
             {

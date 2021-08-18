@@ -120,7 +120,7 @@ namespace AwsIoT
             var topic = $"{ShadowTopicPrefix}{AwsMqtt.ThingName}{shadowTopicPostFix}/get";
             if (namedShadow != string.Empty)
             {
-                topic = $"{ShadowTopicPrefix}{AwsMqtt.ThingName}{shadowTopicPostFix}/name/{namedShadow}/update";
+                topic = $"{ShadowTopicPrefix}{AwsMqtt.ThingName}{shadowTopicPostFix}/name/{namedShadow}/get";
             }
             AwsMqtt.Client.Subscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" }, new MqttQoSLevel[] { MqttQoSLevel.AtMostOnce, MqttQoSLevel.AtMostOnce });
             AwsMqtt.Client.Publish(topic, new byte[0], MqttQoSLevel.AtMostOnce, false);
