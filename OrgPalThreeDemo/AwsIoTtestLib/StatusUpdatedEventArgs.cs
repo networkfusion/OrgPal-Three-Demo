@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) .Net Foundation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -23,12 +23,12 @@ namespace nanoFramework.AwsIoT.Devices.Client
         /// <param name="status">The status.</param>
         public StatusUpdatedEventArgs(IoTCoreStatus status)
         {
-            IoTHubStatus = new IoTCoreStatus(status);
+            IoTCoreStatus = new IoTCoreStatus(status);
         }
 
         /// <summary>
         /// The IoT Hub status.
         /// </summary>
-        public IoTCoreStatus IoTHubStatus { get; set; }
+        public IoTCoreStatus IoTCoreStatus { get; set; }
     }
 }

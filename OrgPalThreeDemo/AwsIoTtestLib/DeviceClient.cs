@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) .Net Foundation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using nanoFramework.AwsIoT.Devices.Shared;
@@ -18,19 +18,19 @@ namespace nanoFramework.AwsIoT.Devices.Client
     /// </summary>
     public class DeviceClient : IDisposable
     {
+        const string ShadowTopicPrefix = "$aws/things/";
+        const string shadowTopicPostFix = "/shadow";
+
         const string ShadowReportedPropertiesTopic = "$iothub/shadow/PATCH/properties/reported/";
         const string ShadowDesiredPropertiesTopic = "$iothub/shadow/GET/";
         const string DirectMethodTopic = "$iothub/methods/POST/";
 
         private readonly string _iotCoreName;
         private readonly string _deviceId;
-        //private readonly string _sasKey;
-        private readonly string _telemetryTopic;
+        const int _port = 8883; //Default MQTTS port.
         private readonly X509Certificate2 _clientCert;
-        private readonly string _deviceMessageTopic;
         private readonly string _privateKey;
-        private Shadow _shadow;
-        private bool _shadowReceived;
+
         private MqttClient _mqttc;
         private readonly IoTCoreStatus _ioTCoreStatus = new IoTCoreStatus();
         private readonly ArrayList _methodCallback = new ArrayList();
@@ -38,6 +38,13 @@ namespace nanoFramework.AwsIoT.Devices.Client
         private readonly object _lock = new object();
         private Timer _timerTokenRenew;
         private readonly X509Certificate _awsRootCACert;
+
+        private readonly string _telemetryTopic;
+        private readonly string _deviceMessageTopic;
+
+        private Shadow _shadow;
+        private bool _shadowReceived;
+
 
         /// <summary>
         /// Device shadow updated event.
@@ -54,50 +61,49 @@ namespace nanoFramework.AwsIoT.Devices.Client
         ///// </summary>
         //public event CloudToDeviceMessage CloudToDeviceMessage;
 
-        /// <summary>
-        /// Creates an <see cref="DeviceClient"/> class.
-        /// </summary>
-        /// <param name="iotHubName">The Azure IoT name fully qualified (ex: youriothub.azure-devices.net)</param>
-        /// <param name="deviceId">The device ID which is the name of your device.</param>
-        /// <param name="sasKey">One of the SAS Key either primary, either secondary.</param>
-        /// <param name="qosLevel">The default quality level delivery for the MQTT messages, default to the lower quality</param>
-        /// <param name="awsRootCert">Azure certificate for the connection to Azure IoT Hub</param>
-        public DeviceClient(string iotCoreName, string deviceId, string sasKey, MqttQoSLevel qosLevel = MqttQoSLevel.AtMostOnce, X509Certificate awsRootCert = null)
-        {
-            _clientCert = null;
-            _privateKey = null;
-            _iotCoreName = iotCoreName;
-            _deviceId = deviceId;
-            //_sasKey = sasKey;
-            _telemetryTopic = $"devices/{_deviceId}/messages/events/";
-            _ioTCoreStatus.Status = Status.Disconnected;
-            _ioTCoreStatus.Message = string.Empty;
-            _deviceMessageTopic = $"devices/{_deviceId}/messages/devicebound/";
-            QosLevel = qosLevel;
-            _awsRootCACert = awsRootCert;
-        }
+        ///// <summary>
+        ///// Creates an <see cref="DeviceClient"/> class.
+        ///// </summary>
+        ///// <param name="iotHubName">The Azure IoT name fully qualified (ex: youriothub.azure-devices.net)</param>
+        ///// <param name="deviceId">The device ID which is the name of your device.</param>
+        ///// <param name="sasKey">One of the SAS Key either primary, either secondary.</param>
+        ///// <param name="qosLevel">The default quality level delivery for the MQTT messages, default to the lower quality</param>
+        ///// <param name="awsRootCert">Azure certificate for the connection to Azure IoT Hub</param>
+        //public DeviceClient(string iotCoreName, string deviceId, string sasKey, MqttQoSLevel qosLevel = MqttQoSLevel.AtMostOnce, X509Certificate awsRootCert = null)
+        //{
+        //    _clientCert = null;
+        //    _privateKey = null;
+        //    _iotCoreName = iotCoreName;
+        //    _deviceId = deviceId;
+        //    //_sasKey = sasKey;
+        //    _telemetryTopic = $"devices/{_deviceId}/messages/events/";
+        //    _ioTCoreStatus.Status = Status.Disconnected;
+        //    _ioTCoreStatus.Message = string.Empty;
+        //    _deviceMessageTopic = $"devices/{_deviceId}/messages/devicebound/";
+        //    QosLevel = qosLevel;
+        //    _awsRootCACert = awsRootCert;
+        //}
 
         /// <summary>
         /// Creates an <see cref="DeviceClient"/> class.
         /// </summary>
         /// <param name="iotHubName">The Aws IoT Core domainname fully qualified (ex: youriotinstance.azure-devices.net)</param>
-        /// <param name="deviceId">The device ID which is the name of your device.</param>
+        /// <param name="deviceId">The device ID which is the unique name of your device.</param>
         /// <param name="clientCert">The certificate to connect the device containing both public and private key.</param>
-        /// <param name="qosLevel">The default quality level delivery for the MQTT messages, default to the lower quality</param>
+        /// <param name="qosLevel">The default quality level for the delivery of MQTT messages, default to the lowest quality</param>
         /// /// <param name="awsRootCert">AWS Root certificate for the connection to AWS IoT Core</param>
-        public DeviceClient(string iotHubName, string deviceId, X509Certificate2 clientCert, MqttQoSLevel qosLevel = MqttQoSLevel.AtMostOnce, X509Certificate awsRootCert = null)
+        public DeviceClient(string iotCoreName, string deviceId, X509Certificate2 clientCert, MqttQoSLevel qosLevel = MqttQoSLevel.AtMostOnce, X509Certificate awsRootCert = null)
         {
             _clientCert = clientCert;
             _privateKey = Convert.ToBase64String(clientCert.PrivateKey);
-            _iotCoreName = iotHubName;
+            _iotCoreName = iotCoreName;
             _deviceId = deviceId;
-            //_sasKey = null;
             _telemetryTopic = $"devices/{_deviceId}/messages/events/";
             _ioTCoreStatus.Status = Status.Disconnected;
             _ioTCoreStatus.Message = string.Empty;
             _deviceMessageTopic = $"devices/{_deviceId}/messages/devicebound/";
             QosLevel = qosLevel;
-            _awsRootCACert = awsRootCert;
+            _awsRootCACert = awsRootCert; //TODO: Should override the default one in resources?!
         }
 
         /// <summary>
@@ -126,10 +132,10 @@ namespace nanoFramework.AwsIoT.Devices.Client
         /// <returns></returns>
         public bool Open()
         {
-            // Creates an MQTT Client with default port 8883 using TLS protocol
+            // Creates an MQTT Client with default port 8883 using TLS 1.2 protocol
             _mqttc = new MqttClient(
                 _iotCoreName,
-                8883,
+                _port,
                 true,
                 _awsRootCACert,
                 _clientCert,
@@ -143,15 +149,14 @@ namespace nanoFramework.AwsIoT.Devices.Client
             _mqttc.ConnectionClosed += ClientConnectionClosed;
 
             // Now connect the device
-            string key = ""; //_clientCert == null ? Helper.GetSharedAccessSignature(null, _sasKey, $"{_iotCoreName}/devices/{_deviceId}", new TimeSpan(24, 0, 0)) : _privateKey;
             _mqttc.Connect(
                 _deviceId,
-                $"{_iotCoreName}/{_deviceId}/api-version=2020-09-30",
-                key,
+                null,
+                null,
                 false,
                 MqttQoSLevel.ExactlyOnce,
-                false, "$iothub/shadow/GET/?$rid=999",
-                "Disconnected",
+                false, "device/will/topic/",
+                "MQTT client unexpectedly disconnected",
                 true,
                 60
                 );
@@ -160,14 +165,14 @@ namespace nanoFramework.AwsIoT.Devices.Client
             {
                 _mqttc.Subscribe(
                     new[] {
-                        $"devices/{_deviceId}/messages/devicebound/#",
-                        "$iothub/shadow/#",
-                        "$iothub/methods/POST/#"
+                        //$"devices/{_deviceId}/messages/devicebound/#",
+                        $"{ ShadowTopicPrefix }{_deviceId}{ shadowTopicPostFix }/#", // "$iothub/shadow/#",
+                        //"$iothub/methods/POST/#"
                     },
                     new[] {
+                        //MqttQoSLevel.AtLeastOnce,
                         MqttQoSLevel.AtLeastOnce,
-                        MqttQoSLevel.AtLeastOnce,
-                        MqttQoSLevel.AtLeastOnce
+                        //MqttQoSLevel.AtLeastOnce
                     }
                 );
 
@@ -182,7 +187,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
         }
 
         /// <summary>
-        /// Reconnect to Azure Iot Hub
+        /// Reconnect to AWS Iot Core
         /// </summary>
         public void Reconnect()
         {
@@ -197,16 +202,16 @@ namespace nanoFramework.AwsIoT.Devices.Client
         }
 
         /// <summary>
-        /// Close the connection with Azure IoT and disconnect the device.
+        /// Close the connection with AWS IoT Core and disconnect the device.
         /// </summary>
         public void Close()
         {
             if (_mqttc.IsConnected)
             {
                 _mqttc.Unsubscribe(new[] {
-                    $"devices/{_deviceId}/messages/devicebound/#",
-                    "$iothub/shadow/#",
-                    "$iothub/methods/POST/#"
+                    //$"devices/{_deviceId}/messages/devicebound/#",
+                    $"{ ShadowTopicPrefix }{_deviceId}{ shadowTopicPostFix }/#", // "$iothub/shadow/#",
+                    //"$iothub/methods/POST/#"
                     });
                 _mqttc.Disconnect();
                 // Make sure all get disconnected, cleared 
@@ -286,7 +291,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
         }
 
         /// <summary>
-        /// Send a message to Azure IoT.
+        /// Send a message to Aws IoT.
         /// </summary>
         /// <param name="message">The message to send.</param>
         /// <param name="cancellationToken">A cancellation token. If you use the default one, the confirmation of delivery will not be awaited.</param>
@@ -318,7 +323,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
             {
                 string message = Encoding.UTF8.GetString(e.Message, 0, e.Message.Length);
 
-                if (e.Topic.StartsWith("$iothub/shadow/res/204"))
+                if (e.Topic.StartsWith($"{ShadowTopicPrefix}{_deviceId}{shadowTopicPostFix}"))  //($"$iothub/shadow/res/204"))
                 {
                     _ioTCoreStatus.Status = Status.ShadowUpdateReceived;
                     _ioTCoreStatus.Message = string.Empty;

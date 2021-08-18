@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+﻿// Copyright (c) .Net Foundation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using nanoFramework.AwsIoT.Devices.Client;
@@ -24,12 +24,12 @@ namespace nanoFramework.AwsIoT.Devices.Shared
         /// <param name="shadow">The shadow collection.</param>
         public ShadowUpdateEventArgs(ShadowCollection shadow)
         {
-            AwsShadow = shadow;
+            Shadow = shadow;
         }
 
         /// <summary>
         /// Shadow collection.
         /// </summary>
-        public ShadowCollection AwsShadow { get; set; }
+        public ShadowCollection Shadow { get; set; }
     }
 }
