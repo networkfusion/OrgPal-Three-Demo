@@ -1,7 +1,7 @@
 ﻿// Copyright (c) .Net Foundation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace nanoFramework.AwsIoT.Devices.Client
+namespace nanoFramework.AwsIoT.Devices.Client //TODO: improve for AWS IoT.
 {
     /// <summary>
     /// Azure IoT Hub status.

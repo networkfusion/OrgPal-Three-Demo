@@ -59,6 +59,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="AwsIoTtestLib\README.md" />
     <None Include="packages.config" />
     <None Include="Resources\AwsCAroot.der" />
   </ItemGroup>
