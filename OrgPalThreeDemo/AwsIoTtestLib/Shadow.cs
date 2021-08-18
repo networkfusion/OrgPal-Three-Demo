@@ -16,7 +16,7 @@ namespace nanoFramework.AwsIoT.Devices.Shared
         /// </summary>
         public Shadow()
         {
-            Properties = new ShadowProperties();
+            State = new ShadowProperties();
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace nanoFramework.AwsIoT.Devices.Shared
         {
             DeviceId = deviceId;
             Hashtable props = (Hashtable)JsonConvert.DeserializeObject(jsonShadow, typeof(Hashtable));
-            Properties = new ShadowProperties((Hashtable)props["desired"], (Hashtable)props["reported"]);
+            State = new ShadowProperties((Hashtable)props["desired"], (Hashtable)props["reported"]);
         }
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace nanoFramework.AwsIoT.Devices.Shared
         /// <param name="shadowProperties">The shadow properties.</param>
         public Shadow(ShadowProperties shadowProperties)
         {
-            Properties = shadowProperties;
+            State = shadowProperties;
         }
 
         /// <summary>
@@ -54,29 +54,21 @@ namespace nanoFramework.AwsIoT.Devices.Shared
         /// </summary>
         public string DeviceId { get; set; }
 
-        /// <summary>
-        /// The DTDL model Id of the device.
-        /// </summary>
-        /// <remarks>
-        /// The value will be null for a non-pnp device.
-        /// The value will be null for a pnp device until the device connects and registers with the model Id.
-        /// </remarks>
-        public string ModelId { get; set; }
 
         /// <summary>
         /// Gets and sets the <see cref="Shadow"/> properties.
         /// </summary>
-        public ShadowProperties Properties { get; set; }
+        public ShadowProperties State { get; set; }
 
         /// <summary>
         /// Shadow's Version
         /// </summary>
         public long Version { get; set; }
 
-        ///// <summary>
-        ///// Shadow's Client Token
-        ///// </summary>
-        //public long ClientToken { get; set; }
+        /// <summary>
+        /// Shadow's Client Token
+        /// </summary>
+        public string ClientToken { get; set; }
 
         /// <summary>
         /// Gets the Shadow as a JSON string.
@@ -85,22 +77,17 @@ namespace nanoFramework.AwsIoT.Devices.Shared
         public string ToJson()
         {
             Hashtable ser = new();
-            ser.Add("properties", Properties); //TODO: should this be "state"? https://docs.aws.amazon.com/iot/latest/developerguide/device-shadow-document.html
-
-            //if (!string.IsNullOrEmpty(ModelId))
-            //{
-            //    ser.Add("modelid", ModelId);
-            //}
+            ser.Add("state", State); //TODO: should this be "state"? https://docs.aws.amazon.com/iot/latest/developerguide/device-shadow-document.html
 
             //if (!string.IsNullOrEmpty(DeviceId))
             //{
             //    ser.Add("deviceid", DeviceId);
             //}
 
-            //if (!string.IsNullOrEmpty(ClientToken)) //TODO: uncommend when ready!
-            //{
-            //    ser.Add("clientToken", ClientToken);
-            //}
+            if (!string.IsNullOrEmpty(ClientToken)) //TODO: uncommend when ready!
+            {
+                ser.Add("clientToken", ClientToken);
+            }
 
             if (Version != 0)
             {
