@@ -85,7 +85,7 @@ namespace nanoFramework.AwsIoT.Devices.Shared
         public string ToJson()
         {
             Hashtable ser = new();
-            ser.Add("properties", Properties);
+            ser.Add("properties", Properties); //TODO: should this be "state"? https://docs.aws.amazon.com/iot/latest/developerguide/device-shadow-document.html
 
             //if (!string.IsNullOrEmpty(ModelId))
             //{
@@ -97,7 +97,7 @@ namespace nanoFramework.AwsIoT.Devices.Shared
             //    ser.Add("deviceid", DeviceId);
             //}
 
-            //if (!string.IsNullOrEmpty(ClientToken))
+            //if (!string.IsNullOrEmpty(ClientToken)) //TODO: uncommend when ready!
             //{
             //    ser.Add("clientToken", ClientToken);
             //}

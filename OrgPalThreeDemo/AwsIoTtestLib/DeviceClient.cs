@@ -40,7 +40,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
         private readonly X509Certificate _awsRootCACert;
 
         private readonly string _telemetryTopic;
-        private readonly string _deviceMessageTopic;
+        //private readonly string _deviceMessageTopic;
 
         private Shadow _shadow;
         private bool _shadowReceived;
@@ -101,7 +101,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
             _telemetryTopic = $"devices/{_deviceId}/messages/events/"; //TODO: should we make this configurable?!
             _ioTCoreStatus.Status = Status.Disconnected;
             _ioTCoreStatus.Message = string.Empty;
-            _deviceMessageTopic = $"devices/{_deviceId}/messages/devicebound/"; //TODO: should we make this configurable?!
+            //_deviceMessageTopic = $"devices/{_deviceId}/messages/devicebound/"; //TODO: should we make this configurable?!
             QosLevel = qosLevel;
             _awsRootCACert = awsRootCert; //TODO: Should override the default one in resources?!
         }
@@ -151,13 +151,13 @@ namespace nanoFramework.AwsIoT.Devices.Client
             // Now connect the device
             _mqttc.Connect(
                 _deviceId,
-                null,
-                null,
-                false,
+                "",
+                "",
+                false, //TODO: what does "willretain" actually mean!
                 MqttQoSLevel.ExactlyOnce,
                 false, "device/will/topic/",
                 "MQTT client unexpectedly disconnected",
-                true,
+                true, //TODO: this "should" handle persistant connections, and should be configurable?!
                 60
                 );
 
@@ -331,13 +331,13 @@ namespace nanoFramework.AwsIoT.Devices.Client
             return false;
         }
 
-        private void ClientMqttMsgReceived(object sender, MqttMsgPublishEventArgs e)
+        private void ClientMqttMsgReceived(object sender, MqttMsgPublishEventArgs e) //TODO: can we also add subscriptions publically?!! 
         {
             try
             { //TODO: need to revisit this https://docs.aws.amazon.com/iot/latest/developerguide/device-shadow-mqtt.html#update-documents-pub-sub-topic to understand the full implementation!
                 string message = Encoding.UTF8.GetString(e.Message, 0, e.Message.Length);
 
-                if (e.Topic.StartsWith($"{ShadowTopicPrefix}{_deviceId}{shadowTopicPostFix}/update/accepted"))  //($"$iothub/shadow/res/204"))
+                if (e.Topic.StartsWith($"{ShadowTopicPrefix}{_deviceId}{shadowTopicPostFix}/update/accepted"))  //($"$iothub/shadow/res/204")) //TODO: what about named shadows!
                 {
                     _ioTCoreStatus.Status = Status.ShadowUpdateReceived;
                     _ioTCoreStatus.Message = string.Empty;
@@ -358,7 +358,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
                         _ioTCoreStatus.Message = string.Empty;
                         StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
                     }
-                    else
+                    else //TODO: is this handling "documents"
                     {
                         if ((message.Length > 0) && !_shadowReceived)
                         {
@@ -412,18 +412,14 @@ namespace nanoFramework.AwsIoT.Devices.Client
                 //        }
                 //    }
                 //}
-                else if (e.Topic.StartsWith(_deviceMessageTopic))
-                {
-                    string messageTopic = e.Topic.Substring(_deviceMessageTopic.Length);
-                    _ioTCoreStatus.Status = Status.MessageReceived;
-                    _ioTCoreStatus.Message = $"{messageTopic}/{message}";
-                    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
-                    //CloudToDeviceMessage?.Invoke(this, new CloudToDeviceMessageEventArgs(message, messageTopic));
-                }
-
-                //TODO: Other message type callback or throw?!
-
-
+                //else if (e.Topic.StartsWith(_deviceMessageTopic))
+                //{
+                //    string messageTopic = e.Topic.Substring(_deviceMessageTopic.Length);
+                //    _ioTCoreStatus.Status = Status.MessageReceived;
+                //    _ioTCoreStatus.Message = $"{messageTopic}/{message}";
+                //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                //    CloudToDeviceMessage?.Invoke(this, new CloudToDeviceMessageEventArgs(message, messageTopic));
+                //}
                 //else if (e.Topic.StartsWith("$iothub/clientproxy/"))
                 //{
                 //    _ioTCoreStatus.Status = Status.Disconnected;
@@ -452,6 +448,14 @@ namespace nanoFramework.AwsIoT.Devices.Client
                 //{
                 //    _ioTCoreStatus.Status = Status.IoTCoreWarning;
                 //    _ioTCoreStatus.Message = message;
+                //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                //}
+
+                //else //TODO: Other message type callback or throw?!
+                //{
+                //    _ioTCoreStatus.Status = Status.MessageReceived;
+                //    _ioTCoreStatus.Message = e.Message.ToString();
+                //    Debug.WriteLine(e.Message.ToString());
                 //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
                 //}
 
