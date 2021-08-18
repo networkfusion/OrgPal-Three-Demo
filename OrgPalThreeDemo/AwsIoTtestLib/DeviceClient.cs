@@ -88,10 +88,10 @@ namespace nanoFramework.AwsIoT.Devices.Client
         /// Creates an <see cref="DeviceClient"/> class.
         /// </summary>
         /// <param name="iotCoreName">The AWS IoT Core broker fully quilified domain name (example: <instance>.<region>.<domain>)</param>
-        /// <param name="deviceId">The device ID which is the unique name of your device.</param>
-        /// <param name="clientCert">The certificate used to connect the device containing both the public and private key.</param>
-        /// <param name="qosLevel">The default quality level for the delivery of MQTT messages, (defaults to the lowest quality)</param>
-        /// /// <param name="awsRootCert">AWS Root certificate for the connection to AWS IoT Core</param>
+        /// <param name="deviceId">The device (thing) ID which is the unique name of your device.</param>
+        /// <param name="clientCert">The certificate used to connect the device to the MQTT broker (containing both the public and private key).</param>
+        /// <param name="qosLevel">The default quality of service level for the delivery of MQTT messages, (defaults to the lowest quality)</param>
+        /// /// <param name="awsRootCert">The Root (AWS) certificate for the connection to AWS IoT Core</param>
         public DeviceClient(string iotCoreName, string deviceId, X509Certificate2 clientCert, MqttQoSLevel qosLevel = MqttQoSLevel.AtMostOnce, X509Certificate awsRootCert = null)
         {
             _clientCert = clientCert;
@@ -112,27 +112,27 @@ namespace nanoFramework.AwsIoT.Devices.Client
         public Shadow LastShadow => _shadow;
 
         /// <summary>
-        /// The latests status.
+        /// The latest status.
         /// </summary>
         public IoTCoreStatus IoTCoreStatus => new IoTCoreStatus(_ioTCoreStatus);
 
         /// <summary>
-        /// The default level quality.
+        /// The default quality of service level.
         /// </summary>
         public MqttQoSLevel QosLevel { get; set; }
 
         /// <summary>
-        /// True if the device connected
+        /// True if the device connected to the broker.
         /// </summary>
         public bool IsConnected => (_mqttc != null) && _mqttc.IsConnected;
 
         /// <summary>
-        /// Open the connection with Aws IoT Core. This will connected AWS IoT Core to the device.
+        /// Open the connection with AWS IoT Core. This will connect AWS IoT Core (via MQTT) to the device.
         /// </summary>
         /// <returns></returns>
         public bool Open()
         {
-            // Creates an MQTT Client with default port 8883 using TLS 1.2 protocol
+            // Creates an MQTT Client with default TLS port 8883 using TLS 1.2 protocol
             _mqttc = new MqttClient(
                 _iotCoreName,
                 _mqttsPort,
@@ -145,7 +145,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
             _mqttc.MqttMsgPublishReceived += ClientMqttMsgReceived;
             // Handler for publisher
             _mqttc.MqttMsgPublished += ClientMqttMsgPublished;
-            // event when connection has been dropped
+            // Event when connection has been dropped
             _mqttc.ConnectionClosed += ClientConnectionClosed;
 
             // Now connect the device
@@ -179,7 +179,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
                 _ioTCoreStatus.Status = Status.Connected;
                 _ioTCoreStatus.Message = string.Empty;
                 StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
-                // We will renew 10 minutes before just in case
+                // We will renew after 10 minutes before just in case
                 _timerTokenRenew = new Timer(TimerCallbackReconnect, null, new TimeSpan(23, 50, 0), TimeSpan.MaxValue);
             }
 
@@ -187,7 +187,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
         }
 
         /// <summary>
-        /// Reconnect to AWS Iot Core
+        /// Reconnect to AWS Iot Core MQTT.
         /// </summary>
         public void Reconnect()
         {
@@ -202,7 +202,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
         }
 
         /// <summary>
-        /// Close the connection with AWS IoT Core and disconnect the device.
+        /// Close the connection with AWS IoT Core MQTT and disconnect the device.
         /// </summary>
         public void Close()
         {
@@ -222,7 +222,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
         }
 
         /// <summary>
-        /// Gets the shadow.
+        /// Gets the device shadow.
         /// </summary>
         /// <param name="cancellationToken">A cancellation token</param>
         /// <param name="namedShadow">A named shadow</param>
@@ -250,7 +250,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
         }
 
         /// <summary>
-        /// Update the shadow reported properties.
+        /// Update the device shadow reported properties.
         /// </summary>
         /// <param name="reported">The reported properties.</param>
         /// <param name="cancellationToken">A cancellation token. If you use the default one, the confirmation of delivery will not be awaited.</param>
@@ -305,7 +305,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
         }
 
         /// <summary>
-        /// Send a message to Aws IoT.
+        /// Send a message to Aws IoT Core.
         /// </summary>
         /// <param name="message">The message to send.</param>
         /// <param name="cancellationToken">A cancellation token. If you use the default one, the confirmation of delivery will not be awaited.</param>
