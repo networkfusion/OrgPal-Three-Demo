@@ -25,10 +25,11 @@ namespace nanoFramework.AwsIoT.Devices.Client
         //const string ShadowDesiredPropertiesTopic = "$iothub/shadow/GET/";
         //const string DirectMethodTopic = "$iothub/methods/POST/";
 
-        private readonly string _iotCoreName;
-        private readonly string _deviceId;
+        private readonly string _iotCoreName; // FQDN
+        private readonly string _deviceId; //Otherwise known as the Thing Name.
         const int _mqttsPort = 8883; //Default MQTTS port.
-        private readonly X509Certificate2 _clientCert;
+        private readonly X509Certificate2 _clientCert; //ClientRsaSha256Crt and ClientRsaKey
+        private readonly X509Certificate _awsRootCACert;
         //private readonly string _privateKey;
 
         private MqttClient _mqttc;
@@ -37,7 +38,6 @@ namespace nanoFramework.AwsIoT.Devices.Client
         private readonly ArrayList _waitForConfirmation = new ArrayList();
         private readonly object _lock = new object();
         private Timer _timerTokenRenew;
-        private readonly X509Certificate _awsRootCACert;
 
         private readonly string _telemetryTopic;
         //private readonly string _deviceMessageTopic;
@@ -64,7 +64,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
         ///// <summary>
         ///// Creates an <see cref="DeviceClient"/> class.
         ///// </summary>
-        ///// <param name="iotCoreName">The AWS IoT Core fully quilified domain name (example: <instance>.<region>.<domain>)</param>
+        ///// <param name="iotCoreName">The AWS IoT Core fully quilified domain name (example: <instance>.<region>.amazonaws.com)</param>
         ///// <param name="deviceId">The device ID which is the name of your device.</param>
         ///// <param name="sasKey">One of the SAS Key either primary, either secondary.</param>
         ///// <param name="qosLevel">The default quality level delivery for the MQTT messages, default to the lower quality</param>
@@ -87,7 +87,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
         /// <summary>
         /// Creates an <see cref="DeviceClient"/> class.
         /// </summary>
-        /// <param name="iotCoreName">The AWS IoT Core broker fully quilified domain name (example: <instance>.<region>.<domain>)</param>
+        /// <param name="iotCoreName">The AWS IoT Core fully quilified domain name (example: <instance>.<region>.amazonaws.com)</param>
         /// <param name="deviceId">The device (thing) ID which is the unique name of your device.</param>
         /// <param name="clientCert">The certificate used to connect the device to the MQTT broker (containing both the public and private key).</param>
         /// <param name="qosLevel">The default quality of service level for the delivery of MQTT messages, (defaults to the lowest quality)</param>
@@ -112,7 +112,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
         public Shadow LastShadow => _shadow;
 
         /// <summary>
-        /// The latest status.
+        /// The latest connection status.
         /// </summary>
         public IoTCoreStatus IoTCoreStatus => new IoTCoreStatus(_ioTCoreStatus);
 
@@ -122,14 +122,14 @@ namespace nanoFramework.AwsIoT.Devices.Client
         public MqttQoSLevel QosLevel { get; set; }
 
         /// <summary>
-        /// True if the device connected to the broker.
+        /// True if the device connected sucessfully.
         /// </summary>
         public bool IsConnected => (_mqttc != null) && _mqttc.IsConnected;
 
         /// <summary>
         /// Open the connection with AWS IoT Core. This will connect AWS IoT Core (via MQTT) to the device.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>True for a successful connection</returns>
         public bool Open()
         {
             // Creates an MQTT Client with default TLS port 8883 using TLS 1.2 protocol
