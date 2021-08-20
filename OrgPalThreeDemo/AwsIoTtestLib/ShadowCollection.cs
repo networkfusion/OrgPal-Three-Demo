@@ -4,7 +4,7 @@
 using nanoFramework.Json;
 using System.Collections;
 
-namespace nanoFramework.AwsIoT.Devices.Shared
+namespace nanoFramework.Aws.IoTCore.Shared
 {
     /// <summary>
     /// Represents a collection of properties for <see cref="Shadow"/>.

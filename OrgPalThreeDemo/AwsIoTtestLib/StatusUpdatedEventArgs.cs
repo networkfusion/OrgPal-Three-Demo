@@ -3,12 +3,12 @@
 
 using System;
 
-namespace nanoFramework.AwsIoT.Devices.Client
+namespace nanoFramework.Aws.IoTCore
 {
     /// <summary>
     /// Delegate method for status update.
     /// </summary>
-    /// <param name="sender">The <see cref="MqttDeviceClient"/> sender.</param>
+    /// <param name="sender">The <see cref="MqttConnectionClient"/> sender.</param>
     /// <param name="e">The status updated arguments.</param>
     public delegate void StatusUpdated(object sender, StatusUpdatedEventArgs e);
 

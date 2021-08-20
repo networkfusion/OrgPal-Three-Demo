@@ -3,7 +3,7 @@
 
 using System.Collections;
 
-namespace nanoFramework.AwsIoT.Devices.Shared
+namespace nanoFramework.Aws.IoTCore.Shared
 {
     /// <summary>
     /// Represents <see cref="Shadow"/> properties

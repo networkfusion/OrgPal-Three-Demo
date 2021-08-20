@@ -1,15 +1,15 @@
 ﻿// Copyright (c) .Net Foundation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using nanoFramework.AwsIoT.Devices.Client;
+using nanoFramework.Aws.IoTCore;
 using System;
 
-namespace nanoFramework.AwsIoT.Devices.Shared
+namespace nanoFramework.Aws.IoTCore.Shared
 {
     /// <summary>
     /// Delegate for Shadow updated.
     /// </summary>
-    /// <param name="sender">The <see cref="MqttDeviceClient"/> sender.</param>
+    /// <param name="sender">The <see cref="MqttConnectionClient"/> sender.</param>
     /// <param name="e">The Shadow updated event arguments.</param>
     public delegate void ShadowUpdated(object sender, ShadowUpdateEventArgs e);
 

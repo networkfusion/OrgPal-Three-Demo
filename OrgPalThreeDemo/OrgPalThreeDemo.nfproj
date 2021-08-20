@@ -20,10 +20,11 @@
   <ItemGroup>
     <Compile Include="AwsIoTtestLib\Shadow.cs" />
     <Compile Include="AwsIoTtestLib\ShadowState.cs" />
+    <Compile Include="AwsIoTtestLib\WebsocketConnectionClient.cs" />
     <Compile Include="AwsIoT\AwsMqtt.cs" />
     <Compile Include="AwsIoT\AwsShadow.cs" />
     <Compile Include="AwsIoTtestLib\ConfirmationStatus.cs" />
-    <Compile Include="AwsIoTtestLib\MqttDeviceClient.cs" />
+    <Compile Include="AwsIoTtestLib\MqttConnectionClient.cs" />
     <Compile Include="AwsIoTtestLib\IoTCoreStatus.cs" />
     <Compile Include="AwsIoTtestLib\MethodCallback.cs" />
     <Compile Include="AwsIoTtestLib\ShadowCollection.cs" />

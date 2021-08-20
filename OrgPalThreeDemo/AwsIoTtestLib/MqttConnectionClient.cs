@@ -1,7 +1,7 @@
 ﻿// Copyright (c) .Net Foundation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using nanoFramework.AwsIoT.Devices.Shared;
+using nanoFramework.Aws.IoTCore.Shared;
 using nanoFramework.M2Mqtt;
 using nanoFramework.M2Mqtt.Messages;
 using System;
@@ -11,7 +11,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 
-namespace nanoFramework.AwsIoT.Devices.Client
+namespace nanoFramework.Aws.IoTCore
 {
     // https://github.com/aws/aws-sdk-net/blob/master/sdk/src/Services/IotData/Generated/_netstandard/AmazonIotDataClient.cs
     // https://github.com/aws/aws-iot-device-sdk-embedded-C/tree/master/src
@@ -19,9 +19,9 @@ namespace nanoFramework.AwsIoT.Devices.Client
 
 
     /// <summary>
-    /// AWS IoT Core MQTT Client for .NET nanoFramework
+    /// AWS IoT Core MQTT Connection Client for .NET nanoFramework
     /// </summary>
-    public class MqttDeviceClient : IDisposable
+    public class MqttConnectionClient : IDisposable
     {
         const string ShadowTopicPrefix = "$aws/things/";
         const string shadowTopicPostFix = "/shadow";
@@ -37,7 +37,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
         private readonly X509Certificate _awsRootCACert;
         //private readonly string _privateKey;
 
-        private MqttClient _mqttc;
+        private M2Mqtt.MqttClient _mqttc;
         private readonly IoTCoreStatus _ioTCoreStatus = new IoTCoreStatus();
         private readonly ArrayList _methodCallback = new ArrayList();
         private readonly ArrayList _waitForConfirmation = new ArrayList();
@@ -68,14 +68,14 @@ namespace nanoFramework.AwsIoT.Devices.Client
 
 
         /// <summary>
-        /// Creates an <see cref="MqttDeviceClient"/> class.
+        /// Creates an <see cref="MqttConnectionClient"/> class.
         /// </summary>
         /// <param name="iotCoreUri">The AWS IoT Core fully quilified domain name (example: <instance>.<region>.amazonaws.com)</param>
-        /// <param name="uniqueId">A unique identity of your device (Device ID / Thing Name).</param>
+        /// <param name="uniqueId">A unique identity for your device (Device ID / Thing Name).</param>
         /// <param name="clientCert">The certificate used to connect the device to the MQTT broker (containing both the public and private key).</param>
         /// <param name="qosLevel">The default quality of service level for the delivery of MQTT messages, (defaults to the lowest quality)</param>
         /// /// <param name="awsRootCert">The Root (AWS) certificate for the connection to AWS IoT Core</param>
-        public MqttDeviceClient(string iotCoreUri, string uniqueId, X509Certificate2 clientCert, MqttQoSLevel qosLevel = MqttQoSLevel.AtMostOnce, X509Certificate awsRootCert = null)
+        public MqttConnectionClient(string iotCoreUri, string uniqueId, X509Certificate2 clientCert, MqttQoSLevel qosLevel = MqttQoSLevel.AtMostOnce, X509Certificate awsRootCert = null)
         {
             _clientCert = clientCert;
             //_privateKey = Convert.ToBase64String(clientCert.PrivateKey);
@@ -116,7 +116,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
         public bool Open()
         {
             // Creates an MQTT Client with default TLS port 8883 using TLS 1.2 protocol
-            _mqttc = new MqttClient(
+            _mqttc = new M2Mqtt.MqttClient(
                 _iotCoreUri,
                 _mqttsPort,
                 true,

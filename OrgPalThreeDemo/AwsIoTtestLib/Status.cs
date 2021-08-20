@@ -1,7 +1,7 @@
 ﻿// Copyright (c) .Net Foundation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace nanoFramework.AwsIoT.Devices.Client //TODO: improve for AWS IoT.
+namespace nanoFramework.Aws.IoTCore //TODO: improve for AWS IoT.
 {
     /// <summary>
     /// Azure IoT Hub status.
@@ -77,5 +77,31 @@ namespace nanoFramework.AwsIoT.Devices.Client //TODO: improve for AWS IoT.
         /// A direct method has been called.
         /// </summary>
         DirectMethodCalled,
+
+        //TODO: map the following exceptions?!
+        ///// <exception cref="Amazon.IotData.Model.InternalFailureException">
+        ///// An unexpected error has occurred.
+        ///// </exception>
+        ///// <exception cref="Amazon.IotData.Model.InvalidRequestException">
+        ///// The request is not valid.
+        ///// </exception>
+        ///// <exception cref="Amazon.IotData.Model.MethodNotAllowedException">
+        ///// The specified combination of HTTP verb and URI is not supported.
+        ///// </exception>
+        ///// <exception cref="Amazon.IotData.Model.ResourceNotFoundException">
+        ///// The specified resource does not exist.
+        ///// </exception>
+        ///// <exception cref="Amazon.IotData.Model.ServiceUnavailableException">
+        ///// The service is temporarily unavailable.
+        ///// </exception>
+        ///// <exception cref="Amazon.IotData.Model.ThrottlingException">
+        ///// The rate exceeds the limit.
+        ///// </exception>
+        ///// <exception cref="Amazon.IotData.Model.UnauthorizedException">
+        ///// You are not authorized to perform this operation.
+        ///// </exception>
+        ///// <exception cref="Amazon.IotData.Model.UnsupportedDocumentEncodingException">
+        ///// The document encoding is not supported.
+        ///// </exception>
     }
 }
