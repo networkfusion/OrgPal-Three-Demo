@@ -20,6 +20,7 @@
   <ItemGroup>
     <Compile Include="AwsIoTtestLib\Shadow.cs" />
     <Compile Include="AwsIoTtestLib\ShadowState.cs" />
+    <Compile Include="AwsIoTtestLib\Tests\program.cs" />
     <Compile Include="AwsIoTtestLib\WebsocketConnectionClient.cs" />
     <Compile Include="AwsIoT\AwsMqtt.cs" />
     <Compile Include="AwsIoT\AwsShadow.cs" />
