@@ -8,7 +8,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
     /// <summary>
     /// Delegate method for status update.
     /// </summary>
-    /// <param name="sender">The <see cref="DeviceClient"/> sender.</param>
+    /// <param name="sender">The <see cref="MqttDeviceClient"/> sender.</param>
     /// <param name="e">The status updated arguments.</param>
     public delegate void StatusUpdated(object sender, StatusUpdatedEventArgs e);
 
@@ -27,7 +27,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
         }
 
         /// <summary>
-        /// The IoT Hub status.
+        /// The IoT Core status.
         /// </summary>
         public IoTCoreStatus IoTCoreStatus { get; set; }
     }

@@ -9,7 +9,7 @@ namespace nanoFramework.AwsIoT.Devices.Shared
     /// <summary>
     /// Delegate for Shadow updated.
     /// </summary>
-    /// <param name="sender">The <see cref="DeviceClient"/> sender.</param>
+    /// <param name="sender">The <see cref="MqttDeviceClient"/> sender.</param>
     /// <param name="e">The Shadow updated event arguments.</param>
     public delegate void ShadowUpdated(object sender, ShadowUpdateEventArgs e);
 

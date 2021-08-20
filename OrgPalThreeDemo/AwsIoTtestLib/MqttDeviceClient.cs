@@ -19,9 +19,9 @@ namespace nanoFramework.AwsIoT.Devices.Client
 
 
     /// <summary>
-    /// AWS IoT Core Client SDK for .NET nanoFramework using MQTT
+    /// AWS IoT Core MQTT Client for .NET nanoFramework
     /// </summary>
-    public class DeviceClient : IDisposable
+    public class MqttDeviceClient : IDisposable
     {
         const string ShadowTopicPrefix = "$aws/things/";
         const string shadowTopicPostFix = "/shadow";
@@ -30,8 +30,8 @@ namespace nanoFramework.AwsIoT.Devices.Client
         //const string ShadowDesiredPropertiesTopic = "$iothub/shadow/GET/";
         //const string DirectMethodTopic = "$iothub/methods/POST/";
 
-        private readonly string _iotCoreName; // FQDN
-        private readonly string _deviceId; //Otherwise known as the Thing Name.
+        private readonly string _iotCoreUri; // FQDN
+        private readonly string _uniqueId; //Otherwise known as the Thing Name.
         const int _mqttsPort = 8883; //Default MQTTS port.
         private readonly X509Certificate2 _clientCert; //ClientRsaSha256Crt and ClientRsaKey
         private readonly X509Certificate _awsRootCACert;
@@ -66,44 +66,22 @@ namespace nanoFramework.AwsIoT.Devices.Client
         ///// </summary>
         //public event CloudToDeviceMessage CloudToDeviceMessage;
 
-        ///// <summary>
-        ///// Creates an <see cref="DeviceClient"/> class.
-        ///// </summary>
-        ///// <param name="iotCoreName">The AWS IoT Core fully quilified domain name (example: <instance>.<region>.amazonaws.com)</param>
-        ///// <param name="deviceId">The device ID (Thing Name) which is the unique identity of your device.</param>
-        ///// <param name="sasKey">One of the SAS Key either primary, either secondary.</param>
-        ///// <param name="qosLevel">The default quality level delivery for the MQTT messages, default to the lower quality</param>
-        ///// <param name="awsRootCert">Azure certificate for the connection to Azure IoT Hub</param>
-        //public DeviceClient(string iotCoreName, string deviceId, string sasKey, MqttQoSLevel qosLevel = MqttQoSLevel.AtMostOnce, X509Certificate awsRootCert = null)
-        //{
-        //    _clientCert = null;
-        //    _privateKey = null;
-        //    _iotCoreName = iotCoreName;
-        //    _deviceId = deviceId;
-        //    //_sasKey = sasKey;
-        //    _telemetryTopic = $"devices/{_deviceId}/messages/events/";
-        //    _ioTCoreStatus.Status = Status.Disconnected;
-        //    _ioTCoreStatus.Message = string.Empty;
-        //    _deviceMessageTopic = $"devices/{_deviceId}/messages/devicebound/";
-        //    QosLevel = qosLevel;
-        //    _awsRootCACert = awsRootCert;
-        //}
 
         /// <summary>
-        /// Creates an <see cref="DeviceClient"/> class.
+        /// Creates an <see cref="MqttDeviceClient"/> class.
         /// </summary>
-        /// <param name="iotCoreName">The AWS IoT Core fully quilified domain name (example: <instance>.<region>.amazonaws.com)</param>
-        /// <param name="deviceId">The device ID (Thing Name) which is the unique identity of your device.</param>
+        /// <param name="iotCoreUri">The AWS IoT Core fully quilified domain name (example: <instance>.<region>.amazonaws.com)</param>
+        /// <param name="uniqueId">A unique identity of your device (Device ID / Thing Name).</param>
         /// <param name="clientCert">The certificate used to connect the device to the MQTT broker (containing both the public and private key).</param>
         /// <param name="qosLevel">The default quality of service level for the delivery of MQTT messages, (defaults to the lowest quality)</param>
         /// /// <param name="awsRootCert">The Root (AWS) certificate for the connection to AWS IoT Core</param>
-        public DeviceClient(string iotCoreName, string deviceId, X509Certificate2 clientCert, MqttQoSLevel qosLevel = MqttQoSLevel.AtMostOnce, X509Certificate awsRootCert = null)
+        public MqttDeviceClient(string iotCoreUri, string uniqueId, X509Certificate2 clientCert, MqttQoSLevel qosLevel = MqttQoSLevel.AtMostOnce, X509Certificate awsRootCert = null)
         {
             _clientCert = clientCert;
             //_privateKey = Convert.ToBase64String(clientCert.PrivateKey);
-            _iotCoreName = iotCoreName;
-            _deviceId = deviceId;
-            _telemetryTopic = $"nanoframework/devices/{_deviceId}/messages/events/"; //TODO: we should make this configurable!
+            _iotCoreUri = iotCoreUri;
+            _uniqueId = uniqueId;
+            _telemetryTopic = $"nanoframework/devices/{_uniqueId}/messages/events/"; //TODO: we should make this configurable!
             _ioTCoreStatus.Status = Status.Disconnected;
             _ioTCoreStatus.Message = string.Empty;
             //_deviceMessageTopic = $"devices/{_deviceId}/messages/devicebound/"; //TODO: should we make this configurable?!
@@ -139,7 +117,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
         {
             // Creates an MQTT Client with default TLS port 8883 using TLS 1.2 protocol
             _mqttc = new MqttClient(
-                _iotCoreName,
+                _iotCoreUri,
                 _mqttsPort,
                 true,
                 _awsRootCACert,
@@ -155,13 +133,13 @@ namespace nanoFramework.AwsIoT.Devices.Client
 
             // Now connect the device
             _mqttc.Connect(
-                _deviceId,
-                "",
-                "",
+                _uniqueId,
+                "", //TODO: should this be null?
+                "", //TODO: should this be null?
                 false, //TODO: what does "willretain" actually mean!
-                MqttQoSLevel.ExactlyOnce,
+                MqttQoSLevel.ExactlyOnce, //TODO: guessing that this is the "default" QOS level?!
                 false, "device/will/topic/", //TODO: should this be configurable?!
-                "MQTT client unexpectedly disconnected",
+                "MQTT connection was disconnected unexpectedly!",
                 true, //TODO: this "should" handle persistant connections, and should be configurable?!
                 60
                 );
@@ -171,7 +149,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
                 _mqttc.Subscribe(
                     new[] {
                         //$"devices/{_deviceId}/messages/devicebound/#",
-                        $"{ ShadowTopicPrefix }{_deviceId}{ shadowTopicPostFix }/#", // "$iothub/shadow/#",
+                        $"{ ShadowTopicPrefix }{_uniqueId}{ shadowTopicPostFix }/#", // "$iothub/shadow/#",
                         //"$iothub/methods/POST/#"
                     },
                     new[] {
@@ -215,7 +193,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
             {
                 _mqttc.Unsubscribe(new[] {
                     //$"devices/{_deviceId}/messages/devicebound/#",
-                    $"{ ShadowTopicPrefix }{_deviceId}{ shadowTopicPostFix }/#", // "$iothub/shadow/#",
+                    $"{ ShadowTopicPrefix }{_uniqueId}{ shadowTopicPostFix }/#", // "$iothub/shadow/#",
                     //"$iothub/methods/POST/#"
                     });
                 _mqttc.Disconnect();
@@ -238,10 +216,10 @@ namespace nanoFramework.AwsIoT.Devices.Client
         {
             _shadowReceived = false;
 
-            var topic = $"{ShadowTopicPrefix}{_deviceId}{shadowTopicPostFix}/get";
+            var topic = $"{ShadowTopicPrefix}{_uniqueId}{shadowTopicPostFix}/get";
             if (namedShadow != string.Empty)
             {
-                topic = $"{ShadowTopicPrefix}{_deviceId}{shadowTopicPostFix}/name/{namedShadow}/get";
+                topic = $"{ShadowTopicPrefix}{_uniqueId}{shadowTopicPostFix}/name/{namedShadow}/get";
             }
 
             _mqttc.Publish(topic, Encoding.UTF8.GetBytes(""), MqttQoSLevel.AtLeastOnce, false);
@@ -287,10 +265,10 @@ namespace nanoFramework.AwsIoT.Devices.Client
         /// <returns>True for successful message delivery.</returns>
         public bool UpdateReportedState(ShadowCollection reported, CancellationToken cancellationToken = default, string namedShadow = "")
         {
-            var topic = $"{ShadowTopicPrefix}{_deviceId}{shadowTopicPostFix}/update";
+            var topic = $"{ShadowTopicPrefix}{_uniqueId}{shadowTopicPostFix}/update";
             if (namedShadow != string.Empty)
             {
-                topic = $"{ShadowTopicPrefix}{_deviceId}{shadowTopicPostFix}/name/{namedShadow}/update";
+                topic = $"{ShadowTopicPrefix}{_uniqueId}{shadowTopicPostFix}/name/{namedShadow}/update";
             }
 
             string shadow = reported.ToJson();
@@ -367,13 +345,13 @@ namespace nanoFramework.AwsIoT.Devices.Client
             { //TODO: need to revisit this https://docs.aws.amazon.com/iot/latest/developerguide/device-shadow-mqtt.html#update-documents-pub-sub-topic to understand the full implementation!
                 string message = Encoding.UTF8.GetString(e.Message, 0, e.Message.Length);
 
-                if (e.Topic.StartsWith($"{ShadowTopicPrefix}{_deviceId}{shadowTopicPostFix}/update/accepted"))  //($"$iothub/shadow/res/204")) //TODO: what about named shadows!
+                if (e.Topic.StartsWith($"{ShadowTopicPrefix}{_uniqueId}{shadowTopicPostFix}/update/accepted"))  //($"$iothub/shadow/res/204")) //TODO: what about named shadows!
                 {
                     _ioTCoreStatus.Status = Status.ShadowUpdateReceived;
                     _ioTCoreStatus.Message = string.Empty;
                     StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
                 }
-                else if (e.Topic.StartsWith($"{ShadowTopicPrefix}{_deviceId}{shadowTopicPostFix}/update/")) //("$iothub/shadow/"))
+                else if (e.Topic.StartsWith($"{ShadowTopicPrefix}{_uniqueId}{shadowTopicPostFix}/update/")) //("$iothub/shadow/"))
                 {
                     if (e.Topic.IndexOf("rejected/") > 0) //if (e.Topic.IndexOf("res/400/") > 0 || e.Topic.IndexOf("res/404/") > 0 || e.Topic.IndexOf("res/500/") > 0)
                     {
@@ -395,7 +373,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
                             // skip if already received in this session                         
                             try
                             {
-                                _shadow = new Shadow(_deviceId, message);
+                                _shadow = new Shadow(_uniqueId, message);
                                 _shadowReceived = true;
                                 _ioTCoreStatus.Status = Status.ShadowReceived;
                                 _ioTCoreStatus.Message = message;
