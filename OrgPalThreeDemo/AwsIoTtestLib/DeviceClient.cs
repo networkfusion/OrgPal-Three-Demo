@@ -13,6 +13,11 @@ using System.Threading;
 
 namespace nanoFramework.AwsIoT.Devices.Client
 {
+    // https://github.com/aws/aws-sdk-net/blob/master/sdk/src/Services/IotData/Generated/_netstandard/AmazonIotDataClient.cs
+    // https://github.com/aws/aws-iot-device-sdk-embedded-C/tree/master/src
+    // https://docs.aws.amazon.com/iot/latest/developerguide/device-shadow-mqtt.html
+
+
     /// <summary>
     /// AWS IoT Core Client SDK for .NET nanoFramework using MQTT
     /// </summary>
@@ -65,7 +70,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
         ///// Creates an <see cref="DeviceClient"/> class.
         ///// </summary>
         ///// <param name="iotCoreName">The AWS IoT Core fully quilified domain name (example: <instance>.<region>.amazonaws.com)</param>
-        ///// <param name="deviceId">The device ID which is the name of your device.</param>
+        ///// <param name="deviceId">The device ID (Thing Name) which is the unique identity of your device.</param>
         ///// <param name="sasKey">One of the SAS Key either primary, either secondary.</param>
         ///// <param name="qosLevel">The default quality level delivery for the MQTT messages, default to the lower quality</param>
         ///// <param name="awsRootCert">Azure certificate for the connection to Azure IoT Hub</param>
@@ -88,7 +93,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
         /// Creates an <see cref="DeviceClient"/> class.
         /// </summary>
         /// <param name="iotCoreName">The AWS IoT Core fully quilified domain name (example: <instance>.<region>.amazonaws.com)</param>
-        /// <param name="deviceId">The device (thing) ID which is the unique name of your device.</param>
+        /// <param name="deviceId">The device ID (Thing Name) which is the unique identity of your device.</param>
         /// <param name="clientCert">The certificate used to connect the device to the MQTT broker (containing both the public and private key).</param>
         /// <param name="qosLevel">The default quality of service level for the delivery of MQTT messages, (defaults to the lowest quality)</param>
         /// /// <param name="awsRootCert">The Root (AWS) certificate for the connection to AWS IoT Core</param>
@@ -98,7 +103,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
             //_privateKey = Convert.ToBase64String(clientCert.PrivateKey);
             _iotCoreName = iotCoreName;
             _deviceId = deviceId;
-            _telemetryTopic = $"devices/{_deviceId}/messages/events/"; //TODO: should we make this configurable?!
+            _telemetryTopic = $"nanoframework/devices/{_deviceId}/messages/events/"; //TODO: we should make this configurable!
             _ioTCoreStatus.Status = Status.Disconnected;
             _ioTCoreStatus.Message = string.Empty;
             //_deviceMessageTopic = $"devices/{_deviceId}/messages/devicebound/"; //TODO: should we make this configurable?!
@@ -155,7 +160,7 @@ namespace nanoFramework.AwsIoT.Devices.Client
                 "",
                 false, //TODO: what does "willretain" actually mean!
                 MqttQoSLevel.ExactlyOnce,
-                false, "device/will/topic/",
+                false, "device/will/topic/", //TODO: should this be configurable?!
                 "MQTT client unexpectedly disconnected",
                 true, //TODO: this "should" handle persistant connections, and should be configurable?!
                 60
@@ -249,13 +254,38 @@ namespace nanoFramework.AwsIoT.Devices.Client
             return _shadowReceived ? _shadow : null;
         }
 
+        //public bool PublishShadow(CancellationToken cancellationToken = default, string namedShadow = "")
+        //{
+
+        //}
+
+        //public bool DeleteShadow(CancellationToken cancellationToken = default, string namedShadow = "")
+        //{
+        //    var topic = $"{ShadowTopicPrefix}{_deviceId}{shadowTopicPostFix}/delete";
+        //    if (namedShadow != string.Empty)
+        //    {
+        //        topic = $"{ShadowTopicPrefix}{_deviceId}{shadowTopicPostFix}/name/{namedShadow}/update";
+        //    }
+        //    //AwsMqtt.Client.Subscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" }, new MqttQoSLevel[] { MqttQoSLevel.AtMostOnce, MqttQoSLevel.AtMostOnce });
+        //    _mqttc.Publish(topic, Encoding.UTF8.GetBytes(""), MqttQoSLevel.AtLeastOnce, false);
+
+        //    //while (!_shadowReceived && !cancellationToken.IsCancellationRequested)
+        //    //{
+        //    //    cancellationToken.WaitHandle.WaitOne(200, true);
+        //    //}
+
+        //    //return _shadowReceived ? _shadow : null;
+        //    return false; //TODO: confirm action took place! (ShadowDeleted)
+        //    //AwsMqtt.Client.Unsubscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" });
+        //}
+
         /// <summary>
-        /// Update the device shadow reported properties.
+        /// Update the device shadow reported state.
         /// </summary>
         /// <param name="reported">The reported properties.</param>
         /// <param name="cancellationToken">A cancellation token. If you use the default one, the confirmation of delivery will not be awaited.</param>
         /// <returns>True for successful message delivery.</returns>
-        public bool UpdateReportedProperties(ShadowCollection reported, CancellationToken cancellationToken = default, string namedShadow = "")
+        public bool UpdateReportedState(ShadowCollection reported, CancellationToken cancellationToken = default, string namedShadow = "")
         {
             var topic = $"{ShadowTopicPrefix}{_deviceId}{shadowTopicPostFix}/update";
             if (namedShadow != string.Empty)

@@ -39,6 +39,11 @@ namespace nanoFramework.AwsIoT.Devices.Client //TODO: improve for AWS IoT.
         ShadowUpdateReceived,
 
         /// <summary>
+        /// Shadow deleted.
+        /// </summary>
+        ShadowDeleted,
+
+        /// <summary>
         /// IoT Hub Error.
         /// </summary>
         IoTCoreError,

@@ -11,12 +11,14 @@ namespace nanoFramework.AwsIoT.Devices.Shared
     /// </summary>
     public class Shadow
     {
+        // https://docs.aws.amazon.com/iot/latest/developerguide/device-shadow-document.html
+
         /// <summary>
         /// Creates an instance of <see cref="Shadow"/>.
         /// </summary>
         public Shadow()
         {
-            State = new ShadowProperties();
+            State = new ShadowState();
         }
 
         /// <summary>
@@ -37,16 +39,16 @@ namespace nanoFramework.AwsIoT.Devices.Shared
         {
             DeviceId = deviceId;
             Hashtable props = (Hashtable)JsonConvert.DeserializeObject(jsonShadow, typeof(Hashtable));
-            State = new ShadowProperties((Hashtable)props["desired"], (Hashtable)props["reported"]);
+            State = new ShadowState((Hashtable)props["desired"], (Hashtable)props["reported"]);
         }
 
         /// <summary>
         /// Creates an instance of <see cref="Shadow"/>.
         /// </summary>
         /// <param name="shadowProperties">The shadow properties.</param>
-        public Shadow(ShadowProperties shadowProperties)
+        public Shadow(ShadowState shadowState)
         {
-            State = shadowProperties;
+            State = shadowState;
         }
 
         /// <summary>
@@ -58,7 +60,7 @@ namespace nanoFramework.AwsIoT.Devices.Shared
         /// <summary>
         /// Gets and sets the <see cref="Shadow"/> properties.
         /// </summary>
-        public ShadowProperties State { get; set; }
+        public ShadowState State { get; set; }
 
         /// <summary>
         /// Shadow's Version
@@ -77,14 +79,14 @@ namespace nanoFramework.AwsIoT.Devices.Shared
         public string ToJson()
         {
             Hashtable ser = new();
-            ser.Add("state", State); //TODO: should this be "state"? https://docs.aws.amazon.com/iot/latest/developerguide/device-shadow-document.html
+            ser.Add("state", State);
 
             //if (!string.IsNullOrEmpty(DeviceId))
             //{
             //    ser.Add("deviceid", DeviceId);
             //}
 
-            if (!string.IsNullOrEmpty(ClientToken)) //TODO: uncommend when ready!
+            if (!string.IsNullOrEmpty(ClientToken))
             {
                 ser.Add("clientToken", ClientToken);
             }

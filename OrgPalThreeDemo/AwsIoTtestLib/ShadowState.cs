@@ -8,23 +8,23 @@ namespace nanoFramework.AwsIoT.Devices.Shared
     /// <summary>
     /// Represents <see cref="Shadow"/> properties
     /// </summary>
-    public class ShadowProperties
+    public class ShadowState
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="ShadowProperties"/>
+        /// Initializes a new instance of <see cref="ShadowState"/>
         /// </summary>
-        public ShadowProperties()
+        public ShadowState()
         {
             Desired = new ShadowCollection();
             Reported = new ShadowCollection();
         }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="ShadowProperties"/>
+        /// Initializes a new instance of <see cref="ShadowState"/>
         /// </summary>
         /// <param name="desired">Hashtable for the desired properties</param>
         /// <param name="reported">Hashtable for the reported properties</param>
-        public ShadowProperties(Hashtable desired, Hashtable reported)
+        public ShadowState(Hashtable desired, Hashtable reported)
         {
             Desired = new ShadowCollection(desired);
             Reported = new ShadowCollection(reported);

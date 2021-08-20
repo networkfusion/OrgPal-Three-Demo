@@ -19,7 +19,7 @@
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
     <Compile Include="AwsIoTtestLib\Shadow.cs" />
-    <Compile Include="AwsIoTtestLib\ShadowProperties.cs" />
+    <Compile Include="AwsIoTtestLib\ShadowState.cs" />
     <Compile Include="AwsIoT\AwsMqtt.cs" />
     <Compile Include="AwsIoT\AwsShadow.cs" />
     <Compile Include="AwsIoTtestLib\ConfirmationStatus.cs" />
