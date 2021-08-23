@@ -81,10 +81,10 @@ namespace nanoFramework.Aws.IoTCore
             //_privateKey = Convert.ToBase64String(clientCert.PrivateKey);
             _iotCoreUri = iotCoreUri;
             _uniqueId = uniqueId;
-            _telemetryTopic = $"nanoframework/devices/{_uniqueId}/messages/events/"; //TODO: we should make this configurable!
+            _telemetryTopic = $"nanoframework/device/{_uniqueId}/messages/events/"; //TODO: we should make this configurable!
             _ioTCoreStatus.Status = Status.Disconnected;
             _ioTCoreStatus.Message = string.Empty;
-            //_deviceMessageTopic = $"devices/{_deviceId}/messages/devicebound/"; //TODO: should we make this configurable?!
+            //_deviceMessageTopic = $"nanoframework/device/{_deviceId}/messages/devicebound/"; //TODO: should we make this configurable?! e.g. I need "{_uniqueId}/sys/"??? (or do I (since CSL doing its own thing here!)!!)
             QosLevel = qosLevel;
             _awsRootCACert = awsRootCert; //TODO: Should override the default one in resources?!
         }
@@ -138,7 +138,7 @@ namespace nanoFramework.Aws.IoTCore
                 "", //TODO: should this be null?
                 false, //TODO: what does "willretain" actually mean!
                 MqttQoSLevel.ExactlyOnce, //TODO: guessing that this is the "default" QOS level?!
-                false, "device/will/topic/", //TODO: should this be configurable?!
+                false, $"nanoframework/device/{_uniqueId}/lwt/", //TODO: should this Last Will and Testiment topic be configurable?!
                 "MQTT connection was disconnected unexpectedly!",
                 true, //TODO: this "should" handle persistant connections, and should be configurable?!
                 60
@@ -148,7 +148,7 @@ namespace nanoFramework.Aws.IoTCore
             {
                 _mqttc.Subscribe(
                     new[] {
-                        //$"devices/{_deviceId}/messages/devicebound/#",
+                        //$"nanoframework/device/{_deviceId}/messages/devicebound/#",
                         $"{ ShadowTopicPrefix }{_uniqueId}{ shadowTopicPostFix }/#", // "$iothub/shadow/#",
                         //"$iothub/methods/POST/#"
                     },
@@ -192,7 +192,7 @@ namespace nanoFramework.Aws.IoTCore
             if (_mqttc.IsConnected)
             {
                 _mqttc.Unsubscribe(new[] {
-                    //$"devices/{_deviceId}/messages/devicebound/#",
+                    //$"nanoframework/device/{_deviceId}/messages/devicebound/#",
                     $"{ ShadowTopicPrefix }{_uniqueId}{ shadowTopicPostFix }/#", // "$iothub/shadow/#",
                     //"$iothub/methods/POST/#"
                     });
