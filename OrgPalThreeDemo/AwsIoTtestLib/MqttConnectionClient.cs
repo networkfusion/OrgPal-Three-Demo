@@ -23,8 +23,8 @@ namespace nanoFramework.Aws.IoTCore
     /// </summary>
     public class MqttConnectionClient : IDisposable
     {
-        const string ShadowTopicPrefix = "$aws/things/";
-        const string shadowTopicPostFix = "/shadow";
+
+        private readonly string _shadowTopic;
 
         //const string ShadowReportedPropertiesTopic = "$iothub/shadow/PATCH/properties/reported/";
         //const string ShadowDesiredPropertiesTopic = "$iothub/shadow/GET/";
@@ -45,7 +45,8 @@ namespace nanoFramework.Aws.IoTCore
         private Timer _timerTokenRenew;
 
         private readonly string _telemetryTopic;
-        //private readonly string _deviceMessageTopic;
+        private readonly string _lwtTopic;
+        private readonly string _deviceMessageTopic;
 
         private Shadow _shadow;
         private bool _shadowReceived;
@@ -81,10 +82,12 @@ namespace nanoFramework.Aws.IoTCore
             //_privateKey = Convert.ToBase64String(clientCert.PrivateKey);
             _iotCoreUri = iotCoreUri;
             _uniqueId = uniqueId;
-            _telemetryTopic = $"nanoframework/device/{_uniqueId}/messages/events/"; //TODO: we should make this configurable!
+            _shadowTopic = $"$aws/things/{_uniqueId}/shadow";
+            _telemetryTopic = $"nanoframework/device/{_uniqueId}/messages/events"; //TODO: we should make this configurable!
+            _lwtTopic = $"nanoframework/device/{_uniqueId}/lwt"; //TODO: should this Last Will and Testiment topic be configurable?!
             _ioTCoreStatus.Status = Status.Disconnected;
             _ioTCoreStatus.Message = string.Empty;
-            //_deviceMessageTopic = $"nanoframework/device/{_deviceId}/messages/devicebound/"; //TODO: should we make this configurable?! e.g. I need "{_uniqueId}/sys/"??? (or do I (since CSL doing its own thing here!)!!)
+            _deviceMessageTopic = $"nanoframework/device/{_uniqueId}/messages/devicebound"; //TODO: should we make this configurable?! e.g. I need "{_uniqueId}/sys/"??? (or do I (since CSL doing its own thing here!)!!)
             QosLevel = qosLevel;
             _awsRootCACert = awsRootCert; //TODO: Should override the default one in resources?!
         }
@@ -113,7 +116,7 @@ namespace nanoFramework.Aws.IoTCore
         /// Open the connection with AWS IoT Core. This will connect AWS IoT Core (via MQTT) to the device.
         /// </summary>
         /// <returns>True for a successful connection</returns>
-        public bool Open()
+        public bool Open() //TODO: perhaps the override topics should be parameters here?!
         {
             // Creates an MQTT Client with default TLS port 8883 using TLS 1.2 protocol
             _mqttc = new M2Mqtt.MqttClient(
@@ -138,8 +141,8 @@ namespace nanoFramework.Aws.IoTCore
                 "", //TODO: should this be null?
                 false, //TODO: what does "willretain" actually mean!
                 MqttQoSLevel.ExactlyOnce, //TODO: guessing that this is the "default" QOS level?!
-                false, $"nanoframework/device/{_uniqueId}/lwt/", //TODO: should this Last Will and Testiment topic be configurable?!
-                "MQTT connection was disconnected unexpectedly!",
+                false, _lwtTopic,
+                "MQTT connection was unexpectedly disconnected!",
                 true, //TODO: this "should" handle persistant connections, and should be configurable?!
                 60
                 );
@@ -148,12 +151,12 @@ namespace nanoFramework.Aws.IoTCore
             {
                 _mqttc.Subscribe(
                     new[] {
-                        //$"nanoframework/device/{_deviceId}/messages/devicebound/#",
-                        $"{ ShadowTopicPrefix }{_uniqueId}{ shadowTopicPostFix }/#", // "$iothub/shadow/#",
+                        $"{_deviceMessageTopic}/#",
+                        $"{ _shadowTopic }/#",
                         //"$iothub/methods/POST/#"
                     },
                     new[] {
-                        //MqttQoSLevel.AtLeastOnce,
+                        MqttQoSLevel.AtLeastOnce,
                         MqttQoSLevel.AtLeastOnce,
                         //MqttQoSLevel.AtLeastOnce
                     }
@@ -192,8 +195,8 @@ namespace nanoFramework.Aws.IoTCore
             if (_mqttc.IsConnected)
             {
                 _mqttc.Unsubscribe(new[] {
-                    //$"nanoframework/device/{_deviceId}/messages/devicebound/#",
-                    $"{ ShadowTopicPrefix }{_uniqueId}{ shadowTopicPostFix }/#", // "$iothub/shadow/#",
+                    $"{_deviceMessageTopic}/#",
+                    $"{ _shadowTopic }/#", // "$iothub/shadow/#",
                     //"$iothub/methods/POST/#"
                     });
                 _mqttc.Disconnect();
@@ -216,10 +219,10 @@ namespace nanoFramework.Aws.IoTCore
         {
             _shadowReceived = false;
 
-            var topic = $"{ShadowTopicPrefix}{_uniqueId}{shadowTopicPostFix}/get";
+            var topic = $"{_shadowTopic}/get";
             if (namedShadow != string.Empty)
             {
-                topic = $"{ShadowTopicPrefix}{_uniqueId}{shadowTopicPostFix}/name/{namedShadow}/get";
+                topic = $"{_shadowTopic}/name/{namedShadow}/get";
             }
 
             _mqttc.Publish(topic, Encoding.UTF8.GetBytes(""), MqttQoSLevel.AtLeastOnce, false);
@@ -239,10 +242,10 @@ namespace nanoFramework.Aws.IoTCore
 
         //public bool DeleteShadow(CancellationToken cancellationToken = default, string namedShadow = "")
         //{
-        //    var topic = $"{ShadowTopicPrefix}{_deviceId}{shadowTopicPostFix}/delete";
+        //    var topic = $"{_shadowTopic}/delete";
         //    if (namedShadow != string.Empty)
         //    {
-        //        topic = $"{ShadowTopicPrefix}{_deviceId}{shadowTopicPostFix}/name/{namedShadow}/update";
+        //        topic = $"{_shadowTopic}/name/{namedShadow}/update";
         //    }
         //    //AwsMqtt.Client.Subscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" }, new MqttQoSLevel[] { MqttQoSLevel.AtMostOnce, MqttQoSLevel.AtMostOnce });
         //    _mqttc.Publish(topic, Encoding.UTF8.GetBytes(""), MqttQoSLevel.AtLeastOnce, false);
@@ -265,10 +268,10 @@ namespace nanoFramework.Aws.IoTCore
         /// <returns>True for successful message delivery.</returns>
         public bool UpdateReportedState(ShadowCollection reported, CancellationToken cancellationToken = default, string namedShadow = "")
         {
-            var topic = $"{ShadowTopicPrefix}{_uniqueId}{shadowTopicPostFix}/update";
+            var topic = $"{_shadowTopic}/update";
             if (namedShadow != string.Empty)
             {
-                topic = $"{ShadowTopicPrefix}{_uniqueId}{shadowTopicPostFix}/name/{namedShadow}/update";
+                topic = $"{_shadowTopic}/name/{namedShadow}/update";
             }
 
             string shadow = reported.ToJson();
@@ -345,13 +348,13 @@ namespace nanoFramework.Aws.IoTCore
             { //TODO: need to revisit this https://docs.aws.amazon.com/iot/latest/developerguide/device-shadow-mqtt.html#update-documents-pub-sub-topic to understand the full implementation!
                 string message = Encoding.UTF8.GetString(e.Message, 0, e.Message.Length);
 
-                if (e.Topic.StartsWith($"{ShadowTopicPrefix}{_uniqueId}{shadowTopicPostFix}/update/accepted"))  //($"$iothub/shadow/res/204")) //TODO: what about named shadows!
+                if (e.Topic.StartsWith($"{_shadowTopic}/update/accepted"))  //($"$iothub/shadow/res/204")) //TODO: what about named shadows!
                 {
                     _ioTCoreStatus.Status = Status.ShadowUpdateReceived;
                     _ioTCoreStatus.Message = string.Empty;
                     StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
                 }
-                else if (e.Topic.StartsWith($"{ShadowTopicPrefix}{_uniqueId}{shadowTopicPostFix}/update/")) //("$iothub/shadow/"))
+                else if (e.Topic.StartsWith($"{_shadowTopic}/update/")) //("$iothub/shadow/"))
                 {
                     if (e.Topic.IndexOf("rejected/") > 0) //if (e.Topic.IndexOf("res/400/") > 0 || e.Topic.IndexOf("res/404/") > 0 || e.Topic.IndexOf("res/500/") > 0)
                     {
