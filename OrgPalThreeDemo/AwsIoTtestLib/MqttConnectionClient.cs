@@ -1,7 +1,7 @@
 ﻿// Copyright (c) .Net Foundation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using nanoFramework.Aws.IoTCore.Shared;
+using nanoFramework.Aws.IoTCore.Shadows;
 using nanoFramework.M2Mqtt;
 using nanoFramework.M2Mqtt.Messages;
 using System;

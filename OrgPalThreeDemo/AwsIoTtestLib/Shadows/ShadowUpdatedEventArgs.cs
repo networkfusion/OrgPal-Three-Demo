@@ -4,7 +4,7 @@
 using nanoFramework.Aws.IoTCore;
 using System;
 
-namespace nanoFramework.Aws.IoTCore.Shared
+namespace nanoFramework.Aws.IoTCore.Shadows
 {
     /// <summary>
     /// Delegate for Shadow updated.
