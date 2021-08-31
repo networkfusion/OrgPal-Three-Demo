@@ -167,6 +167,10 @@
       <SpecificVersion>True</SpecificVersion>
     </Reference>
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="AwsIoTtestLib\Tests\GetAcceptedShadowJsonExampleMessage.txt" />
+    <Content Include="AwsIoTtestLib\Tests\UpdateAcceptedShadowExampleMessageJson.txt" />
+  </ItemGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets')" />
   <ProjectExtensions>
     <ProjectCapabilities>

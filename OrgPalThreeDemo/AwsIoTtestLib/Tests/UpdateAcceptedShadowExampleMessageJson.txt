@@ -1,0 +1,32 @@
+﻿{
+  "state" : {
+    "reported" : {
+      "cpu" : "STM32F7",
+      "operatingSystem" : "nanoFramework",
+      "bootTimestamp" : "2021-08-31T16:11:39.813Z",
+      "serialNumber" : "310042001751373137393238",
+      "platform" : "ORGPAL_PALTHREE"
+    }
+  },
+  "metadata" : {
+    "reported" : {
+      "cpu" : {
+        "timestamp" : 1630426335
+      },
+      "operatingSystem" : {
+        "timestamp" : 1630426335
+      },
+      "bootTimestamp" : {
+        "timestamp" : 1630426335
+      },
+      "serialNumber" : {
+        "timestamp" : 1630426335
+      },
+      "platform" : {
+        "timestamp" : 1630426335
+      }
+    }
+  },
+  "version" : 1538,
+  "timestamp" : 1630426335
+}

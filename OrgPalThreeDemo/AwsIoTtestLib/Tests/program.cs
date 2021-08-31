@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using nanoFramework.Aws.IoTCore;
 
 namespace nanoFramework.Aws.Tests
@@ -27,7 +29,16 @@ namespace nanoFramework.Aws.Tests
 
         void Receive_a_client_message_from_the_broker() { }
 
-        void Get_the_unnamed_shadow() { }
+        void Get_the_unnamed_shadow()
+        {
+            var shadow = _awsMqttClient.GetShadow(new CancellationTokenSource(15000).Token);
+            if (shadow != null)
+            {
+                Debug.WriteLine($"Get shadow result:");
+                Debug.WriteLine($"Desired:  {shadow.State.Desired.ToJson()}");
+                Debug.WriteLine($"Reported:  {shadow.State.Reported.ToJson()}");
+            }
+        }
 
         void Update_the_unnamed_shadow() { }
 
