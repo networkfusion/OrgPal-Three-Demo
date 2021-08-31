@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Text;
-using nanoFramework.M2Mqtt;
-using nanoFramework.M2Mqtt.Messages;
+using nanoFramework.Aws.IoTCore;
 
 namespace AwsIoT
 {
@@ -15,7 +14,7 @@ namespace AwsIoT
         public static string ClientRsaSha256Crt = string.Empty; //Device Certificate copied from AWS
         public static string ClientRsaKey = string.Empty; //Device private key copied from AWS
         public static byte[] RootCA; //AWS root CA
-        public static MqttClient Client;
-        public static AwsShadow Shadow = new AwsShadow();
+        public static MqttConnectionClient Client;
+        //public static AwsShadow Shadow = new AwsShadow();
     }
 }

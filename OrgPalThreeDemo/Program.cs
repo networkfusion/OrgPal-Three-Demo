@@ -5,15 +5,14 @@ using PalThree;
 using System;
 using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading;
-using nanoFramework.M2Mqtt;
 using nanoFramework.M2Mqtt.Messages;
 using System.Device.Gpio;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using AwsIoT;
-//using mqttTrace = nanoFramework.M2Mqtt.Utility.Trace; //superseeded in lib by just using Debug.WriteLine (when in debug - rather than release mode).
+using nanoFramework.Aws.IoTCore;
+//using nanoFramework.Aws.IoTCore.Shared;
 
 namespace OrgPalThreeDemo
 {
@@ -35,10 +34,10 @@ namespace OrgPalThreeDemo
         public const int shadowSendInterval = 600000; //10 minutes...  TODO: increase shadow interval to 3600000 for 1 hour when happy!
 
 
-        static void WriteTrace(string format, params object[] args)
-        {
-            Debug.WriteLine(string.Format(format, args));
-        }
+        //static void WriteTrace(string format, params object[] args)
+        //{
+        //    Debug.WriteLine(string.Format(format, args));
+        //}
 
         public static void Main()
         {
@@ -90,7 +89,7 @@ namespace OrgPalThreeDemo
             ReadStorage();
 
             Debug.WriteLine($"Time before network available: {DateTime.UtcNow}");
-            
+
             SetupNetwork();
 
             while (DateTime.UtcNow.Year < 2021)
@@ -101,11 +100,6 @@ namespace OrgPalThreeDemo
 
             Debug.WriteLine($"Start Time: {startTime.ToString("yyyy-MM-dd HH:mm:ss")}");
 
-            // Setup MQTT connection.
-            // set trace level (this is now using Debug.WriteLine instead of trace in the original lib!)
-            //mqttTrace.TraceLevel = nanoFramework.M2Mqtt.Utility.TraceLevel.Verbose | nanoFramework.M2Mqtt.Utility.TraceLevel.Error | nanoFramework.M2Mqtt.Utility.TraceLevel.Frame;
-            // enable trace
-            //mqttTrace.TraceListener = WriteTrace;
 
             var connected = false;
             int connectionAttempt = 0;
@@ -153,10 +147,10 @@ namespace OrgPalThreeDemo
 
         private static void SetupNetwork()
         {
-            CancellationTokenSource cs = new(60000); //60 seconds.
+            CancellationTokenSource cs = new(5000); //5 seconds.
             // We are using TLS and it requires valid date & time (so we should set the option to true, but SNTP is run in the background, and setting it manually causes issues for the moment!!!)
             Debug.WriteLine("Waiting for network up and IP address...");
-            var success = NetworkHelper.WaitForValidIPAndDate(false, System.Net.NetworkInformation.NetworkInterfaceType.Ethernet, cs.Token);
+            var success = NetworkHelper.WaitForValidIPAndDate(true, System.Net.NetworkInformation.NetworkInterfaceType.Ethernet, cs.Token);
 
             if (!success)
             {
@@ -187,26 +181,26 @@ namespace OrgPalThreeDemo
                 X509Certificate2 clientCert = new X509Certificate2(AwsMqtt.ClientRsaSha256Crt, AwsMqtt.ClientRsaKey, ""); //make sure to add a correct pfx certificate
 
 
-                AwsMqtt.Client = new MqttClient(AwsMqtt.Host, AwsMqtt.Port, true, caCert, clientCert, MqttSslProtocols.TLSv1_2);
+                AwsMqtt.Client = new MqttConnectionClient(AwsMqtt.Host, AwsMqtt.ThingName, clientCert, MqttQoSLevel.AtLeastOnce, caCert);
 
-                AwsMqtt.Client.Connect(AwsMqtt.ThingName);
-                //TODO: this does not always fail gracefully (although possibily not here) and likely caused by SNTP:
-                //  ++++Exception System.ObjectDisposedException - 0x00000000(4)++++
-                //  ++++ Message:
-                //  ++++System.Net.Security.SslStream::Read[IP: 0010]++++
-                //  ++++ uPLibrary.Networking.M2Mqtt.MqttNetworkChannel::Receive[IP: 001a]++++
-                //  ++++ uPLibrary.Networking.M2Mqtt.MqttClient::ReceiveThread[IP: 0013]++++
-                //  Exception occurred: System.ObjectDisposedException: Exception was thrown: System.ObjectDisposedException
+                AwsMqtt.Client.Open();
 
                 // register to message received 
-                AwsMqtt.Client.MqttMsgPublishReceived += Client_MqttMsgPublishReceived;
+                //AwsMqtt.Client.MqttMsgPublishReceived += Client_MqttMsgPublishReceived;
 
                 // subscribe to the topic with QoS 1
-                AwsMqtt.Client.Subscribe(new string[] { $"{AwsMqtt.ThingName}/sys" }, new MqttQoSLevel[] { MqttQoSLevel.AtMostOnce });
+                //AwsMqtt.Client.Subscribe(new string[] { $"{AwsMqtt.ThingName}/sys" }, new MqttQoSLevel[] { MqttQoSLevel.AtMostOnce });
                 Thread telemetryThread = new Thread(new ThreadStart(TelemetryLoop));
                 telemetryThread.Start();
 
 
+                var shadow = AwsMqtt.Client.GetShadow(new CancellationTokenSource(15000).Token); 
+                if (shadow != null)
+                {
+                    Debug.WriteLine($"Get shadow result:");
+                    Debug.WriteLine($"Desired:  {shadow.State.Desired.ToJson()}");
+                    Debug.WriteLine($"Reported:  {shadow.State.Reported.ToJson()}");
+                }
 
                 Thread shadowThread = new Thread(new ThreadStart(ShadowLoop)); //TODO: currently throws exception on subscribe!
                 shadowThread.Start();
@@ -232,7 +226,7 @@ namespace OrgPalThreeDemo
             {
                 try
                 {
-                    var shadowTelemetry = new MessageSchemas.ShadowMessage
+                    var shadowReportedState = new MessageSchemas.ShadowMessage
                     {
                         operatingSystem = "nanoFramework",
                         platform = SystemInfo.TargetName,
@@ -241,7 +235,12 @@ namespace OrgPalThreeDemo
                         bootTimestamp = startTime
                     };
 
-                    AwsMqtt.Shadow.UpdateThingShadow(JsonConvert.SerializeObject(shadowTelemetry));
+                    //TODO: this should be worked out as part of the shadow collection?!
+                    const string shadowUpdateHeader = "{\"state\":{\"reported\":";
+                    const string shadowUpdateFooter = "}}";
+                    string shadowJson = $"{shadowUpdateHeader}{JsonConvert.SerializeObject(shadowReportedState)}{shadowUpdateFooter}";
+                    AwsMqtt.Client.UpdateReportedState(//new ShadowCollection(
+                        shadowJson); //);
 
                 }
                 catch (Exception ex)
@@ -275,7 +274,7 @@ namespace OrgPalThreeDemo
                     };
 
                     string sampleData = JsonConvert.SerializeObject(statusTelemetry);
-                    AwsMqtt.Client.Publish($"{AwsMqtt.ThingName}/data", Encoding.UTF8.GetBytes(sampleData), MqttQoSLevel.AtMostOnce, false);
+                    AwsMqtt.Client.SendMessage(sampleData); // ($"{AwsMqtt.ThingName}/data", Encoding.UTF8.GetBytes(sampleData), MqttQoSLevel.AtMostOnce, false);
 
                     Debug.WriteLine("Message sent: " + sampleData);
                 }
@@ -289,21 +288,21 @@ namespace OrgPalThreeDemo
             }
         }
 
-        static void Client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
-        {
-            try
-            {
-                string Message = new string(Encoding.UTF8.GetChars(e.Message));
-                Debug.WriteLine("Message received: " + Message);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("Message received ex: " + ex);
-                SetupMqtt();
-            }
+        //static void Client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
+        //{
+        //    try
+        //    {
+        //        string Message = new string(Encoding.UTF8.GetChars(e.Message));
+        //        Debug.WriteLine("Message received: " + Message);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Debug.WriteLine("Message received ex: " + ex);
+        //        SetupMqtt();
+        //    }
 
-            //should we handle the shadow received messages here?!
-        }
+        //    //should we handle the shadow received messages here?!
+        //}
 
         private static void ReadStorage()
         {

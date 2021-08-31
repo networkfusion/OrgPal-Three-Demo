@@ -55,7 +55,7 @@ namespace nanoFramework.Aws.IoTCore
         /// <summary>
         /// Device shadow updated event.
         /// </summary>
-        public event ShadowUpdated ShadowUpated;
+        public event ShadowUpdated ShadowUpdated;
 
         /// <summary>
         /// Status change event.
@@ -266,7 +266,7 @@ namespace nanoFramework.Aws.IoTCore
         /// <param name="reported">The reported properties.</param>
         /// <param name="cancellationToken">A cancellation token. If you use the default one, the confirmation of delivery will not be awaited.</param>
         /// <returns>True for successful message delivery.</returns>
-        public bool UpdateReportedState(ShadowCollection reported, CancellationToken cancellationToken = default, string namedShadow = "")
+        public bool UpdateReportedState(string reported, CancellationToken cancellationToken = default, string namedShadow = "") //was ShadowCollection
         {
             var topic = $"{_shadowTopic}/update";
             if (namedShadow != string.Empty)
@@ -274,7 +274,7 @@ namespace nanoFramework.Aws.IoTCore
                 topic = $"{_shadowTopic}/name/{namedShadow}/update";
             }
 
-            string shadow = reported.ToJson();
+            string shadow = reported; //.ToJson();
             Debug.WriteLine($"update shadow: {shadow}");
             var rid = _mqttc.Publish(topic, Encoding.UTF8.GetBytes(shadow), MqttQoSLevel.AtLeastOnce, false);
             _ioTCoreStatus.Status = Status.ShadowUpdated;
@@ -354,7 +354,7 @@ namespace nanoFramework.Aws.IoTCore
                     _ioTCoreStatus.Message = string.Empty;
                     StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
                 }
-                else if (e.Topic.StartsWith($"{_shadowTopic}/update/")) //("$iothub/shadow/"))
+                else if (e.Topic.StartsWith($"{_shadowTopic}/update/") || e.Topic.StartsWith($"{_shadowTopic}/get/")) //("$iothub/shadow/")) //what about get/rejected?
                 {
                     if (e.Topic.IndexOf("rejected/") > 0) //if (e.Topic.IndexOf("res/400/") > 0 || e.Topic.IndexOf("res/404/") > 0 || e.Topic.IndexOf("res/500/") > 0)
                     {
@@ -364,7 +364,7 @@ namespace nanoFramework.Aws.IoTCore
                     }
                     else if (e.Topic.IndexOf("delta/") > 0) //(e.Topic.StartsWith("$iothub/shadow/PATCH/properties/desired/")) //Or should this be "document"?!
                     {
-                        ShadowUpated?.Invoke(this, new ShadowUpdateEventArgs(new ShadowCollection(message)));
+                        ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(new ShadowCollection(message)));
                         _ioTCoreStatus.Status = Status.ShadowUpdateReceived;
                         _ioTCoreStatus.Message = string.Empty;
                         StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
