@@ -79,28 +79,29 @@ namespace nanoFramework.Aws.IoTCore //TODO: improve for AWS IoT.
         DirectMethodCalled,
 
         //TODO: map the following exceptions?!
-        ///// <exception cref="Amazon.IotData.Model.InternalFailureException">
+        ///// Amazon.IotData.Model.
+        ///// <exception cref="InternalFailureException">
         ///// An unexpected error has occurred.
         ///// </exception>
-        ///// <exception cref="Amazon.IotData.Model.InvalidRequestException">
+        ///// <exception cref="InvalidRequestException">
         ///// The request is not valid.
         ///// </exception>
-        ///// <exception cref="Amazon.IotData.Model.MethodNotAllowedException">
+        ///// <exception cref="MethodNotAllowedException">
         ///// The specified combination of HTTP verb and URI is not supported.
         ///// </exception>
-        ///// <exception cref="Amazon.IotData.Model.ResourceNotFoundException">
+        ///// <exception cref="ResourceNotFoundException">
         ///// The specified resource does not exist.
         ///// </exception>
-        ///// <exception cref="Amazon.IotData.Model.ServiceUnavailableException">
+        ///// <exception cref="ServiceUnavailableException">
         ///// The service is temporarily unavailable.
         ///// </exception>
-        ///// <exception cref="Amazon.IotData.Model.ThrottlingException">
+        ///// <exception cref="ThrottlingException">
         ///// The rate exceeds the limit.
         ///// </exception>
-        ///// <exception cref="Amazon.IotData.Model.UnauthorizedException">
+        ///// <exception cref="UnauthorizedException">
         ///// You are not authorized to perform this operation.
         ///// </exception>
-        ///// <exception cref="Amazon.IotData.Model.UnsupportedDocumentEncodingException">
+        ///// <exception cref="UnsupportedDocumentEncodingException">
         ///// The document encoding is not supported.
         ///// </exception>
     }
