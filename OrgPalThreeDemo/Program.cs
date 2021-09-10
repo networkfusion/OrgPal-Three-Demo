@@ -149,24 +149,27 @@ namespace OrgPalThreeDemo
         {
             CancellationTokenSource cs = new(5000); //5 seconds.
             // We are using TLS and it requires valid date & time (so we should set the option to true, but SNTP is run in the background, and setting it manually causes issues for the moment!!!)
+            // Although setting it to false seems to cause a worse issue. Let us fix this by using a managed class instead.
             Debug.WriteLine("Waiting for network up and IP address...");
             var success = NetworkHelper.WaitForValidIPAndDate(true, System.Net.NetworkInformation.NetworkInterfaceType.Ethernet, cs.Token);
 
             if (!success)
             {
-                Debug.WriteLine($"Can't get a proper IP address and DateTime, error: {NetworkHelper.ConnectionError.Error}.");
+                Debug.WriteLine($"Failed to receive an IP address and/or valid DateTime. Error: {NetworkHelper.ConnectionError.Error}.");
                 if (NetworkHelper.ConnectionError.Exception != null)
                 {
                     Debug.WriteLine($"Exception: {NetworkHelper.ConnectionError.Exception}");
                 }
+                Debug.WriteLine("It is likely a DateTime problem, so we will now try to set it using a managed helper class!");
                 success = Rtc.SetSystemTime(ManagedSNTP.NtpClient.GetNetworkTime());
                 if (success)
                 {
-                    Debug.WriteLine("retrived managed NTP");
+                    Debug.WriteLine("Retrived DateTime using managedSNTP Helper class");
                 }
                 else
                 {
-                    Debug.WriteLine("failed to retrived managed NTP");
+                    Debug.WriteLine("Failed to Retrive DateTime (or IP Address). Retrying...");
+                    SetupNetwork();
                 }
                 Debug.WriteLine($"RTC = {DateTime.UtcNow}");
             }
