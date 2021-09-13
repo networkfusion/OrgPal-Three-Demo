@@ -354,7 +354,7 @@ namespace nanoFramework.Aws.IoTCore
                     _ioTCoreStatus.Message = string.Empty;
                     StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
                 }
-                else if (e.Topic.StartsWith($"{_shadowTopic}/update/") || e.Topic.StartsWith($"{_shadowTopic}/get/")) //("$iothub/shadow/")) //what about get/rejected?
+                else if (e.Topic.StartsWith($"{_shadowTopic}/update/"))
                 {
                     if (e.Topic.IndexOf("rejected/") > 0) //if (e.Topic.IndexOf("res/400/") > 0 || e.Topic.IndexOf("res/404/") > 0 || e.Topic.IndexOf("res/500/") > 0)
                     {
@@ -362,14 +362,14 @@ namespace nanoFramework.Aws.IoTCore
                         _ioTCoreStatus.Message = string.Empty;
                         StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
                     }
-                    else if (e.Topic.IndexOf("delta/") > 0) //(e.Topic.StartsWith("$iothub/shadow/PATCH/properties/desired/")) //Or should this be "document"?!
+                    else if (e.Topic.IndexOf("delta/") > 0) // || e.Topic.StartsWith($"{_shadowTopic}/document/") //(e.Topic.StartsWith("$iothub/shadow/PATCH/properties/desired/")) //Or should this be "document"?!
                     {
                         ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(new ShadowCollection(message)));
                         _ioTCoreStatus.Status = Status.ShadowUpdateReceived;
                         _ioTCoreStatus.Message = string.Empty;
                         StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
                     }
-                    else //TODO: is this handling "documents"
+                    else //TODO: is this handling  || e.Topic.StartsWith($"{_shadowTopic}/get/"
                     {
                         if ((message.Length > 0) && !_shadowReceived)
                         {
