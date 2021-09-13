@@ -11,7 +11,7 @@ namespace nanoFramework.Aws.IoTCore.Shadows
     /// </summary>
     public class ShadowCollection : IEnumerable
     {
-        internal const string VersionName = "version";
+        //internal const string VersionName = "version";
         private readonly Hashtable _shadow;
 
         /// <summary>
@@ -38,24 +38,24 @@ namespace nanoFramework.Aws.IoTCore.Shadows
             _shadow = shadow ?? new();
         }
 
-        /// <summary>
-        /// Gets the version of the <see cref="ShadowCollection"/>.
-        /// </summary>
-        public long Version
-        {
-            get
-            {
-                try
-                {
-                    int ver = (int)_shadow[VersionName];
-                    return ver;
-                }
-                catch
-                {
-                    return default(long);
-                }
-            }
-        }
+        ///// <summary>
+        ///// Gets the version of the <see cref="ShadowCollection"/>. //TODO: AWS does not use this! remove?
+        ///// </summary>
+        //public long Version
+        //{
+        //    get
+        //    {
+        //        try
+        //        {
+        //            int ver = (int)_shadow[VersionName];
+        //            return ver;
+        //        }
+        //        catch
+        //        {
+        //            return default(long);
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// Gets the count of properties in the Collection.
@@ -65,10 +65,10 @@ namespace nanoFramework.Aws.IoTCore.Shadows
             get
             {
                 int count = _shadow.Count;
-                if ((count > 0) && Contains(VersionName))
-                {
-                    count--;
-                }
+                //if ((count > 0) && Contains(VersionName))
+                //{
+                //    count--;
+                //}
 
                 return count;
             }

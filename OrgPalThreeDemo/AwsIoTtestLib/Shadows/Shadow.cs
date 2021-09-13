@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections;
-using System.Diagnostics;
 using nanoFramework.Json;
 
 namespace nanoFramework.Aws.IoTCore.Shadows
@@ -39,8 +38,8 @@ namespace nanoFramework.Aws.IoTCore.Shadows
         public Shadow(string deviceId, string jsonShadow)
         {
             DeviceId = deviceId;
-            Hashtable props = (Hashtable)JsonConvert.DeserializeObject(jsonShadow, typeof(Hashtable));
-            State = new ShadowState((Hashtable)props["desired"], (Hashtable)props["reported"]);
+            Hashtable shadowState = (Hashtable)JsonConvert.DeserializeObject(jsonShadow, typeof(Hashtable));
+            State = new ShadowState((Hashtable)shadowState["desired"], (Hashtable)shadowState["reported"]);
         }
 
         /// <summary>
@@ -74,6 +73,11 @@ namespace nanoFramework.Aws.IoTCore.Shadows
         public string ClientToken { get; set; }
 
         /// <summary>
+        /// Shadow's Timestamp
+        /// </summary>
+        public string TimeStamp { get; set; } //TODO: should be datetime!
+
+        /// <summary>
         /// Gets the Shadow as a JSON string.
         /// </summary>
         /// <returns>JSON string</returns>
@@ -95,6 +99,11 @@ namespace nanoFramework.Aws.IoTCore.Shadows
             if (Version != 0)
             {
                 ser.Add("version", Version);
+            }
+
+            if (!string.IsNullOrEmpty(TimeStamp))
+            {
+                ser.Add("timestamp", TimeStamp);
             }
 
             return JsonConvert.SerializeObject(ser);
