@@ -18,20 +18,8 @@
   </PropertyGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
-    <Compile Include="AwsIoTtestLib\Shadows\Shadow.cs" />
-    <Compile Include="AwsIoTtestLib\Shadows\ShadowState.cs" />
-    <Compile Include="AwsIoTtestLib\Tests\program.cs" />
-    <Compile Include="AwsIoTtestLib\WebsocketConnectionClient.cs" />
     <Compile Include="AwsIoT\AwsMqtt.cs" />
     <Compile Include="AwsIoT\AwsShadow.cs" />
-    <Compile Include="AwsIoTtestLib\ConfirmationStatus.cs" />
-    <Compile Include="AwsIoTtestLib\MqttConnectionClient.cs" />
-    <Compile Include="AwsIoTtestLib\IoTCoreStatus.cs" />
-    <Compile Include="AwsIoTtestLib\MethodCallback.cs" />
-    <Compile Include="AwsIoTtestLib\Shadows\ShadowCollection.cs" />
-    <Compile Include="AwsIoTtestLib\Shadows\ShadowUpdatedEventArgs.cs" />
-    <Compile Include="AwsIoTtestLib\Status.cs" />
-    <Compile Include="AwsIoTtestLib\StatusUpdatedEventArgs.cs" />
     <Compile Include="Drivers\LCD.cs" />
     <Compile Include="Drivers\MCP342x.cs" />
     <Compile Include="Drivers\OnboardDevices.cs" />
@@ -61,7 +49,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="AwsIoTtestLib\README.md" />
     <None Include="packages.config" />
     <None Include="Resources\AwsCAroot.der" />
   </ItemGroup>
@@ -168,8 +155,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="AwsIoTtestLib\Tests\GetAcceptedShadowJsonExampleMessage.txt" />
-    <Content Include="AwsIoTtestLib\Tests\UpdateAcceptedShadowExampleMessageJson.txt" />
+    <ProjectReference Include="..\nanoFramework.AwsIoT\nanoFramework.AwsIoT.nfproj" />
   </ItemGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets')" />
   <ProjectExtensions>
