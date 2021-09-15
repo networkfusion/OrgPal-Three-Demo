@@ -6,7 +6,7 @@ using System;
 using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
-using nanoFramework.M2Mqtt.Messages;
+using nanoFramework.M2Mqtt.Messages; // Only required due to QoS level. Perhaps this should be inherited through the Aws lib?!
 using System.Device.Gpio;
 using Windows.Storage;
 using Windows.Storage.Streams;

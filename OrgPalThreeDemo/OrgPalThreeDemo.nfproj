@@ -73,8 +73,8 @@
       <Private>True</Private>
       <SpecificVersion>True</SpecificVersion>
     </Reference>
-    <Reference Include="nanoFramework.Networking.Sntp, Version=1.5.3.3, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\packages\nanoFramework.Networking.Sntp.1.5.3\lib\nanoFramework.Networking.Sntp.dll</HintPath>
+    <Reference Include="nanoFramework.Networking.Sntp, Version=1.5.7.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
+      <HintPath>..\packages\nanoFramework.Networking.Sntp.1.5.7-preview.2\lib\nanoFramework.Networking.Sntp.dll</HintPath>
       <Private>True</Private>
       <SpecificVersion>True</SpecificVersion>
     </Reference>
