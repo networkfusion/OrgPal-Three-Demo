@@ -37,22 +37,35 @@ namespace nanoFramework.Aws.IoTCore.Shadows
         /// </summary>
         /// <param name="deviceId">Device Id.</param>
         /// <param name="jsonShadow">The json shadow.</param>
-        public Shadow(string deviceId, string jsonShadow)
+        public Shadow(string deviceId, string jsonShadow) //We are parsing the json as a string (rather than a serialized class, so we have to decode it!)
         {
             DeviceId = deviceId;
             Debug.WriteLine($"shadow was: {jsonShadow}");
             try
             {
-                Hashtable shadowState = (Hashtable)JsonConvert.DeserializeObject(jsonShadow, typeof(Hashtable));
-                Debug.WriteLine($"Decoded hashtable");
-                State = new ShadowState((Hashtable)shadowState["desired"], (Hashtable)shadowState["reported"]);
+                // TODO: THE OBVIOUS FACT IS THIS CLASS SHOULD ALREADY BE POPULATED VIA SERIALIZATION!
+                Hashtable shadowContent = (Hashtable)JsonConvert.DeserializeObject(jsonShadow, typeof(Hashtable));
+                Debug.WriteLine($"Decoded shadow as hashtable");
+
+                Version = (long)JsonConvert.DeserializeObject(shadowContent["version"].ToString(), typeof(long));
+                TimeStamp = (string)JsonConvert.DeserializeObject(shadowContent["timestamp"].ToString(), typeof(string));
+                //ClientToken is optional!
+                if (shadowContent["clienttoken"] != null)
+                {
+                    ClientToken = (string)JsonConvert.DeserializeObject(shadowContent["clienttoken"].ToString(), typeof(string));
+                }
+
+                Hashtable shadowState = (Hashtable)JsonConvert.DeserializeObject(shadowContent["state"].ToString(), typeof(Hashtable));
+                Hashtable shadowDesired = (Hashtable)JsonConvert.DeserializeObject(shadowState["desired"].ToString(), typeof(Hashtable));
+                Hashtable shadowReported = (Hashtable)JsonConvert.DeserializeObject(shadowState["reported"].ToString(), typeof(Hashtable));
+                State = new ShadowState(shadowDesired, shadowReported);
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"Failed to decode hashtable");
-                Debug.WriteLine($"Reason: {ex.ToString()}");
+                Debug.WriteLine($"Reason: {ex}");
+                State = null;
             }
-            State = null;
 
         }
 
@@ -97,7 +110,7 @@ namespace nanoFramework.Aws.IoTCore.Shadows
         /// <returns>JSON string</returns>
         public string ToJson()
         {
-            Hashtable ser = new();
+            Hashtable ser = new Hashtable();
             ser.Add("state", State);
 
             //if (!string.IsNullOrEmpty(DeviceId))

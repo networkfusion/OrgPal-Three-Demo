@@ -385,7 +385,7 @@ namespace nanoFramework.Aws.IoTCore
                         }
                         else if (e.Topic.IndexOf("accepted") > 0)
                         {
-                            _shadow = new Shadow(_uniqueId, message);
+                            _shadow = new Shadow(_uniqueId, message); //TODO: Shadow (auto deserialize from JSON (but will not have the unique ID!))
                             _shadowReceived = true;
                             _ioTCoreStatus.Status = Status.ShadowReceived;
                             _ioTCoreStatus.Message = message;
