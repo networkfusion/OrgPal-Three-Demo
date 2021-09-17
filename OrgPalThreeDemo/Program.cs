@@ -197,7 +197,7 @@ namespace OrgPalThreeDemo
                 telemetryThread.Start();
 
 
-                var shadow = AwsMqtt.Client.GetShadow(new CancellationTokenSource(15000).Token); 
+                var shadow = AwsMqtt.Client.GetShadow(new CancellationTokenSource(30000).Token); 
                 if (shadow != null)
                 {
                     Debug.WriteLine($"Get shadow result:");

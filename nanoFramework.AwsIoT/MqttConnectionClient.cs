@@ -153,12 +153,10 @@ namespace nanoFramework.Aws.IoTCore
                     new[] {
                         $"{_deviceMessageTopic}/#",
                         $"{ _shadowTopic }/#",
-                        //"$iothub/methods/POST/#"
                     },
                     new[] {
                         MqttQoSLevel.AtLeastOnce,
                         MqttQoSLevel.AtLeastOnce,
-                        //MqttQoSLevel.AtLeastOnce
                     }
                 );
 
@@ -196,8 +194,7 @@ namespace nanoFramework.Aws.IoTCore
             {
                 _mqttc.Unsubscribe(new[] {
                     $"{_deviceMessageTopic}/#",
-                    $"{ _shadowTopic }/#", // "$iothub/shadow/#",
-                    //"$iothub/methods/POST/#"
+                    $"{ _shadowTopic }/#",
                     });
                 _mqttc.Disconnect();
                 // Make sure all get disconnected, cleared 
@@ -227,7 +224,7 @@ namespace nanoFramework.Aws.IoTCore
 
             _mqttc.Publish(topic, Encoding.UTF8.GetBytes(""), MqttQoSLevel.AtLeastOnce, false);
 
-            while (!_shadowReceived && !cancellationToken.IsCancellationRequested)
+            while (!_shadowReceived && !cancellationToken.IsCancellationRequested) // TODO: not firing (or receiving message?!)
             {
                 cancellationToken.WaitHandle.WaitOne(200, true);
             }
@@ -344,139 +341,148 @@ namespace nanoFramework.Aws.IoTCore
 
         private void ClientMqttMsgReceived(object sender, MqttMsgPublishEventArgs e) //TODO: can we also add subscriptions publically?!! 
         {
-            try
-            { //TODO: need to revisit this https://docs.aws.amazon.com/iot/latest/developerguide/device-shadow-mqtt.html#update-documents-pub-sub-topic to understand the full implementation!
-                string message = Encoding.UTF8.GetString(e.Message, 0, e.Message.Length);
+            Debug.WriteLine($"Received message on MqttClient subscribed topic: {e.Topic}");
 
-                if (e.Topic.StartsWith($"{_shadowTopic}/update/accepted"))  //($"$iothub/shadow/res/204")) //TODO: what about named shadows!
+            if (e.Message.Length > 0 && e.Message != null)
                 {
-                    _ioTCoreStatus.Status = Status.ShadowUpdateReceived;
-                    _ioTCoreStatus.Message = string.Empty;
+                try
+                { //TODO: need to revisit this https://docs.aws.amazon.com/iot/latest/developerguide/device-shadow-mqtt.html#update-documents-pub-sub-topic to understand the full implementation!
+                    string message = new string(Encoding.UTF8.GetChars(e.Message)); //Encoding.UTF8.GetString(e.Message, 0, e.Message.Length);
+                    Debug.WriteLine($"Decoded message was: {message}");
+
+                    if (e.Topic.StartsWith($"{_shadowTopic}/update/"))
+                    {
+                        Debug.WriteLine($"Reached {_shadowTopic}/update/");
+                        if (e.Topic.IndexOf("rejected") > 0)
+                        {
+                            _ioTCoreStatus.Status = Status.ShadowUpdateError;
+                            _ioTCoreStatus.Message = message;
+                            StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                        }
+                        else if (e.Topic.IndexOf("delta") > 0)
+                        {
+                            ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(new ShadowCollection(message)));
+                            _ioTCoreStatus.Status = Status.ShadowUpdateReceived;
+                            _ioTCoreStatus.Message = message;
+                            StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                        }
+                        else if (e.Topic.IndexOf("accepted") > 0) //TODO: should this be required, since a delta should take precidence (but what if there is no delta?!...
+                        {
+                            _ioTCoreStatus.Status = Status.ShadowUpdated;
+                            _ioTCoreStatus.Message = message;
+                            StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                        }
+
+                    }
+                    else if (e.Topic.StartsWith($"{_shadowTopic}/get/"))
+                    {
+                        Debug.WriteLine($"Reached {_shadowTopic}/get/");
+                        if (e.Topic.IndexOf("rejected") > 0)
+                        {
+                            _ioTCoreStatus.Status = Status.ShadowUpdateError;
+                            _ioTCoreStatus.Message = message;
+                            StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                        }
+                        else if (e.Topic.IndexOf("accepted") > 0)
+                        {
+                            _shadow = new Shadow(_uniqueId, message);
+                            _shadowReceived = true;
+                            _ioTCoreStatus.Status = Status.ShadowReceived;
+                            _ioTCoreStatus.Message = message;
+                            StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                        }
+
+                    }
+                    //else if (e.Topic.StartsWith(DirectMethodTopic))
+                    //{
+                    //    const string C9PatternMainStyle = "<<Main>$>g__";
+                    //    string method = e.Topic.Substring(DirectMethodTopic.Length);
+                    //    string methodName = method.Substring(0, method.IndexOf('/'));
+                    //    int rid = Convert.ToInt32(method.Substring(method.IndexOf('=') + 1));
+                    //    _ioTCoreStatus.Status = Status.DirectMethodCalled;
+                    //    _ioTCoreStatus.Message = $"{method}/{message}";
+                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                    //    foreach (MethodCallback mt in _methodCallback)
+                    //    {
+                    //        string mtName = mt.Method.Name;
+                    //        if (mtName.Contains(C9PatternMainStyle))
+                    //        {
+                    //            mtName = mtName.Substring(C9PatternMainStyle.Length);
+                    //            mtName = mtName.Substring(0, mtName.IndexOf('|'));
+                    //        }
+                    //        if (mtName == methodName)
+                    //        {
+                    //            try
+                    //            {
+                    //                var res = mt.Invoke(rid, message);
+                    //                _mqttc.Publish($"$iothub/methods/res/200/?$rid={rid}", Encoding.UTF8.GetBytes(res), MqttQoSLevel.AtLeastOnce, false);
+                    //            }
+                    //            catch (Exception ex)
+                    //            {
+                    //                _mqttc.Publish($"$iothub/methods/res/504/?$rid={rid}", Encoding.UTF8.GetBytes($"{{\"Exception:\":\"{ex}\"}}"), MqttQoSLevel.AtLeastOnce, false);
+                    //            }
+                    //        }
+                    //    }
+                    //}
+                    //else if (e.Topic.StartsWith(_deviceMessageTopic))
+                    //{
+                    //    string messageTopic = e.Topic.Substring(_deviceMessageTopic.Length);
+                    //    _ioTCoreStatus.Status = Status.MessageReceived;
+                    //    _ioTCoreStatus.Message = $"{messageTopic}/{message}";
+                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                    //    CloudToDeviceMessage?.Invoke(this, new CloudToDeviceMessageEventArgs(message, messageTopic));
+                    //}
+                    //else if (e.Topic.StartsWith("$iothub/clientproxy/"))
+                    //{
+                    //    _ioTCoreStatus.Status = Status.Disconnected;
+                    //    _ioTCoreStatus.Message = message;
+                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                    //}
+                    //else if (e.Topic.StartsWith("$iothub/logmessage/Info"))
+                    //{
+                    //    _ioTCoreStatus.Status = Status.IoTCoreInformation;
+                    //    _ioTCoreStatus.Message = message;
+                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                    //}
+                    //else if (e.Topic.StartsWith("$iothub/logmessage/HighlightInfo"))
+                    //{
+                    //    _ioTCoreStatus.Status = Status.IoTCoreHighlightInformation;
+                    //    _ioTCoreStatus.Message = message;
+                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                    //}
+                    //else if (e.Topic.StartsWith("$iothub/logmessage/Error"))
+                    //{
+                    //    _ioTCoreStatus.Status = Status.IoTCoreError;
+                    //    _ioTCoreStatus.Message = message;
+                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                    //}
+                    //else if (e.Topic.StartsWith("$iothub/logmessage/Warning"))
+                    //{
+                    //    _ioTCoreStatus.Status = Status.IoTCoreWarning;
+                    //    _ioTCoreStatus.Message = message;
+                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                    //}
+
+                    //else //TODO: Other message type callback or throw?!
+                    //{
+                    //    _ioTCoreStatus.Status = Status.MessageReceived;
+                    //    _ioTCoreStatus.Message = e.Message.ToString();
+                    //    Debug.WriteLine(e.Message.ToString());
+                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                    //}
+
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Exception in event: {ex}");
+                    _ioTCoreStatus.Status = Status.InternalError;
+                    _ioTCoreStatus.Message = ex.ToString();
                     StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
                 }
-                else if (e.Topic.StartsWith($"{_shadowTopic}/update/"))
-                {
-                    if (e.Topic.IndexOf("rejected/") > 0) //if (e.Topic.IndexOf("res/400/") > 0 || e.Topic.IndexOf("res/404/") > 0 || e.Topic.IndexOf("res/500/") > 0)
-                    {
-                        _ioTCoreStatus.Status = Status.ShadowUpdateError;
-                        _ioTCoreStatus.Message = string.Empty;
-                        StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
-                    }
-                    else if (e.Topic.IndexOf("delta/") > 0) // || e.Topic.StartsWith($"{_shadowTopic}/document/") //(e.Topic.StartsWith("$iothub/shadow/PATCH/properties/desired/")) //Or should this be "document"?!
-                    {
-                        ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(new ShadowCollection(message)));
-                        _ioTCoreStatus.Status = Status.ShadowUpdateReceived;
-                        _ioTCoreStatus.Message = string.Empty;
-                        StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
-                    }
-                    else //TODO: is this handling  || e.Topic.StartsWith($"{_shadowTopic}/get/"
-                    {
-                        if ((message.Length > 0) && !_shadowReceived)
-                        {
-                            // skip if already received in this session                         
-                            try
-                            {
-                                _shadow = new Shadow(_uniqueId, message);
-                                _shadowReceived = true;
-                                _ioTCoreStatus.Status = Status.ShadowReceived;
-                                _ioTCoreStatus.Message = message;
-                                StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
-                            }
-                            catch (Exception ex)
-                            {
-                                Debug.WriteLine($"Exception receiving the shadows: {ex}");
-                                _ioTCoreStatus.Status = Status.InternalError;
-                                _ioTCoreStatus.Message = ex.ToString();
-                                StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
-                            }
-                        }
-                    }
-                }
-                //else if (e.Topic.StartsWith(DirectMethodTopic))
-                //{
-                //    const string C9PatternMainStyle = "<<Main>$>g__";
-                //    string method = e.Topic.Substring(DirectMethodTopic.Length);
-                //    string methodName = method.Substring(0, method.IndexOf('/'));
-                //    int rid = Convert.ToInt32(method.Substring(method.IndexOf('=') + 1));
-                //    _ioTCoreStatus.Status = Status.DirectMethodCalled;
-                //    _ioTCoreStatus.Message = $"{method}/{message}";
-                //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
-                //    foreach (MethodCallback mt in _methodCallback)
-                //    {
-                //        string mtName = mt.Method.Name;
-                //        if (mtName.Contains(C9PatternMainStyle))
-                //        {
-                //            mtName = mtName.Substring(C9PatternMainStyle.Length);
-                //            mtName = mtName.Substring(0, mtName.IndexOf('|'));
-                //        }
-                //        if (mtName == methodName)
-                //        {
-                //            try
-                //            {
-                //                var res = mt.Invoke(rid, message);
-                //                _mqttc.Publish($"$iothub/methods/res/200/?$rid={rid}", Encoding.UTF8.GetBytes(res), MqttQoSLevel.AtLeastOnce, false);
-                //            }
-                //            catch (Exception ex)
-                //            {
-                //                _mqttc.Publish($"$iothub/methods/res/504/?$rid={rid}", Encoding.UTF8.GetBytes($"{{\"Exception:\":\"{ex}\"}}"), MqttQoSLevel.AtLeastOnce, false);
-                //            }
-                //        }
-                //    }
-                //}
-                //else if (e.Topic.StartsWith(_deviceMessageTopic))
-                //{
-                //    string messageTopic = e.Topic.Substring(_deviceMessageTopic.Length);
-                //    _ioTCoreStatus.Status = Status.MessageReceived;
-                //    _ioTCoreStatus.Message = $"{messageTopic}/{message}";
-                //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
-                //    CloudToDeviceMessage?.Invoke(this, new CloudToDeviceMessageEventArgs(message, messageTopic));
-                //}
-                //else if (e.Topic.StartsWith("$iothub/clientproxy/"))
-                //{
-                //    _ioTCoreStatus.Status = Status.Disconnected;
-                //    _ioTCoreStatus.Message = message;
-                //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
-                //}
-                //else if (e.Topic.StartsWith("$iothub/logmessage/Info"))
-                //{
-                //    _ioTCoreStatus.Status = Status.IoTCoreInformation;
-                //    _ioTCoreStatus.Message = message;
-                //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
-                //}
-                //else if (e.Topic.StartsWith("$iothub/logmessage/HighlightInfo"))
-                //{
-                //    _ioTCoreStatus.Status = Status.IoTCoreHighlightInformation;
-                //    _ioTCoreStatus.Message = message;
-                //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
-                //}
-                //else if (e.Topic.StartsWith("$iothub/logmessage/Error"))
-                //{
-                //    _ioTCoreStatus.Status = Status.IoTCoreError;
-                //    _ioTCoreStatus.Message = message;
-                //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
-                //}
-                //else if (e.Topic.StartsWith("$iothub/logmessage/Warning"))
-                //{
-                //    _ioTCoreStatus.Status = Status.IoTCoreWarning;
-                //    _ioTCoreStatus.Message = message;
-                //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
-                //}
-
-                //else //TODO: Other message type callback or throw?!
-                //{
-                //    _ioTCoreStatus.Status = Status.MessageReceived;
-                //    _ioTCoreStatus.Message = e.Message.ToString();
-                //    Debug.WriteLine(e.Message.ToString());
-                //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
-                //}
-
             }
-            catch (Exception ex)
+            else
             {
-                Debug.WriteLine($"Exception in event: {ex}");
-                _ioTCoreStatus.Status = Status.InternalError;
-                _ioTCoreStatus.Message = ex.ToString();
-                StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                Debug.WriteLine($"MqttClient subscribed topic {e.Topic}: Message received was empty!");
             }
         }
 
