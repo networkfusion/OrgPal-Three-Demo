@@ -347,7 +347,7 @@ namespace nanoFramework.Aws.IoTCore
                 {
                 try
                 { //TODO: need to revisit this https://docs.aws.amazon.com/iot/latest/developerguide/device-shadow-mqtt.html#update-documents-pub-sub-topic to understand the full implementation!
-                    string message = new string(Encoding.UTF8.GetChars(e.Message)); //Encoding.UTF8.GetString(e.Message, 0, e.Message.Length);
+                    string message = Encoding.UTF8.GetString(e.Message, 0, e.Message.Length);
                     Debug.WriteLine($"Decoded message was: {message}");
 
                     if (e.Topic.StartsWith($"{_shadowTopic}/update/"))

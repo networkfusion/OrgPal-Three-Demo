@@ -188,6 +188,16 @@ namespace OrgPalThreeDemo
 
                 AwsMqtt.Client.Open();
 
+
+                Thread.Sleep(1000); //ensure that we are ready (and connected)???
+                var shadow = AwsMqtt.Client.GetShadow(new CancellationTokenSource(30000).Token);
+                if (shadow != null)
+                {
+                    Debug.WriteLine($"Get shadow result:");
+                    Debug.WriteLine($"Desired:  {shadow.State.Desired.ToJson()}");
+                    Debug.WriteLine($"Reported:  {shadow.State.Reported.ToJson()}");
+                }
+
                 // register to message received 
                 //AwsMqtt.Client.MqttMsgPublishReceived += Client_MqttMsgPublishReceived;
 
@@ -196,14 +206,6 @@ namespace OrgPalThreeDemo
                 Thread telemetryThread = new Thread(new ThreadStart(TelemetryLoop));
                 telemetryThread.Start();
 
-
-                var shadow = AwsMqtt.Client.GetShadow(new CancellationTokenSource(30000).Token); 
-                if (shadow != null)
-                {
-                    Debug.WriteLine($"Get shadow result:");
-                    Debug.WriteLine($"Desired:  {shadow.State.Desired.ToJson()}");
-                    Debug.WriteLine($"Reported:  {shadow.State.Reported.ToJson()}");
-                }
 
                 Thread shadowThread = new Thread(new ThreadStart(ShadowLoop)); //TODO: currently throws exception on subscribe!
                 shadowThread.Start();

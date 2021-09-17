@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections;
+using System.Diagnostics;
 using nanoFramework.Json;
 
 namespace nanoFramework.Aws.IoTCore.Shadows
@@ -38,8 +40,20 @@ namespace nanoFramework.Aws.IoTCore.Shadows
         public Shadow(string deviceId, string jsonShadow)
         {
             DeviceId = deviceId;
-            Hashtable shadowState = (Hashtable)JsonConvert.DeserializeObject(jsonShadow, typeof(Hashtable));
-            State = new ShadowState((Hashtable)shadowState["desired"], (Hashtable)shadowState["reported"]);
+            Debug.WriteLine($"shadow was: {jsonShadow}");
+            try
+            {
+                Hashtable shadowState = (Hashtable)JsonConvert.DeserializeObject(jsonShadow, typeof(Hashtable));
+                Debug.WriteLine($"Decoded hashtable");
+                State = new ShadowState((Hashtable)shadowState["desired"], (Hashtable)shadowState["reported"]);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to decode hashtable");
+                Debug.WriteLine($"Reason: {ex.ToString()}");
+            }
+            State = null;
+
         }
 
         /// <summary>
