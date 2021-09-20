@@ -10,35 +10,35 @@ namespace nanoFramework.AwsIoT.Shadows
     /// </summary>
     public class ShadowState
     {
-        ///// <summary>
-        ///// Initializes a new instance of <see cref="ShadowState"/>
-        ///// </summary>
-        //public ShadowState()
-        //{
-        //    Desired = new ShadowCollection();
-        //    Reported = new ShadowCollection();
-        //}
+        /// <summary>
+        /// Initializes a new instance of <see cref="ShadowState"/>
+        /// </summary>
+        public ShadowState()
+        {
+            desired = new Hashtable(); // ShadowCollection();
+            reported = new Hashtable(); // ShadowCollection();
+        }
 
         ///// <summary>
         ///// Initializes a new instance of <see cref="ShadowState"/>
         ///// </summary>
         ///// <param name="desired">Hashtable for the desired properties</param>
         ///// <param name="reported">Hashtable for the reported properties</param>
-        //public ShadowState(Hashtable desired, Hashtable reported)
+        //public ShadowState(Hashtable tmp_desired, Hashtable tmp_reported)
         //{
-        //    Desired = new ShadowCollection(desired);
-        //    Reported = new ShadowCollection(reported);
+        //    desired = new ShadowCollection(tmp_desired);
+        //    reported = new ShadowCollection(tmp_reported);
         //}
 
         ///// <summary>
         ///// Gets and sets the <see cref="Shadow"/> desired properties.
         ///// </summary>
-        //public ShadowCollection Desired { get; set; }
+        //public ShadowCollection desired { get; set; }
 
         ///// <summary>
         ///// Gets and sets the <see cref="Shadow"/> reported properties.
         ///// </summary>
-        //public ShadowCollection Reported { get; set; }
+        //public ShadowCollection reported { get; set; }
 
 #pragma warning disable IDE1006 // Naming Styles, disabled due to being Json specific
 
@@ -46,7 +46,5 @@ namespace nanoFramework.AwsIoT.Shadows
         public Hashtable reported { get; set; }
 
 #pragma warning restore IDE1006 // Naming Styles
-
     }
 }
-

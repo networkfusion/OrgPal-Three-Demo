@@ -15,13 +15,13 @@ namespace nanoFramework.AwsIoT.Shadows
     {
         // https://docs.aws.amazon.com/iot/latest/developerguide/device-shadow-document.html
 
-        ///// <summary>
-        ///// Creates an instance of <see cref="Shadow"/>.
-        ///// </summary>
-        //public Shadow()
-        //{
-        //    State = new ShadowState();
-        //}
+        /// <summary>
+        /// Creates an instance of <see cref="Shadow"/>.
+        /// </summary>
+        public Shadow()
+        {
+            state = new ShadowState();
+        }
 
         ///// <summary>
         ///// Creates an instance of <see cref="Shadow"/>.
@@ -69,14 +69,14 @@ namespace nanoFramework.AwsIoT.Shadows
 
         //}
 
-        ///// <summary>
-        ///// Creates an instance of <see cref="Shadow"/>.
-        ///// </summary>
-        ///// <param name="shadowProperties">The shadow properties.</param>
-        //public Shadow(ShadowState shadowState)
-        //{
-        //    State = shadowState;
-        //}
+        /// <summary>
+        /// Creates an instance of <see cref="Shadow"/>.
+        /// </summary>
+        /// <param name="shadowProperties">The shadow properties.</param>
+        public Shadow(ShadowState shadowState)
+        {
+            state = shadowState;
+        }
 
         ///// <summary>
         ///// Gets and sets the <see cref="Shadow"/> Id.

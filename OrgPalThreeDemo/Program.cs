@@ -193,8 +193,8 @@ namespace OrgPalThreeDemo
                 if (shadow != null)
                 {
                     Debug.WriteLine($"Get shadow result:");
-                    //Debug.WriteLine($"Desired:  {shadow.State.Desired.ToJson()}");
-                    //Debug.WriteLine($"Reported:  {shadow.State.Reported.ToJson()}");
+                    //Debug.WriteLine($"Desired:  {shadow.state.desired.ToJson()}");
+                    //Debug.WriteLine($"Reported:  {shadow.state.reported.ToJson()}");
 
                     Debug.WriteLine("state.desired:");
                     DebugHelper.DumpHashTable(shadow.state.desired, 1);
