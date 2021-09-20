@@ -41,6 +41,7 @@
     <Compile Include="MessageSchemas\ShadowMessage.cs" />
     <Compile Include="MessageSchemas\StatusMessage.cs" />
     <Compile Include="Peripherals\WindMasterPro.cs" />
+    <Compile Include="TempDebugHelpers\DebugHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources.resx">

@@ -3,42 +3,50 @@
 
 using System.Collections;
 
-namespace nanoFramework.Aws.IoTCore.Shadows
+namespace nanoFramework.AwsIoT.Shadows
 {
     /// <summary>
     /// Represents <see cref="Shadow"/> properties
     /// </summary>
     public class ShadowState
     {
-        /// <summary>
-        /// Initializes a new instance of <see cref="ShadowState"/>
-        /// </summary>
-        public ShadowState()
-        {
-            Desired = new ShadowCollection();
-            Reported = new ShadowCollection();
-        }
+        ///// <summary>
+        ///// Initializes a new instance of <see cref="ShadowState"/>
+        ///// </summary>
+        //public ShadowState()
+        //{
+        //    Desired = new ShadowCollection();
+        //    Reported = new ShadowCollection();
+        //}
 
-        /// <summary>
-        /// Initializes a new instance of <see cref="ShadowState"/>
-        /// </summary>
-        /// <param name="desired">Hashtable for the desired properties</param>
-        /// <param name="reported">Hashtable for the reported properties</param>
-        public ShadowState(Hashtable desired, Hashtable reported)
-        {
-            Desired = new ShadowCollection(desired);
-            Reported = new ShadowCollection(reported);
-        }
+        ///// <summary>
+        ///// Initializes a new instance of <see cref="ShadowState"/>
+        ///// </summary>
+        ///// <param name="desired">Hashtable for the desired properties</param>
+        ///// <param name="reported">Hashtable for the reported properties</param>
+        //public ShadowState(Hashtable desired, Hashtable reported)
+        //{
+        //    Desired = new ShadowCollection(desired);
+        //    Reported = new ShadowCollection(reported);
+        //}
 
-        /// <summary>
-        /// Gets and sets the <see cref="Shadow"/> desired properties.
-        /// </summary>
-        public ShadowCollection Desired { get; set; }
+        ///// <summary>
+        ///// Gets and sets the <see cref="Shadow"/> desired properties.
+        ///// </summary>
+        //public ShadowCollection Desired { get; set; }
 
-        /// <summary>
-        /// Gets and sets the <see cref="Shadow"/> reported properties.
-        /// </summary>
-        public ShadowCollection Reported { get; set; }
+        ///// <summary>
+        ///// Gets and sets the <see cref="Shadow"/> reported properties.
+        ///// </summary>
+        //public ShadowCollection Reported { get; set; }
+
+#pragma warning disable IDE1006 // Naming Styles, disabled due to being Json specific
+
+        public Hashtable desired { get; set; }
+        public Hashtable reported { get; set; }
+
+#pragma warning restore IDE1006 // Naming Styles
+
     }
 }
 

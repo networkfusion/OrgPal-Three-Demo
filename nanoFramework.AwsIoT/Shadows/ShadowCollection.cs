@@ -4,7 +4,7 @@
 using nanoFramework.Json;
 using System.Collections;
 
-namespace nanoFramework.Aws.IoTCore.Shadows
+namespace nanoFramework.AwsIoT.Shadows
 {
     /// <summary>
     /// Represents a collection of properties for <see cref="Shadow"/>.

@@ -1,10 +1,9 @@
 ﻿// Copyright (c) .Net Foundation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using nanoFramework.Aws.IoTCore;
 using System;
 
-namespace nanoFramework.Aws.IoTCore.Shadows
+namespace nanoFramework.AwsIoT.Shadows
 {
     /// <summary>
     /// Delegate for Shadow updated.

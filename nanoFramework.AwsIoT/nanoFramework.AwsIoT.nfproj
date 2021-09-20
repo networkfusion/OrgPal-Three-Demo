@@ -25,6 +25,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Shadows\Shadow.cs" />
     <Compile Include="Shadows\ShadowCollection.cs" />
+    <Compile Include="Shadows\ShadowMetadata.cs" />
     <Compile Include="Shadows\ShadowState.cs" />
     <Compile Include="Shadows\ShadowUpdatedEventArgs.cs" />
     <Compile Include="Status.cs" />

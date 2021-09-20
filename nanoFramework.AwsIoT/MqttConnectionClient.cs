@@ -1,7 +1,8 @@
 ﻿// Copyright (c) .Net Foundation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using nanoFramework.Aws.IoTCore.Shadows;
+using nanoFramework.AwsIoT.Shadows;
+using nanoFramework.Json;
 using nanoFramework.M2Mqtt;
 using nanoFramework.M2Mqtt.Messages;
 using System;
@@ -359,13 +360,13 @@ namespace nanoFramework.Aws.IoTCore
                             _ioTCoreStatus.Message = message;
                             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
                         }
-                        else if (e.Topic.IndexOf("delta") > 0)
-                        {
-                            ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(new ShadowCollection(message)));
-                            _ioTCoreStatus.Status = Status.ShadowUpdateReceived;
-                            _ioTCoreStatus.Message = message;
-                            StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
-                        }
+                        //else if (e.Topic.IndexOf("delta") > 0)
+                        //{
+                        //    ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(new ShadowCollection(message)));
+                        //    _ioTCoreStatus.Status = Status.ShadowUpdateReceived;
+                        //    _ioTCoreStatus.Message = message;
+                        //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                        //}
                         else if (e.Topic.IndexOf("accepted") > 0) //TODO: should this be required, since a delta should take precidence (but what if there is no delta?!...
                         {
                             _ioTCoreStatus.Status = Status.ShadowUpdated;
@@ -385,7 +386,15 @@ namespace nanoFramework.Aws.IoTCore
                         }
                         else if (e.Topic.IndexOf("accepted") > 0)
                         {
-                            _shadow = new Shadow(_uniqueId, message); //TODO: Shadow (auto deserialize from JSON (but will not have the unique ID!))
+                            //try
+                            //{
+                            _shadow = (Shadow)JsonConvert.DeserializeObject(message, typeof(Shadow));//new Shadow(_uniqueId, message); //TODO: Shadow (auto deserialize from JSON (but will not have the unique ID!))
+                            //}
+                            //catch (Exception ex)
+                            //{
+
+                            //    Debug.WriteLine($"failed to deserialize shadow! reason: {ex}");
+                            //}
                             _shadowReceived = true;
                             _ioTCoreStatus.Status = Status.ShadowReceived;
                             _ioTCoreStatus.Message = message;

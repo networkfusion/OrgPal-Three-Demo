@@ -1,5 +1,4 @@
 ﻿using nanoFramework.Json;
-using nanoFramework.Networking;
 using nanoFramework.Runtime.Native;
 using PalThree;
 using System;
@@ -12,7 +11,7 @@ using Windows.Storage;
 using Windows.Storage.Streams;
 using AwsIoT;
 using nanoFramework.Aws.IoTCore;
-//using nanoFramework.Aws.IoTCore.Shared;
+using OrgPalThreeDemo.TempDebugHelpers;
 
 namespace OrgPalThreeDemo
 {
@@ -194,8 +193,20 @@ namespace OrgPalThreeDemo
                 if (shadow != null)
                 {
                     Debug.WriteLine($"Get shadow result:");
-                    Debug.WriteLine($"Desired:  {shadow.State.Desired.ToJson()}");
-                    Debug.WriteLine($"Reported:  {shadow.State.Reported.ToJson()}");
+                    //Debug.WriteLine($"Desired:  {shadow.State.Desired.ToJson()}");
+                    //Debug.WriteLine($"Reported:  {shadow.State.Reported.ToJson()}");
+
+                    Debug.WriteLine("state.desired:");
+                    DebugHelper.DumpHashTable(shadow.state.desired, 1);
+                    Debug.WriteLine("state.reported:");
+                    DebugHelper.DumpHashTable(shadow.state.reported, 1);
+                    Debug.WriteLine("metadata.desired:");
+                    DebugHelper.DumpHashTable(shadow.metadata.desired, 1);
+                    Debug.WriteLine("metadata.reported:");
+                    DebugHelper.DumpHashTable(shadow.metadata.reported, 1);
+                    Debug.WriteLine($"timestamp={DateTime.FromUnixTimeSeconds(shadow.timestamp)}");
+                    Debug.WriteLine($"version={shadow.version}");
+                    Debug.WriteLine($"clienttoken={shadow.clienttoken}");
                 }
 
                 // register to message received 
