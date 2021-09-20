@@ -79,7 +79,7 @@ namespace OrgPalThreeDemo
 
             foreach (byte b in nanoFramework.Hardware.Stm32.Utilities.UniqueDeviceId)
             {
-                _serialNumber += b.ToString("X2");
+                _serialNumber += b.ToString("X2"); //Generates a unique ID for the device.
             }
 
             // add event handlers for Removable Device insertion and removal
@@ -93,7 +93,8 @@ namespace OrgPalThreeDemo
 
             while (DateTime.UtcNow.Year < 2021)
             {
-                Thread.Sleep(100); //give time for native SNTP to be retrieved.
+                Thread.Sleep(1000); //give time for native SNTP to be retrieved.
+                Debug.WriteLine("Waiting for time to be set...");
             }
             startTime = DateTime.UtcNow; //set now because the clock might have been wrong before ntp is checked.
 
@@ -207,6 +208,9 @@ namespace OrgPalThreeDemo
                     Debug.WriteLine($"timestamp={DateTime.FromUnixTimeSeconds(shadow.timestamp)}");
                     Debug.WriteLine($"version={shadow.version}");
                     Debug.WriteLine($"clienttoken={shadow.clienttoken}");
+                    ////Debug.WriteLine("");
+                    //Debug.WriteLine($"Get shadow as json:");
+                    //Debug.WriteLine($"...:  {shadow.ToJson()}"); //TODO: this currently throws an exception.
                 }
 
                 // register to message received 
@@ -347,6 +351,7 @@ namespace OrgPalThreeDemo
                 foreach(var file in filesInDevice)
                 {
                     Debug.WriteLine(file.Name);
+                    //TODO: we should really check if certs are in the mcu flash before retreiving them from the filesystem (SD).
                     if (file.FileType == "crt")
                     {
                         //clientRsaSha256Crt = FileIO.ReadText(f); //Currently doesnt work with nf!
@@ -411,7 +416,7 @@ namespace OrgPalThreeDemo
 
                         }
 
-                        //Should load into secure storage (somewhere) and delete file on removable device?
+                        //TODO: if they are on the SD, Should load into (secure) mcu storage and [delete file on removable device]?
                     }
                 }
             }
