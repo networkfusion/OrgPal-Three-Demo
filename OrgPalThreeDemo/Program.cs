@@ -208,9 +208,9 @@ namespace OrgPalThreeDemo
                     Debug.WriteLine($"timestamp={DateTime.FromUnixTimeSeconds(shadow.timestamp)}");
                     Debug.WriteLine($"version={shadow.version}");
                     Debug.WriteLine($"clienttoken={shadow.clienttoken}");
-                    //Debug.WriteLine("");
-                    //Debug.WriteLine($"Get shadow as json (string):");
-                    //Debug.WriteLine($"...:  {shadow.ToJson()}"); //TODO: this currently throws an invalid cast exception.
+                    Debug.WriteLine("");
+                    Debug.WriteLine($"Get shadow as json (string):");
+                    Debug.WriteLine($"...:  {shadow.ToJson()}"); //TODO: this currently throws an invalid cast exception.
                 }
 
                 // register to message received 
@@ -251,8 +251,8 @@ namespace OrgPalThreeDemo
                         operatingSystem = "nanoFramework",
                         platform = SystemInfo.TargetName,
                         cpu = SystemInfo.Platform,
-                        serialNumber = $"SN{_serialNumber }", //TODO: "SN" should not be needed!
-                        bootTimestamp = startTime
+                        serialNumber = "test-device", //"//$"SN{_serialNumber }", //TODO: "SN" should not be needed! and this seems to throw anyway!
+                        bootTimestamp = startTime.ToUnixTimeSeconds()
                     };
 
                     //TODO: this should be worked out as part of the shadow collection?!
