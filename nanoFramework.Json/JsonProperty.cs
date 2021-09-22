@@ -54,11 +54,13 @@ namespace nanoFramework.Json
 
 				return sb.ToString();
 			}
-			//catch (Exception ex)
-			//{
-			//	Debug.WriteLine(ex.ToString());
-			//	return "";
-			//}
+			catch (Exception ex)
+			{
+				Debug.WriteLine("JsonProperty.ToString() Exception:");
+				Debug.WriteLine(ex.ToString());
+
+				return sb.ToString();
+			}
 			finally
 			{
 				ExitSerialization();

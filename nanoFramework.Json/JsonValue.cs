@@ -5,6 +5,7 @@
 //
 
 using System;
+using System.Diagnostics;
 
 namespace nanoFramework.Json
 {
@@ -79,6 +80,13 @@ namespace nanoFramework.Json
 				{
 					return Value.ToString();
 				}
+			}
+			catch (Exception ex)
+			{
+				Debug.WriteLine("JsonValue.ToString() Exception:");
+				Debug.WriteLine(ex.ToString());
+
+				return "";
 			}
 			finally
 			{

@@ -122,12 +122,11 @@ namespace nanoFramework.Json
 			// set up a SerializationContext object and Lock it (via Monitor)
 			EnterSerialization();
 
+			StringBuilder sb = new();
+			sb.Append('[');
+
 			try
 			{
-				StringBuilder sb = new();
-
-				sb.Append('[');
-
 				int prefaceLength = 0;
 				bool first = true;
 				
@@ -154,7 +153,15 @@ namespace nanoFramework.Json
 				}
 
 				sb.Append(']');
+				
+				return sb.ToString();
+			}
+			catch (Exception ex)
+			{
+				Debug.WriteLine("JsonArray.ToString() Exception:");
+				Debug.WriteLine(ex.ToString());
 
+				sb.Append(']');
 				return sb.ToString();
 			}
 			finally

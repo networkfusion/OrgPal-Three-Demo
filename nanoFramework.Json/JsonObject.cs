@@ -260,11 +260,11 @@ namespace nanoFramework.Json
 			// set up a SerializationContext object and Lock it (via Monitor)
 			EnterSerialization();
 
+			StringBuilder sb = new();
+			sb.Append("{");
+
 			try
 			{
-				StringBuilder sb = new();
-
-				sb.Append("{"); 
 
 				bool first = true;
 				
@@ -283,15 +283,17 @@ namespace nanoFramework.Json
 				}
 
 				sb.Append("}");
-
 				return sb.ToString();
 			}
-			//catch (Exception ex)
-			//{
-			//	Debug.WriteLine(ex.ToString());
-			//	return "";
-			//}
-			finally
+            catch (Exception ex)
+            {
+				Debug.WriteLine("JsonObject.ToString() Exception:");
+				Debug.WriteLine(ex.ToString());
+
+				sb.Append("}");
+				return sb.ToString();
+			}
+            finally
 			{
 				ExitSerialization();    // Unlocks the SerializationContext object
 			}
