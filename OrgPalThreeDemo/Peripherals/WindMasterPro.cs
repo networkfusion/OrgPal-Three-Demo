@@ -1,9 +1,9 @@
-﻿using System;
-using System.Text;
+﻿//using System;
+//using System.Text;
 
-namespace OrgPalThreeDemo.Peripherals
-{
-    public class WindMasterPro
-    {
-    }
-}
+//namespace OrgPalThreeDemo.Peripherals
+//{
+//    public class WindMasterPro
+//    {
+//    }
+//}

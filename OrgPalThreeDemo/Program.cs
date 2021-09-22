@@ -306,7 +306,7 @@ namespace OrgPalThreeDemo
                     SetupMqtt();
                 }
 
-                Thread.Sleep(telemetrySendInterval);
+                Thread.Sleep(telemetrySendInterval); //TODO: this should probably be a stopwatch to ensure timing consistancy!
             }
         }
 
