@@ -31,6 +31,7 @@ namespace OrgPalThreeDemo
         private static DateTime startTime = DateTime.UtcNow;
         private static int messagesSent = 0;
         public const int shadowSendInterval = 600000; //10 minutes...  TODO: increase shadow interval to 3600000 for 1 hour when happy!
+        public const int telemetrySendInterval = 60000; //1 minute... TODO: does not take into account delays or execution time!
 
 
         //static void WriteTrace(string format, params object[] args)
@@ -305,7 +306,7 @@ namespace OrgPalThreeDemo
                     SetupMqtt();
                 }
 
-                Thread.Sleep(60000); //1 minute (TODO: this thread takes time and needs to account for it...)
+                Thread.Sleep(telemetrySendInterval);
             }
         }
 

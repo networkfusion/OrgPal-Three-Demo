@@ -5,6 +5,10 @@ using System.Device.I2c;
 
 namespace PalThree
 {
+
+    //!!! TODO: convert to using Iot.Devices
+
+
     /// <summary>
     /// A Class to manage the MicroChip MCP342x, 18-Bit Multi-Channel delta-sigma ADC series with
     /// I²C Interface and On-Board Reference
