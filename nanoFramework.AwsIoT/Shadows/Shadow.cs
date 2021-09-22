@@ -107,7 +107,7 @@ namespace nanoFramework.AwsIoT.Shadows
         /// <summary>
         /// Shadow's Timestamp
         /// </summary>
-        public int timestamp { get; set; } //TODO: should be datetime!
+        public int timestamp { get; set; } //TODO: should return datetime! and should actually be a float!
 
 #pragma warning restore IDE1006 // Naming Styles
 
@@ -115,18 +115,19 @@ namespace nanoFramework.AwsIoT.Shadows
         /// Gets the Shadow as a JSON string.
         /// </summary>
         /// <returns>JSON string</returns>
-        public string ToJson() //TODO: may want to return a partial object, especially when sending a shadow update!
+        /// <remarks>Only returns a partial json string for use with updates.</remarks>
+        public string ToJson() //TODO: may want to return a full object, especially when not sending a shadow update!
         {
             //TODO: need help from ShadowCollection here, through inspiration of DebugHelper!
-            Hashtable serializedShadow = new Hashtable();
-            Hashtable serializedShadowState = new Hashtable();
-            serializedShadowState.Add("reported", state.reported); //TODO: currently this throws an exception!
-            serializedShadow.Add("state", serializedShadowState);
+            //Hashtable serializedShadow = new Hashtable();
+            //Hashtable serializedShadowState = new Hashtable(); //TODO: the Json Lib does not seem to like a hashtable inside a hashtable!
+            //serializedShadowState.Add("reported", state.reported); //TODO: currently this throws an exception!
+            //serializedShadow.Add("state", serializedShadowState);
 
-            if (!string.IsNullOrEmpty(clienttoken)) //not sure about this one!
-            {
-                serializedShadow.Add("clientToken", clienttoken);
-            }
+            //if (!string.IsNullOrEmpty(clienttoken)) //not sure about this one!
+            //{
+            //    serializedShadow.Add("clientToken", clienttoken);
+            //}
 
             //serializedShadow.Add("metadata", metadata);  //probably dont want to include this regardless!
 
@@ -150,7 +151,17 @@ namespace nanoFramework.AwsIoT.Shadows
             //    serializedShadow.Add("timestamp", timestamp);
             //}
 
-            return JsonConvert.SerializeObject(serializedShadow); //TODO: should work but does not!
+            //return JsonConvert.SerializeObject(serializedShadow); //TODO: should work but does not!
+
+            //TODO: The following is a workaround (and hacky at that)!
+            var shadowStringHeader = @"{""state"":""reported""" + JsonConvert.SerializeObject(state.reported);
+            var shadowStringBody = string.Empty;
+            if (!string.IsNullOrEmpty(clienttoken)) //not sure about this one!
+            {
+                shadowStringBody = $",clientToken:{ clienttoken}";
+            }
+            var shadowStringFooter = "}";
+            return shadowStringHeader + shadowStringBody + shadowStringFooter;
         }
     }
 }
