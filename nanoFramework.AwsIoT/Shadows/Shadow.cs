@@ -117,9 +117,16 @@ namespace nanoFramework.AwsIoT.Shadows
         /// <returns>JSON string</returns>
         public string ToJson() //TODO: may want to return a partial object, especially when sending a shadow update!
         {
-            //TODO: need help from ShadowCollection here, through inspitation of DebugHelper!
+            //TODO: need help from ShadowCollection here, through inspiration of DebugHelper!
             Hashtable serializedShadow = new Hashtable();
-            serializedShadow.Add("state", state); //TODO: currently this throws an exception!
+            Hashtable serializedShadowState = new Hashtable();
+            serializedShadowState.Add("reported", state.reported); //TODO: currently this throws an exception!
+            serializedShadow.Add("state", serializedShadowState);
+
+            if (!string.IsNullOrEmpty(clienttoken)) //not sure about this one!
+            {
+                serializedShadow.Add("clientToken", clienttoken);
+            }
 
             //serializedShadow.Add("metadata", metadata);  //probably dont want to include this regardless!
 
@@ -143,7 +150,7 @@ namespace nanoFramework.AwsIoT.Shadows
             //    serializedShadow.Add("timestamp", timestamp);
             //}
 
-            return JsonConvert.SerializeObject(serializedShadow);
+            return JsonConvert.SerializeObject(serializedShadow); //TODO: should work but does not!
         }
     }
 }

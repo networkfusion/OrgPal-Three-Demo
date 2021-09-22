@@ -208,9 +208,9 @@ namespace OrgPalThreeDemo
                     Debug.WriteLine($"timestamp={DateTime.FromUnixTimeSeconds(shadow.timestamp)}");
                     Debug.WriteLine($"version={shadow.version}");
                     Debug.WriteLine($"clienttoken={shadow.clienttoken}");
-                    ////Debug.WriteLine("");
-                    //Debug.WriteLine($"Get shadow as json:");
-                    //Debug.WriteLine($"...:  {shadow.ToJson()}"); //TODO: this currently throws an exception.
+                    //Debug.WriteLine("");
+                    //Debug.WriteLine($"Get shadow as json (string):");
+                    //Debug.WriteLine($"...:  {shadow.ToJson()}"); //TODO: this currently throws an invalid cast exception.
                 }
 
                 // register to message received 
@@ -251,7 +251,7 @@ namespace OrgPalThreeDemo
                         operatingSystem = "nanoFramework",
                         platform = SystemInfo.TargetName,
                         cpu = SystemInfo.Platform,
-                        serialNumber = _serialNumber,
+                        serialNumber = $"SN{_serialNumber }", //TODO: "SN" should not be needed!
                         bootTimestamp = startTime
                     };
 
@@ -259,8 +259,9 @@ namespace OrgPalThreeDemo
                     const string shadowUpdateHeader = "{\"state\":{\"reported\":";
                     const string shadowUpdateFooter = "}}";
                     string shadowJson = $"{shadowUpdateHeader}{JsonConvert.SerializeObject(shadowReportedState)}{shadowUpdateFooter}";
-                    AwsMqtt.Client.UpdateReportedState(//new ShadowCollection(
+                    bool updateResult = AwsMqtt.Client.UpdateReportedState(//new ShadowCollection(
                         shadowJson); //);
+                    Debug.WriteLine($"Updating shadow result was: {updateResult}");
 
                 }
                 catch (Exception ex)
