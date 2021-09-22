@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Threading;
 using System.Device.I2c;
+//using Iot.Device.Mcp3428;
 
 namespace PalThree
 {
