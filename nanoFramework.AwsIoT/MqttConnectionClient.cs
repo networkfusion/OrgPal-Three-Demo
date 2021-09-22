@@ -281,18 +281,18 @@ namespace nanoFramework.Aws.IoTCore
 
             if (cancellationToken.CanBeCanceled)
             {
-                ConfirmationStatus conf = new(rid);
-                _waitForConfirmation.Add(conf);
-                while (!conf.Received && !cancellationToken.IsCancellationRequested)
+                ConfirmationStatus confirmSuccess = new(rid);
+                _waitForConfirmation.Add(confirmSuccess);
+                while (!confirmSuccess.Received && !cancellationToken.IsCancellationRequested)
                 {
                     cancellationToken.WaitHandle.WaitOne(200, true);
                 }
 
-                _waitForConfirmation.Remove(conf);
-                return conf.Received;
+                _waitForConfirmation.Remove(confirmSuccess);
+                return confirmSuccess.Received; //Received == false
             }
 
-            return false;
+                return false; //Received == false
         }
 
         /// <summary>
@@ -360,14 +360,14 @@ namespace nanoFramework.Aws.IoTCore
                             _ioTCoreStatus.Message = message;
                             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
                         }
-                        //else if (e.Topic.IndexOf("delta") > 0)
-                        //{
-                        //    ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(new ShadowCollection(message)));
-                        //    _ioTCoreStatus.Status = Status.ShadowUpdateReceived;
-                        //    _ioTCoreStatus.Message = message;
-                        //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
-                        //}
-                        else if (e.Topic.IndexOf("accepted") > 0) //TODO: should this be required, since a delta should take precidence (but what if there is no delta?!...
+                        else if (e.Topic.IndexOf("delta") > 0)
+                        {
+                            ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(new ShadowCollection(message)));
+                            _ioTCoreStatus.Status = Status.ShadowUpdateReceived;
+                            _ioTCoreStatus.Message = message;
+                            StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                        }
+                        else if (e.Topic.IndexOf("accepted") > 0) //TODO: this should not be required, since a delta should take precidence (but what if there is no delta?!)...
                         {
                             _ioTCoreStatus.Status = Status.ShadowUpdated;
                             _ioTCoreStatus.Message = message;
@@ -386,15 +386,8 @@ namespace nanoFramework.Aws.IoTCore
                         }
                         else if (e.Topic.IndexOf("accepted") > 0)
                         {
-                            //try
-                            //{
-                            _shadow = (Shadow)JsonConvert.DeserializeObject(message, typeof(Shadow));//new Shadow(_uniqueId, message); //TODO: Shadow (auto deserialize from JSON (but will not have the unique ID!))
-                            //}
-                            //catch (Exception ex)
-                            //{
-
-                            //    Debug.WriteLine($"failed to deserialize shadow! reason: {ex}");
-                            //}
+                            _shadow = (Shadow)JsonConvert.DeserializeObject(message, typeof(Shadow));
+                            //_shadow = new Shadow(_uniqueId, message); //TODO: Shadow (auto deserialize from JSON)
                             _shadowReceived = true;
                             _ioTCoreStatus.Status = Status.ShadowReceived;
                             _ioTCoreStatus.Message = message;

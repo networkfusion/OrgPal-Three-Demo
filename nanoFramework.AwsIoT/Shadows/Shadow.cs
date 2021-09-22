@@ -1,9 +1,7 @@
 ﻿// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections;
-using System.Diagnostics;
 using nanoFramework.Json;
 
 namespace nanoFramework.AwsIoT.Shadows
@@ -21,27 +19,31 @@ namespace nanoFramework.AwsIoT.Shadows
         public Shadow()
         {
             state = new ShadowState();
+            metadata = new ShadowMetadata(); //TODO: doubt this is needed, but better not being null!
         }
-
-        ///// <summary>
-        ///// Creates an instance of <see cref="Shadow"/>.
-        ///// </summary>
-        ///// <param name="deviceId">Device Id</param>
-        //public Shadow(string deviceId) : this()
-        //{
-        //    DeviceId = deviceId;
-        //}
 
         /// <summary>
         /// Creates an instance of <see cref="Shadow"/>.
         /// </summary>
-        /// <param name="deviceId">Device Id.</param>
+        /// <param name="clientToken">Client Token.</param>
+        /// <remarks>The client token can be no longer than 64 bytes.</remarks>
+        public Shadow(string clientToken) : this()
+        {
+            clienttoken = clientToken;
+        }
+
+        /// <summary>
+        /// Creates an instance of <see cref="Shadow"/>.
+        /// </summary>
+        /// <param name="clientToken">Client Token.</param>
         /// <param name="jsonShadow">The json shadow.</param>
+        /// <remarks>The client token can be no longer than 64 bytes.</remarks>
         public Shadow(string clientToken, string jsonShadow) //We are parsing the json as a string (rather than a serialized class, so we have to decode it!)
         {
-            clienttoken = clienttoken;
-            Hashtable shadowStateProps = (Hashtable)JsonConvert.DeserializeObject(jsonShadow, typeof(Hashtable));
+            clienttoken = clientToken;
+            Hashtable shadowStateProps = (Hashtable)JsonConvert.DeserializeObject(jsonShadow, typeof(Hashtable)); //surely this needs to be the state property first
             state = new ShadowState((Hashtable)shadowStateProps["desired"], (Hashtable)shadowStateProps["reported"]);
+            metadata = new ShadowMetadata(); //TODO: doubt this is needed, but better not being null!
 
         }
 
@@ -52,12 +54,8 @@ namespace nanoFramework.AwsIoT.Shadows
         public Shadow(ShadowState shadowState)
         {
             state = shadowState;
+            metadata = new ShadowMetadata(); //TODO: doubt this is needed, but better not being null!
         }
-
-        ///// <summary>
-        ///// Gets and sets the <see cref="Shadow"/> Id.
-        ///// </summary>
-        //public string DeviceId { get; set; }
 
 #pragma warning disable IDE1006 // Naming Styles, disabled due to being Json specific
         /// <summary>

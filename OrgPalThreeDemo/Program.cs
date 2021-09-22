@@ -6,7 +6,7 @@ using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using nanoFramework.M2Mqtt.Messages; // Only required due to QoS level. Perhaps this should be inherited through the Aws lib?!
-using System.Device.Gpio;
+//using System.Device.Gpio;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using AwsIoT;
@@ -17,10 +17,10 @@ namespace OrgPalThreeDemo
 {
     public class Program
     {
-        private static GpioController gpioController;
+        //private static GpioController gpioController;
 
         //private static GpioPin _muxFlowControl;
-        private static GpioPin _wakeButton;
+        //private static GpioPin _wakeButton;
         //private static GpioPin _userButton;
         private static Drivers.OnboardDevices palthree;
         private static LCD lcd;
@@ -40,12 +40,12 @@ namespace OrgPalThreeDemo
 
         public static void Main()
         {
-            Debug.WriteLine("OrgPal Three Demo!");
+            Debug.WriteLine("OrgPal Three AWS MQTT Demo!");
 
             palthree = new Drivers.OnboardDevices();
             adcPalSensor = new MCP342x();
 
-            gpioController = new GpioController();
+            //gpioController = new GpioController();
 
 
             //the buttons are multiplexed so that the board can wake up by user, or by the RTC
@@ -59,9 +59,9 @@ namespace OrgPalThreeDemo
             //_userButton.SetPinMode(PinMode.Input);
             //_userButton.ValueChanged += UserButton_ValueChanged;
 
-            _wakeButton = gpioController.OpenPin(PalThreePins.GpioPin.BUTTON_WAKE_PA0);
-            _wakeButton.SetPinMode(PinMode.Input);
-            _wakeButton.ValueChanged += WakeButton_ValueChanged;
+            //_wakeButton = gpioController.OpenPin(PalThreePins.GpioPin.BUTTON_WAKE_PA0);
+            //_wakeButton.SetPinMode(PinMode.Input);
+            //_wakeButton.ValueChanged += WakeButton_ValueChanged;
 
             lcd = new LCD
             {
@@ -73,8 +73,8 @@ namespace OrgPalThreeDemo
 
             lcd.Display($"Voltage: {palthree.GetBatteryUnregulatedVoltage().ToString("n2")} \n Temp: {palthree.GetTemperatureOnBoard().ToString("n2")}"); //, 0);
 
-            Thread.Sleep(5000);
-            lcd.BacklightOn = false;
+            //Thread.Sleep(5000);
+            //lcd.BacklightOn = false;
 
 
             foreach (byte b in nanoFramework.Hardware.Stm32.Utilities.UniqueDeviceId)
@@ -123,22 +123,22 @@ namespace OrgPalThreeDemo
         //    Debug.WriteLine("Handle Mux Flow...!");
         //}
 
-        private static void WakeButton_ValueChanged(object sender, PinValueChangedEventArgs e)
-        {
-            if (lcd.BacklightOn == false)
-            {
-                //TODO: this has display corruption!!!
-                if (e.ChangeType == PinEventTypes.Rising)
-                {
-                    lcd.BacklightOn = true;
-                    lcd.Clear();
-                    lcd.Display($"Voltage: {palthree.GetBatteryUnregulatedVoltage().ToString("n2")} \n Temp: {palthree.GetTemperatureOnBoard().ToString("n2")}"); //, 0);
+        //private static void WakeButton_ValueChanged(object sender, PinValueChangedEventArgs e)
+        //{
+        //    if (lcd.BacklightOn == false)
+        //    {
+        //        //TODO: this has display corruption!!!
+        //        if (e.ChangeType == PinEventTypes.Rising)
+        //        {
+        //            lcd.BacklightOn = true;
+        //            lcd.Clear();
+        //            lcd.Display($"Voltage: {palthree.GetBatteryUnregulatedVoltage().ToString("n2")} \n Temp: {palthree.GetTemperatureOnBoard().ToString("n2")}"); //, 0);
 
-                    Thread.Sleep(5000);
-                    lcd.BacklightOn = false;
-                }
-            }
-        }
+        //            Thread.Sleep(5000);
+        //            lcd.BacklightOn = false;
+        //        }
+        //    }
+        //}
 
         //private static void UserButton_ValueChanged(object sender, GpioPinValueChangedEventArgs e)
         //{
@@ -261,7 +261,7 @@ namespace OrgPalThreeDemo
                     string shadowJson = $"{shadowUpdateHeader}{JsonConvert.SerializeObject(shadowReportedState)}{shadowUpdateFooter}";
                     bool updateResult = AwsMqtt.Client.UpdateReportedState(//new ShadowCollection(
                         shadowJson); //);
-                    Debug.WriteLine($"Updating shadow result was: {updateResult}");
+                    Debug.WriteLine($"Updating shadow result was: {!updateResult}"); //Received == false (inverted for UI).
 
                 }
                 catch (Exception ex)
