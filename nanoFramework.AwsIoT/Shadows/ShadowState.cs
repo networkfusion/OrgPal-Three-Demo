@@ -15,20 +15,24 @@ namespace nanoFramework.AwsIoT.Shadows
         /// </summary>
         public ShadowState()
         {
-            desired = new Hashtable(); // ShadowCollection();
-            reported = new Hashtable(); // ShadowCollection();
+            desired = new Hashtable();
+            reported = new Hashtable();
+            //desired = new ShadowCollection();
+            //reported = new ShadowCollection();
         }
 
-        ///// <summary>
-        ///// Initializes a new instance of <see cref="ShadowState"/>
-        ///// </summary>
-        ///// <param name="desired">Hashtable for the desired properties</param>
-        ///// <param name="reported">Hashtable for the reported properties</param>
-        //public ShadowState(Hashtable tmp_desired, Hashtable tmp_reported)
-        //{
-        //    desired = new ShadowCollection(tmp_desired);
-        //    reported = new ShadowCollection(tmp_reported);
-        //}
+        /// <summary>
+        /// Initializes a new instance of <see cref="ShadowState"/>
+        /// </summary>
+        /// <param name="desired">Hashtable for the desired properties</param>
+        /// <param name="reported">Hashtable for the reported properties</param>
+        public ShadowState(Hashtable tmp_desired, Hashtable tmp_reported)
+        {
+            //desired = new ShadowCollection(tmp_desired);
+            //reported = new ShadowCollection(tmp_reported);
+            desired = tmp_desired;
+            reported = tmp_reported;
+        }
 
         ///// <summary>
         ///// Gets and sets the <see cref="Shadow"/> desired properties.
