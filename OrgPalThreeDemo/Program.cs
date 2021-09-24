@@ -148,7 +148,7 @@ namespace OrgPalThreeDemo
 
         private static void SetupNetwork()
         {
-            CancellationTokenSource cs = new(5000); //5 seconds.
+            CancellationTokenSource cs = new CancellationTokenSource(5000); //5 seconds.
             // We are using TLS and it requires valid date & time (so we should set the option to true, but SNTP is run in the background, and setting it manually causes issues for the moment!!!)
             // Although setting it to false seems to cause a worse issue. Let us fix this by using a managed class instead.
             Debug.WriteLine("Waiting for network up and IP address...");

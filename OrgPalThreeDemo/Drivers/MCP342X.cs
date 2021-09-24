@@ -7,7 +7,7 @@ using System.Device.I2c;
 namespace PalThree
 {
 
-    //!!! TODO: convert to using Iot.Devices
+    //!!! TODO: convert to using Iot.Devices (nanoFramework.Iot.Device.Mcp3428)
 
 
     /// <summary>
