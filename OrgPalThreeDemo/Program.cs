@@ -63,9 +63,9 @@ namespace OrgPalThreeDemo
             };
             lcd.Display("Please Wait...");
 
-            Thread.Sleep(1000);
+            //Thread.Sleep(1000);
 
-            lcd.Display($"Voltage: {palthree.GetBatteryUnregulatedVoltage().ToString("n2")} \n Temp: {palthree.GetTemperatureOnBoard().ToString("n2")}"); //, 0);
+            lcd.Display($"Voltage: {palthree.GetBatteryUnregulatedVoltage().ToString("n2")} \n PCB-Temp: {palthree.GetTemperatureOnBoard().ToString("n2")}"); //, 0);
 
             //Thread.Sleep(5000);
             //lcd.BacklightOn = false;
