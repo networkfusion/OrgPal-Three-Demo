@@ -6,10 +6,9 @@ using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using nanoFramework.M2Mqtt.Messages; // Only required due to QoS level. Perhaps this should be inherited through the Aws lib?!
-using System.Device.Gpio;
+//using System.Device.Gpio;
 using Windows.Storage;
 using Windows.Storage.Streams;
-using OrgPalThreeDemo.AwsIoT;
 using nanoFramework.AwsIot;
 using OrgPalThreeDemo.TempDebugHelpers;
 
@@ -17,7 +16,7 @@ namespace OrgPalThreeDemo
 {
     public class Program
     {
-        private static GpioController gpioController;
+        //private static GpioController gpioController;
 
         //private static GpioPin _muxFlowControl;
         //private static GpioPin _wakeButton;
@@ -32,12 +31,6 @@ namespace OrgPalThreeDemo
         private static int messagesSent = 0;
         public const int shadowSendInterval = 600000; //10 minutes...  TODO: increase shadow interval to 3600000 for 1 hour when happy!
         public const int telemetrySendInterval = 60000; //1 minute... TODO: does not take into account delays or execution time!
-
-
-        //static void WriteTrace(string format, params object[] args)
-        //{
-        //    Debug.WriteLine(string.Format(format, args));
-        //}
 
         public static void Main()
         {
@@ -181,17 +174,17 @@ namespace OrgPalThreeDemo
         {
             try
             {
-                X509Certificate caCert = new X509Certificate(AwsMqtt.RootCA); //commented out as MDP changes mean resources dont currently work//Resources.GetBytes(Resources.BinaryResources.AwsCAroot)); //should this be in secure storage, or is it fine where it is?
-                X509Certificate2 clientCert = new X509Certificate2(AwsMqtt.ClientRsaSha256Crt, AwsMqtt.ClientRsaKey, ""); //make sure to add a correct pfx certificate
+                X509Certificate caCert = new X509Certificate(AwsMqttConnector.RootCA); //commented out as MDP changes mean resources dont currently work//Resources.GetBytes(Resources.BinaryResources.AwsCAroot)); //should this be in secure storage, or is it fine where it is?
+                X509Certificate2 clientCert = new X509Certificate2(AwsMqttConnector.ClientRsaSha256Crt, AwsMqttConnector.ClientRsaKey, ""); //make sure to add a correct pfx certificate
 
 
-                AwsMqtt.Client = new MqttConnectionClient(AwsMqtt.Host, AwsMqtt.ThingName, clientCert, MqttQoSLevel.AtLeastOnce, caCert);
+                AwsMqttConnector.Client = new MqttConnectionClient(AwsMqttConnector.Host, AwsMqttConnector.ThingName, clientCert, MqttQoSLevel.AtLeastOnce, caCert);
 
-                AwsMqtt.Client.Open();
+                AwsMqttConnector.Client.Open();
 
 
                 Thread.Sleep(1000); //ensure that we are ready (and connected)???
-                var shadow = AwsMqtt.Client.GetShadow(new CancellationTokenSource(30000).Token);
+                var shadow = AwsMqttConnector.Client.GetShadow(new CancellationTokenSource(30000).Token);
                 if (shadow != null)
                 {
                     Debug.WriteLine($"Get shadow result:");
@@ -260,7 +253,7 @@ namespace OrgPalThreeDemo
                     const string shadowUpdateHeader = "{\"state\":{\"reported\":";
                     const string shadowUpdateFooter = "}}";
                     string shadowJson = $"{shadowUpdateHeader}{JsonConvert.SerializeObject(shadowReportedState)}{shadowUpdateFooter}";
-                    bool updateResult = AwsMqtt.Client.UpdateReportedState(//new ShadowCollection(
+                    bool updateResult = AwsMqttConnector.Client.UpdateReportedState(//new ShadowCollection(
                         shadowJson); //);
                     Debug.WriteLine($"Updating shadow result was: {!updateResult}"); //Received == false (inverted for UI).
 
@@ -296,7 +289,7 @@ namespace OrgPalThreeDemo
                     };
 
                     string sampleData = JsonConvert.SerializeObject(statusTelemetry);
-                    AwsMqtt.Client.SendMessage(sampleData); // ($"{AwsMqtt.ThingName}/data", Encoding.UTF8.GetBytes(sampleData), MqttQoSLevel.AtMostOnce, false);
+                    AwsMqttConnector.Client.SendMessage(sampleData); // ($"{AwsMqtt.ThingName}/data", Encoding.UTF8.GetBytes(sampleData), MqttQoSLevel.AtMostOnce, false);
 
                     Debug.WriteLine("Message sent: " + sampleData);
                 }
@@ -361,7 +354,7 @@ namespace OrgPalThreeDemo
                         var buffer = FileIO.ReadBuffer(file);
                         using (DataReader dataReader = DataReader.FromBuffer(buffer))
                         {
-                            AwsMqtt.ClientRsaSha256Crt = dataReader.ReadString(buffer.Length);
+                            AwsMqttConnector.ClientRsaSha256Crt = dataReader.ReadString(buffer.Length);
                         }
                         
                         //Should load into secure storage (somewhere) and delete file on removable device?
@@ -371,8 +364,8 @@ namespace OrgPalThreeDemo
                         var buffer = FileIO.ReadBuffer(file);
                         using (DataReader dataReader = DataReader.FromBuffer(buffer))
                         {
-                            AwsMqtt.RootCA = new byte[buffer.Length];
-                            dataReader.ReadBytes(AwsMqtt.RootCA);
+                            AwsMqttConnector.RootCA = new byte[buffer.Length];
+                            dataReader.ReadBytes(AwsMqttConnector.RootCA);
                         }
                     }
                     if (file.FileType == "key")
@@ -382,7 +375,7 @@ namespace OrgPalThreeDemo
                         var buffer = FileIO.ReadBuffer(file);
                         using (DataReader dataReader = DataReader.FromBuffer(buffer))
                         {
-                            AwsMqtt.ClientRsaKey = dataReader.ReadString(buffer.Length);
+                            AwsMqttConnector.ClientRsaKey = dataReader.ReadString(buffer.Length);
                         }
                         
                         //Should load into secure storage (somewhere) and delete file on removable device?
@@ -396,18 +389,18 @@ namespace OrgPalThreeDemo
                             try
                             {
                                 MqttConfig config = (MqttConfig)JsonConvert.DeserializeObject(dataReader, typeof(MqttConfig));
-                                AwsMqtt.Host = config.Url;
+                                AwsMqttConnector.Host = config.Url;
                                 if (config.Port != null)
                                 {
-                                    AwsMqtt.Port = int.Parse(config.Port);
+                                    AwsMqttConnector.Port = int.Parse(config.Port);
                                 }
                                 if (config.ThingName != string.Empty || config.ThingName != null)
                                 {
-                                    AwsMqtt.ThingName = config.ThingName;
+                                    AwsMqttConnector.ThingName = config.ThingName;
                                 }
                                 else
                                 {
-                                    AwsMqtt.ThingName = _serialNumber;
+                                    AwsMqttConnector.ThingName = _serialNumber;
                                 }
                             }
                             catch (Exception)

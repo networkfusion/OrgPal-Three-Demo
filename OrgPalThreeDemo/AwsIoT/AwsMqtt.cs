@@ -2,9 +2,9 @@
 using System.Text;
 using nanoFramework.AwsIot;
 
-namespace OrgPalThreeDemo.AwsIoT
+namespace OrgPalThreeDemo
 {
-    public static class AwsMqtt
+    public static class AwsMqttConnector
     {
 
         public static string Host = string.Empty; //make sure to add your AWS endpoint and region, e.g. "<endpoint>-ats.iot.<region>.amazonaws.com"
