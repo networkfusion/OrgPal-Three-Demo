@@ -12,7 +12,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 
-namespace nanoFramework.Aws.IoTCore
+namespace nanoFramework.AwsIot
 {
     // https://github.com/aws/aws-sdk-net/blob/master/sdk/src/Services/IotData/Generated/_netstandard/AmazonIotDataClient.cs
     // https://github.com/aws/aws-iot-device-sdk-embedded-C/tree/master/src
@@ -39,7 +39,7 @@ namespace nanoFramework.Aws.IoTCore
         //private readonly string _privateKey;
 
         private M2Mqtt.MqttClient _mqttc;
-        private readonly IoTCoreStatus _ioTCoreStatus = new IoTCoreStatus();
+        private readonly ConnectionState _mqttBrokerStatus = new ConnectionState();
         private readonly ArrayList _methodCallback = new ArrayList();
         private readonly ArrayList _waitForConfirmation = new ArrayList();
         private readonly object _lock = new object();
@@ -86,8 +86,8 @@ namespace nanoFramework.Aws.IoTCore
             _shadowTopic = $"$aws/things/{_uniqueId}/shadow";
             _telemetryTopic = $"nanoframework/device/{_uniqueId}/messages/events"; //TODO: we should make this configurable!
             _lwtTopic = $"nanoframework/device/{_uniqueId}/lwt"; //TODO: should this Last Will and Testiment topic be configurable?!
-            _ioTCoreStatus.Status = Status.Disconnected;
-            _ioTCoreStatus.Message = string.Empty;
+            _mqttBrokerStatus.Status = Status.Disconnected;
+            _mqttBrokerStatus.Message = string.Empty;
             _deviceMessageTopic = $"nanoframework/device/{_uniqueId}/messages/devicebound"; //TODO: should we make this configurable?! e.g. I need "{_uniqueId}/sys/"??? (or do I (since CSL doing its own thing here!)!!)
             QosLevel = qosLevel;
             _awsRootCACert = awsRootCert; //TODO: Should override the default one in resources?!
@@ -101,7 +101,7 @@ namespace nanoFramework.Aws.IoTCore
         /// <summary>
         /// The latest connection status.
         /// </summary>
-        public IoTCoreStatus IoTCoreStatus => new IoTCoreStatus(_ioTCoreStatus);
+        public ConnectionState ConnectionStatus => new ConnectionState(_mqttBrokerStatus);
 
         /// <summary>
         /// The default quality of service level.
@@ -161,9 +161,9 @@ namespace nanoFramework.Aws.IoTCore
                     }
                 );
 
-                _ioTCoreStatus.Status = Status.Connected;
-                _ioTCoreStatus.Message = string.Empty;
-                StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                _mqttBrokerStatus.Status = Status.Connected;
+                _mqttBrokerStatus.Message = string.Empty;
+                StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                 // We will renew after 10 minutes before just in case
                 _timerTokenRenew = new Timer(TimerCallbackReconnect, null, new TimeSpan(23, 50, 0), TimeSpan.MaxValue);
             }
@@ -275,9 +275,9 @@ namespace nanoFramework.Aws.IoTCore
             string shadow = reported; //.ToJson();
             Debug.WriteLine($"update shadow: {shadow}");
             var rid = _mqttc.Publish(topic, Encoding.UTF8.GetBytes(shadow), MqttQoSLevel.AtLeastOnce, false);
-            _ioTCoreStatus.Status = Status.ShadowUpdated;
-            _ioTCoreStatus.Message = string.Empty;
-            StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+            _mqttBrokerStatus.Status = Status.ShadowUpdated;
+            _mqttBrokerStatus.Message = string.Empty;
+            StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
 
             if (cancellationToken.CanBeCanceled)
             {
@@ -356,22 +356,22 @@ namespace nanoFramework.Aws.IoTCore
                         Debug.WriteLine($"Reached {_shadowTopic}/update/");
                         if (e.Topic.IndexOf("rejected") > 0)
                         {
-                            _ioTCoreStatus.Status = Status.ShadowUpdateError;
-                            _ioTCoreStatus.Message = message;
-                            StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                            _mqttBrokerStatus.Status = Status.ShadowUpdateError;
+                            _mqttBrokerStatus.Message = message;
+                            StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
                         else if (e.Topic.IndexOf("delta") > 0)
                         {
                             ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(new ShadowCollection(message)));
-                            _ioTCoreStatus.Status = Status.ShadowUpdateReceived;
-                            _ioTCoreStatus.Message = message;
-                            StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                            _mqttBrokerStatus.Status = Status.ShadowUpdateReceived;
+                            _mqttBrokerStatus.Message = message;
+                            StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
                         else if (e.Topic.IndexOf("accepted") > 0) //TODO: this should not be required, since a delta should take precidence (but what if there is no delta?!)...
                         {
-                            _ioTCoreStatus.Status = Status.ShadowUpdated;
-                            _ioTCoreStatus.Message = message;
-                            StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                            _mqttBrokerStatus.Status = Status.ShadowUpdated;
+                            _mqttBrokerStatus.Message = message;
+                            StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
 
                     }
@@ -380,18 +380,18 @@ namespace nanoFramework.Aws.IoTCore
                         Debug.WriteLine($"Reached {_shadowTopic}/get/");
                         if (e.Topic.IndexOf("rejected") > 0)
                         {
-                            _ioTCoreStatus.Status = Status.ShadowUpdateError;
-                            _ioTCoreStatus.Message = message;
-                            StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                            _mqttBrokerStatus.Status = Status.ShadowUpdateError;
+                            _mqttBrokerStatus.Message = message;
+                            StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
                         else if (e.Topic.IndexOf("accepted") > 0)
                         {
                             _shadow = (Shadow)JsonConvert.DeserializeObject(message, typeof(Shadow));
                             //_shadow = new Shadow(_uniqueId, message); //TODO: Shadow (auto deserialize from JSON)
                             _shadowReceived = true;
-                            _ioTCoreStatus.Status = Status.ShadowReceived;
-                            _ioTCoreStatus.Message = message;
-                            StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                            _mqttBrokerStatus.Status = Status.ShadowReceived;
+                            _mqttBrokerStatus.Message = message;
+                            StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
 
                     }
@@ -401,9 +401,9 @@ namespace nanoFramework.Aws.IoTCore
                     //    string method = e.Topic.Substring(DirectMethodTopic.Length);
                     //    string methodName = method.Substring(0, method.IndexOf('/'));
                     //    int rid = Convert.ToInt32(method.Substring(method.IndexOf('=') + 1));
-                    //    _ioTCoreStatus.Status = Status.DirectMethodCalled;
-                    //    _ioTCoreStatus.Message = $"{method}/{message}";
-                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                    //    _mqttBrokerStatus.Status = Status.DirectMethodCalled;
+                    //    _mqttBrokerStatus.Message = $"{method}/{message}";
+                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                     //    foreach (MethodCallback mt in _methodCallback)
                     //    {
                     //        string mtName = mt.Method.Name;
@@ -429,57 +429,57 @@ namespace nanoFramework.Aws.IoTCore
                     //else if (e.Topic.StartsWith(_deviceMessageTopic))
                     //{
                     //    string messageTopic = e.Topic.Substring(_deviceMessageTopic.Length);
-                    //    _ioTCoreStatus.Status = Status.MessageReceived;
-                    //    _ioTCoreStatus.Message = $"{messageTopic}/{message}";
-                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                    //    _mqttBrokerStatus.Status = Status.MessageReceived;
+                    //    _mqttBrokerStatus.Message = $"{messageTopic}/{message}";
+                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                     //    CloudToDeviceMessage?.Invoke(this, new CloudToDeviceMessageEventArgs(message, messageTopic));
                     //}
                     //else if (e.Topic.StartsWith("$iothub/clientproxy/"))
                     //{
-                    //    _ioTCoreStatus.Status = Status.Disconnected;
-                    //    _ioTCoreStatus.Message = message;
-                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                    //    _mqttBrokerStatus.Status = Status.Disconnected;
+                    //    _mqttBrokerStatus.Message = message;
+                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                     //}
                     //else if (e.Topic.StartsWith("$iothub/logmessage/Info"))
                     //{
-                    //    _ioTCoreStatus.Status = Status.IoTCoreInformation;
-                    //    _ioTCoreStatus.Message = message;
-                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                    //    _mqttBrokerStatus.Status = Status.IoTCoreInformation;
+                    //    _mqttBrokerStatus.Message = message;
+                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                     //}
                     //else if (e.Topic.StartsWith("$iothub/logmessage/HighlightInfo"))
                     //{
-                    //    _ioTCoreStatus.Status = Status.IoTCoreHighlightInformation;
-                    //    _ioTCoreStatus.Message = message;
-                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                    //    _mqttBrokerStatus.Status = Status.IoTCoreHighlightInformation;
+                    //    _mqttBrokerStatus.Message = message;
+                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                     //}
                     //else if (e.Topic.StartsWith("$iothub/logmessage/Error"))
                     //{
-                    //    _ioTCoreStatus.Status = Status.IoTCoreError;
-                    //    _ioTCoreStatus.Message = message;
-                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                    //    _mqttBrokerStatus.Status = Status.IoTCoreError;
+                    //    _mqttBrokerStatus.Message = message;
+                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                     //}
                     //else if (e.Topic.StartsWith("$iothub/logmessage/Warning"))
                     //{
-                    //    _ioTCoreStatus.Status = Status.IoTCoreWarning;
-                    //    _ioTCoreStatus.Message = message;
-                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                    //    _mqttBrokerStatus.Status = Status.IoTCoreWarning;
+                    //    _mqttBrokerStatus.Message = message;
+                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                     //}
 
                     //else //TODO: Other message type callback or throw?!
                     //{
-                    //    _ioTCoreStatus.Status = Status.MessageReceived;
-                    //    _ioTCoreStatus.Message = e.Message.ToString();
+                    //    _mqttBrokerStatus.Status = Status.MessageReceived;
+                    //    _mqttBrokerStatus.Message = e.Message.ToString();
                     //    Debug.WriteLine(e.Message.ToString());
-                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                     //}
 
                 }
                 catch (Exception ex)
                 {
                     Debug.WriteLine($"Exception in event: {ex}");
-                    _ioTCoreStatus.Status = Status.InternalError;
-                    _ioTCoreStatus.Message = ex.ToString();
-                    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+                    _mqttBrokerStatus.Status = Status.InternalError;
+                    _mqttBrokerStatus.Message = ex.ToString();
+                    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                 }
             }
             else
@@ -512,9 +512,9 @@ namespace nanoFramework.Aws.IoTCore
 
         private void ClientConnectionClosed(object sender, EventArgs e)
         {
-            _ioTCoreStatus.Status = Status.Disconnected;
-            _ioTCoreStatus.Message = string.Empty;
-            StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_ioTCoreStatus));
+            _mqttBrokerStatus.Status = Status.Disconnected;
+            _mqttBrokerStatus.Message = string.Empty;
+            StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
         }
 
         /// <inheritdoc/>

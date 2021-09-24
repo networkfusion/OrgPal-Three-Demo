@@ -7,7 +7,7 @@ using System.Collections;
 namespace nanoFramework.AwsIoT.Shadows
 {
     /// <summary>
-    /// Represents a collection of properties for <see cref="Shadow"/>.
+    /// Represents a collection of state (or metadata) properties for <see cref="Shadow"/>.
     /// </summary>
     public class ShadowCollection : IEnumerable
     {
@@ -104,13 +104,13 @@ namespace nanoFramework.AwsIoT.Shadows
         }
 
         /// <summary>
-        /// Gets the ShadowProperties as a JSON string.
+        /// Gets the Shadow State/Metadata Properties as a JSON string.
         /// </summary>
         /// <returns>JSON string</returns>
         public string ToJson() => ToString();
 
         /// <summary>
-        /// Add a property.
+        /// Add a new property.
         /// </summary>
         /// <param name="property">The property to add.</param>
         /// <param name="value">The value of the property.</param>

@@ -2,7 +2,7 @@
 //using System.Diagnostics;
 //using System.Security.Cryptography.X509Certificates;
 //using System.Threading;
-//using nanoFramework.Aws.IoTCore;
+//using nanoFramework.AwsIot;
 
 //namespace nanoFramework.Aws.Tests
 //{

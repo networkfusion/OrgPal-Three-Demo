@@ -3,7 +3,7 @@
 
 using System;
 
-namespace nanoFramework.Aws.IoTCore
+namespace nanoFramework.AwsIot
 {
     /// <summary>
     /// Delegate method for status update.
@@ -21,14 +21,14 @@ namespace nanoFramework.Aws.IoTCore
         /// Constructor for status updated arguments.
         /// </summary>
         /// <param name="status">The status.</param>
-        public StatusUpdatedEventArgs(IoTCoreStatus status)
+        public StatusUpdatedEventArgs(ConnectionState status)
         {
-            IoTCoreStatus = new IoTCoreStatus(status);
+            ConnectionStatus = new ConnectionState(status);
         }
 
         /// <summary>
         /// The IoT Core status.
         /// </summary>
-        public IoTCoreStatus IoTCoreStatus { get; set; }
+        public ConnectionState ConnectionStatus { get; set; }
     }
 }

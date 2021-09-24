@@ -19,7 +19,7 @@
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
     <Compile Include="ConfirmationStatus.cs" />
-    <Compile Include="IoTCoreStatus.cs" />
+    <Compile Include="ConnectionState.cs" />
     <Compile Include="MethodCallback.cs" />
     <Compile Include="MqttConnectionClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

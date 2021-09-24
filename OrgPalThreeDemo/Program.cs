@@ -6,18 +6,18 @@ using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using nanoFramework.M2Mqtt.Messages; // Only required due to QoS level. Perhaps this should be inherited through the Aws lib?!
-//using System.Device.Gpio;
+using System.Device.Gpio;
 using Windows.Storage;
 using Windows.Storage.Streams;
-using AwsIoT;
-using nanoFramework.Aws.IoTCore;
+using OrgPalThreeDemo.AwsIoT;
+using nanoFramework.AwsIot;
 using OrgPalThreeDemo.TempDebugHelpers;
 
 namespace OrgPalThreeDemo
 {
     public class Program
     {
-        //private static GpioController gpioController;
+        private static GpioController gpioController;
 
         //private static GpioPin _muxFlowControl;
         //private static GpioPin _wakeButton;

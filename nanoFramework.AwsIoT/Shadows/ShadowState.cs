@@ -17,6 +17,7 @@ namespace nanoFramework.AwsIoT.Shadows
         {
             desired = new Hashtable();
             reported = new Hashtable();
+            //TODO: we need to get the following working (rather than the above!).
             //desired = new ShadowCollection();
             //reported = new ShadowCollection();
         }
@@ -28,11 +29,21 @@ namespace nanoFramework.AwsIoT.Shadows
         /// <param name="reported">Hashtable for the reported properties</param>
         public ShadowState(Hashtable tmp_desired, Hashtable tmp_reported)
         {
-            //desired = new ShadowCollection(tmp_desired);
-            //reported = new ShadowCollection(tmp_reported);
             desired = tmp_desired;
             reported = tmp_reported;
+            //TODO: we need to get the following working (rather than the above!).
+            //desired = new ShadowCollection(tmp_desired);
+            //reported = new ShadowCollection(tmp_reported);
         }
+
+#pragma warning disable IDE1006 // Naming Styles, disabled due to being Json specific
+
+        public Hashtable desired { get; set; }
+        public Hashtable reported { get; set; }
+
+#pragma warning restore IDE1006 // Naming Styles
+
+        //TODO: we need to get the following working (rather than the above!).
 
         ///// <summary>
         ///// Gets and sets the <see cref="Shadow"/> desired properties.
@@ -44,11 +55,6 @@ namespace nanoFramework.AwsIoT.Shadows
         ///// </summary>
         //public ShadowCollection reported { get; set; }
 
-#pragma warning disable IDE1006 // Naming Styles, disabled due to being Json specific
 
-        public Hashtable desired { get; set; }
-        public Hashtable reported { get; set; }
-
-#pragma warning restore IDE1006 // Naming Styles
     }
 }

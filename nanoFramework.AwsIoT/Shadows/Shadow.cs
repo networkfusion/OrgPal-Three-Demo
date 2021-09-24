@@ -9,9 +9,9 @@ namespace nanoFramework.AwsIoT.Shadows
     /// <summary>
     /// Shadow Representation.
     /// </summary>
+    /// <remarks>As per: <see cref="https://docs.aws.amazon.com/iot/latest/developerguide/device-shadow-document.html"/></remarks>
     public class Shadow
     {
-        // https://docs.aws.amazon.com/iot/latest/developerguide/device-shadow-document.html
 
         /// <summary>
         /// Creates an instance of <see cref="Shadow"/>.

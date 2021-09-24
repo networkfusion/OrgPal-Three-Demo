@@ -1,14 +1,14 @@
 ﻿// Copyright (c) .Net Foundation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace nanoFramework.Aws.IoTCore
+namespace nanoFramework.AwsIot
 {
     /// <summary>
-    /// Azure IoT Hub status.
+    /// Connection status.
     /// </summary>
-    public class IoTCoreStatus
+    public class ConnectionState
     {
-        internal IoTCoreStatus(IoTCoreStatus status)
+        internal ConnectionState(ConnectionState status)
         {
             Status = status.Status;
             Message = status.Message;
@@ -17,7 +17,7 @@ namespace nanoFramework.Aws.IoTCore
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public IoTCoreStatus()
+        public ConnectionState()
         { }
 
         /// <summary>

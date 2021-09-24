@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Text;
-using nanoFramework.Aws.IoTCore;
+using nanoFramework.AwsIot;
 
-namespace AwsIoT
+namespace OrgPalThreeDemo.AwsIoT
 {
     public static class AwsMqtt
     {

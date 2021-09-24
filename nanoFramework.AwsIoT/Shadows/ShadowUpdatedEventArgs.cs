@@ -6,7 +6,7 @@ using System;
 namespace nanoFramework.AwsIoT.Shadows
 {
     /// <summary>
-    /// Delegate for Shadow updated.
+    /// Delegate for Shadow updated event.
     /// </summary>
     /// <param name="sender">The <see cref="MqttConnectionClient"/> sender.</param>
     /// <param name="e">The Shadow updated event arguments.</param>
