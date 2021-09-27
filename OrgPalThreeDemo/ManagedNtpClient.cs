@@ -32,12 +32,12 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 
-namespace OrgPalThreeDemo.ManagedSNTP
+namespace OrgPalThreeDemo
 {
     /// <summary>
     /// Static class to receive the time from a NTP server.
     /// </summary>
-    public class NtpClient
+    public class ManagedNtpClient
     {
         /// <summary>
         /// Gets the current DateTime from time-a.nist.gov.

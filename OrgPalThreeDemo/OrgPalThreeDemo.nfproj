@@ -26,10 +26,10 @@
     <Compile Include="Drivers\PalHelper.cs" />
     <Compile Include="Drivers\PalThreePins.cs" />
     <Compile Include="Drivers\PCF85263.cs" />
-    <Compile Include="managedSNTP.cs" />
+    <Compile Include="ManagedNtpClient.cs" />
     <Compile Include="NetworkHelper.cs" />
     <Compile Include="Peripherals\HMT330.cs" />
-    <Compile Include="MqttConfig.cs" />
+    <Compile Include="MqttConfigFileSchema.cs" />
     <Compile Include="Peripherals\LufftVentus.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

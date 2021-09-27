@@ -155,7 +155,7 @@ namespace OrgPalThreeDemo
                     Debug.WriteLine($"Exception: {NetworkHelper.ConnectionError.Exception}");
                 }
                 Debug.WriteLine("It is likely a DateTime problem, so we will now try to set it using a managed helper class!");
-                success = Rtc.SetSystemTime(ManagedSNTP.NtpClient.GetNetworkTime());
+                success = Rtc.SetSystemTime(ManagedNtpClient.GetNetworkTime());
                 if (success)
                 {
                     Debug.WriteLine("Retrived DateTime using managedSNTP Helper class");
@@ -388,7 +388,7 @@ namespace OrgPalThreeDemo
                             readMqttConfig:
                             try
                             {
-                                MqttConfig config = (MqttConfig)JsonConvert.DeserializeObject(dataReader, typeof(MqttConfig));
+                                MqttConfigFileSchema config = (MqttConfigFileSchema)JsonConvert.DeserializeObject(dataReader, typeof(MqttConfigFileSchema));
                                 AwsMqttConnector.Host = config.Url;
                                 if (config.Port != null)
                                 {
