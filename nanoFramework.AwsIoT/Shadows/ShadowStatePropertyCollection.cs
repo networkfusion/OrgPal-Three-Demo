@@ -7,39 +7,40 @@ using System.Collections;
 namespace nanoFramework.AwsIoT.Shadows
 {
     /// <summary>
-    /// Represents a collection of state (or metadata) properties for <see cref="Shadow"/>.
+    /// Represents a collection of state (or metadata) properties for <see cref="ShadowState"/>.
     /// </summary>
-    public class ShadowCollection : IEnumerable
+    public class ShadowStatePropertyCollection : IEnumerable
     {
         internal const string VersionName = "$version"; //Used for versioning the collection.
-        private readonly Hashtable _shadow;
+        private readonly Hashtable _shadowStateProperty;
 
         /// <summary>
-        /// Creates an empty <see cref="ShadowCollection"/>.
+        /// Creates an empty <see cref="ShadowStatePropertyCollection"/>.
         /// </summary>
-        public ShadowCollection() : this(string.Empty)
-        { }
+        public ShadowStatePropertyCollection() : this(string.Empty)
+        {
+        }
 
         /// <summary>
-        /// Creates a <see cref="ShadowCollection"/> using the given JSON fragments for the body.
+        /// Creates a <see cref="ShadowStatePropertyCollection"/> using the given JSON fragments for the body.
         /// </summary>
         /// <param name="shadowJson">JSON fragment containing the shadow data.</param>        
-        public ShadowCollection(string shadowJson)
+        public ShadowStatePropertyCollection(string shadowJson)
         {
-            _shadow = string.IsNullOrEmpty(shadowJson) ? new() : (Hashtable)JsonConvert.DeserializeObject(shadowJson, typeof(Hashtable));
+            _shadowStateProperty = string.IsNullOrEmpty(shadowJson) ? new() : (Hashtable)JsonConvert.DeserializeObject(shadowJson, typeof(Hashtable));
         }
 
         /// <summary>
-        /// Creates a <see cref="ShadowCollection"/> using the given JSON fragments for the body.
+        /// Creates a <see cref="ShadowStatePropertyCollection"/> using the given JSON fragments for the body.
         /// </summary>
         /// <param name="shadow">The JSON hashtable.</param>
-        public ShadowCollection(Hashtable shadow)
+        public ShadowStatePropertyCollection(Hashtable shadow)
         {
-            _shadow = shadow ?? new();
+            _shadowStateProperty = shadow ?? new();
         }
 
         /// <summary>
-        /// Gets the version of the <see cref="ShadowCollection"/>.
+        /// Gets the version of the <see cref="ShadowStatePropertyCollection"/>.
         /// </summary>
         public long Version
         {
@@ -47,7 +48,7 @@ namespace nanoFramework.AwsIoT.Shadows
             {
                 try
                 {
-                    int ver = (int)_shadow[VersionName];
+                    int ver = (int)_shadowStateProperty[VersionName];
                     return ver;
                 }
                 catch
@@ -64,7 +65,7 @@ namespace nanoFramework.AwsIoT.Shadows
         {
             get
             {
-                int count = _shadow.Count;
+                int count = _shadowStateProperty.Count;
                 if ((count > 0) && Contains(VersionName))
                 {
                     count--;
@@ -86,7 +87,7 @@ namespace nanoFramework.AwsIoT.Shadows
             {
                 try
                 {
-                    return _shadow[propertyName];
+                    return _shadowStateProperty[propertyName];
                 }
                 catch
                 {
@@ -94,13 +95,13 @@ namespace nanoFramework.AwsIoT.Shadows
                 }
             }
 
-            set => _shadow[propertyName] = value;
+            set => _shadowStateProperty[propertyName] = value;
         }
 
         /// <inheritdoc />
         public override string ToString()
         {
-            return JsonConvert.SerializeObject(_shadow);
+            return JsonConvert.SerializeObject(_shadowStateProperty);
         }
 
         /// <summary>
@@ -116,7 +117,7 @@ namespace nanoFramework.AwsIoT.Shadows
         /// <param name="value">The value of the property.</param>
         public void Add(string property, object value)
         {
-            _shadow.Add(property, value);
+            _shadowStateProperty.Add(property, value);
         }
 
         /// <summary>
@@ -128,7 +129,7 @@ namespace nanoFramework.AwsIoT.Shadows
         {
             try
             {
-                var obj = _shadow[propertyName];
+                var obj = _shadowStateProperty[propertyName];
                 return true;
             }
             catch
@@ -139,6 +140,6 @@ namespace nanoFramework.AwsIoT.Shadows
         }
 
         /// <inheritdoc />
-        public IEnumerator GetEnumerator() => _shadow as IEnumerator;
+        public IEnumerator GetEnumerator() => _shadowStateProperty as IEnumerator;
     }
 }

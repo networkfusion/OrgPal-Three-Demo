@@ -188,13 +188,13 @@ namespace OrgPalThreeDemo
                 if (shadow != null)
                 {
                     Debug.WriteLine($"Get shadow result:");
-                    //Debug.WriteLine($"Desired:  {shadow.state.desired.ToJson()}");
-                    //Debug.WriteLine($"Reported:  {shadow.state.reported.ToJson()}");
+//                    Debug.WriteLine($"Desired:  {shadow.state.desired.ToJson()}");
+                    Debug.WriteLine($"Reported:  {shadow.state.ToJson()}"); //reported.ToJson()}");
 
-                    Debug.WriteLine("state.desired:");
-                    DebugHelper.DumpHashTable(shadow.state.desired, 1);
-                    Debug.WriteLine("state.reported:");
-                    DebugHelper.DumpHashTable(shadow.state.reported, 1);
+                    //Debug.WriteLine("state.desired:");
+                    //DebugHelper.DumpHashTable(shadow.state.desired, 1);
+                    //Debug.WriteLine("state.reported:");
+                    //DebugHelper.DumpHashTable(shadow.state.reported, 1);
                     Debug.WriteLine("metadata.desired:");
                     DebugHelper.DumpHashTable(shadow.metadata.desired, 1);
                     Debug.WriteLine("metadata.reported:");

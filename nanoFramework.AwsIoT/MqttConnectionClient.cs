@@ -362,7 +362,7 @@ namespace nanoFramework.AwsIot
                         }
                         else if (e.Topic.IndexOf("delta") > 0)
                         {
-                            ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(new ShadowCollection(message)));
+                            ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(new ShadowStatePropertyCollection(message)));
                             _mqttBrokerStatus.Status = Status.ShadowUpdateReceived;
                             _mqttBrokerStatus.Message = message;
                             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
