@@ -85,8 +85,8 @@ namespace nanoFramework.AwsIoT.Shadows
         /// <returns>JSON string</returns>
         public string ToJson(bool partialShadow = true)
         {
-            //if (partialShadow)
-            //{
+            if (partialShadow)
+            {
                 //Hashtable ser = new Hashtable();
                 //ser.Add("state", state);
 
@@ -106,11 +106,12 @@ namespace nanoFramework.AwsIoT.Shadows
                 }
                 var shadowStringFooter = "}";
                 return shadowStringHeader + shadowStringBody + shadowStringFooter;
-            //}
-            //else
-            //{
-                //JsonConvert.SerializeObject(this);
-            //}
+            }
+            else
+            {
+                JsonConvert.SerializeObject(this);
+            }
+            return @"{""shadow"" : ""Serialization-Error""}"; //technically unreachable?!
         }
     }
 }
