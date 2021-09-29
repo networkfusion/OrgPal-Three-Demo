@@ -34,7 +34,8 @@ namespace OrgPalThreeDemo
 
         public static void Main()
         {
-            Debug.WriteLine("OrgPal Three AWS MQTT Demo!");
+            Debug.WriteLine($"{SystemInfo.TargetName} AWS MQTT Demo.");
+            Debug.WriteLine();
 
             palthree = new Drivers.OnboardDevices();
             adcPalSensor = new MCP342x();
@@ -85,11 +86,11 @@ namespace OrgPalThreeDemo
 
             SetupNetwork();
 
-            while (DateTime.UtcNow.Year < 2021)
-            {
-                Thread.Sleep(1000); //give time for native SNTP to be retrieved.
-                Debug.WriteLine("Waiting for time to be set...");
-            }
+            //while (DateTime.UtcNow.Year < 2021)
+            //{
+            //    Thread.Sleep(1000); //give time for native SNTP to be retrieved.
+            //    Debug.WriteLine("Waiting for time to be set...");
+            //}
             startTime = DateTime.UtcNow; //set now because the clock might have been wrong before ntp is checked.
 
             Debug.WriteLine($"Start Time: {startTime.ToString("yyyy-MM-dd HH:mm:ss")}");
@@ -158,11 +159,11 @@ namespace OrgPalThreeDemo
                 success = Rtc.SetSystemTime(ManagedNtpClient.GetNetworkTime());
                 if (success)
                 {
-                    Debug.WriteLine("Retrived DateTime using managedSNTP Helper class");
+                    Debug.WriteLine("Retrived DateTime using Managed NTP Helper class...");
                 }
                 else
                 {
-                    Debug.WriteLine("Failed to Retrive DateTime (or IP Address). Retrying...");
+                    Debug.WriteLine("Failed to Retrive DateTime (or IP Address)! Retrying...");
                     SetupNetwork();
                 }
                 Debug.WriteLine($"RTC = {DateTime.UtcNow}");
@@ -240,7 +241,7 @@ namespace OrgPalThreeDemo
             {
                 try
                 {
-                    var shadowReportedState = new MessageSchemas.ShadowMessage
+                    var shadowReportedState = new DeviceMessageSchemas.ShadowStateProperties
                     {
                         operatingSystem = "nanoFramework",
                         platform = SystemInfo.TargetName,
@@ -249,14 +250,15 @@ namespace OrgPalThreeDemo
                         bootTimestamp = startTime.ToUnixTimeSeconds()
                     };
 
-                    //TODO: this should be worked out as part of the shadow collection?!
+                    Debug.Write($"Updating shadow reported properties... "); //wait for result before writeline.
+                    //TODO: this should be worked out as part of the shadow property collection?!
                     const string shadowUpdateHeader = "{\"state\":{\"reported\":";
                     const string shadowUpdateFooter = "}}";
                     string shadowJson = $"{shadowUpdateHeader}{JsonConvert.SerializeObject(shadowReportedState)}{shadowUpdateFooter}";
                     bool updateResult = AwsMqttConnector.Client.UpdateReportedState(//new ShadowPropertyCollection(
                         shadowJson); //);
 
-                    Debug.WriteLine($"Updating shadow result was: {!updateResult}"); //Received == false (inverted for UI).
+                    Debug.WriteLine($"{!updateResult}"); //Received == false (inverted for UI).
 
                 }
                 catch (Exception ex)
@@ -277,7 +279,7 @@ namespace OrgPalThreeDemo
             {
                 try
                 {
-                    var statusTelemetry = new MessageSchemas.StatusMessage
+                    var statusTelemetry = new DeviceMessageSchemas.TelemetryMessage
                     {
                         serialNumber = _serialNumber,
                         sendTimestamp = DateTime.UtcNow,
@@ -422,12 +424,12 @@ namespace OrgPalThreeDemo
 
         private static void StorageEventManager_RemovableDeviceRemoved(object sender, RemovableDeviceEventArgs e)
         {
-            Debug.WriteLine($"Removable Device @ \"{e.Path}\" removed.");
+            Debug.WriteLine($"Removable Device Event: @ \"{e.Path}\" was removed.");
         }
 
         private static void StorageEventManager_RemovableDeviceInserted(object sender, RemovableDeviceEventArgs e)
         {
-            Debug.WriteLine($"Removable Device @ \"{e.Path}\" inserted.");
+            Debug.WriteLine($"Removable Device Event: @ \"{e.Path}\" was inserted.");
             ReadStorage();
         }
     }

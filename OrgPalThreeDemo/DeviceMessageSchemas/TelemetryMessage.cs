@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace OrgPalThreeDemo.MessageSchemas
+namespace OrgPalThreeDemo.DeviceMessageSchemas
 {
-    public class StatusMessage
+    public class TelemetryMessage
     {
 #pragma warning disable IDE1006 // Naming Styles, disabled due to being Json specific
         public string serialNumber { get; set; }

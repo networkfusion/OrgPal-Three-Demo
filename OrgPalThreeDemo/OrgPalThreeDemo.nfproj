@@ -38,8 +38,8 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="MessageSchemas\ShadowMessage.cs" />
-    <Compile Include="MessageSchemas\StatusMessage.cs" />
+    <Compile Include="DeviceMessageSchemas\ShadowStateProperties.cs" />
+    <Compile Include="DeviceMessageSchemas\TelemetryMessage.cs" />
     <Compile Include="Peripherals\WindMasterPro.cs" />
     <Compile Include="TempDebugHelpers\DebugHelper.cs" />
   </ItemGroup>
