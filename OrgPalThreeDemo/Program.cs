@@ -253,8 +253,9 @@ namespace OrgPalThreeDemo
                     const string shadowUpdateHeader = "{\"state\":{\"reported\":";
                     const string shadowUpdateFooter = "}}";
                     string shadowJson = $"{shadowUpdateHeader}{JsonConvert.SerializeObject(shadowReportedState)}{shadowUpdateFooter}";
-                    bool updateResult = AwsMqttConnector.Client.UpdateReportedState(//new ShadowCollection(
+                    bool updateResult = AwsMqttConnector.Client.UpdateReportedState(//new ShadowPropertyCollection(
                         shadowJson); //);
+
                     Debug.WriteLine($"Updating shadow result was: {!updateResult}"); //Received == false (inverted for UI).
 
                 }

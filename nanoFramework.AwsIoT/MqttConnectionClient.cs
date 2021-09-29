@@ -164,7 +164,7 @@ namespace nanoFramework.AwsIot
                 _mqttBrokerStatus.Status = Status.Connected;
                 _mqttBrokerStatus.Message = string.Empty;
                 StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
-                // We will renew after 10 minutes before just in case
+                // We will renew after 10 minutes before midnight just in case:
                 _timerTokenRenew = new Timer(TimerCallbackReconnect, null, new TimeSpan(23, 50, 0), TimeSpan.MaxValue);
             }
 
@@ -198,7 +198,7 @@ namespace nanoFramework.AwsIot
                     $"{ _shadowTopic }/#",
                     });
                 _mqttc.Disconnect();
-                // Make sure all get disconnected, cleared 
+                // Make sure all get disconnected, cleared (TODO: 1 second arbitary value specified)
                 Thread.Sleep(1000);
             }
 
@@ -348,8 +348,8 @@ namespace nanoFramework.AwsIot
                 {
                 try
                 { //TODO: need to revisit this https://docs.aws.amazon.com/iot/latest/developerguide/device-shadow-mqtt.html#update-documents-pub-sub-topic to understand the full implementation!
-                    string message = Encoding.UTF8.GetString(e.Message, 0, e.Message.Length);
-                    Debug.WriteLine($"Decoded message was: {message}");
+                    string jsonMessageBody = Encoding.UTF8.GetString(e.Message, 0, e.Message.Length);
+                    Debug.WriteLine($"Decoded message was: {jsonMessageBody}");
 
                     if (e.Topic.StartsWith($"{_shadowTopic}/update/"))
                     {
@@ -357,20 +357,20 @@ namespace nanoFramework.AwsIot
                         if (e.Topic.IndexOf("rejected") > 0)
                         {
                             _mqttBrokerStatus.Status = Status.ShadowUpdateError;
-                            _mqttBrokerStatus.Message = message;
+                            _mqttBrokerStatus.Message = jsonMessageBody;
                             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
                         else if (e.Topic.IndexOf("delta") > 0)
                         {
-                            ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(new ShadowCollection(message)));
+                            ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(new Shadow(jsonMessageBody))); //ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(new ShadowCollection(jsonMessageBody)));
                             _mqttBrokerStatus.Status = Status.ShadowUpdateReceived;
-                            _mqttBrokerStatus.Message = message;
+                            _mqttBrokerStatus.Message = jsonMessageBody;
                             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
                         else if (e.Topic.IndexOf("accepted") > 0) //TODO: this should not be required, since a delta should take precidence (but what if there is no delta?!)...
                         {
                             _mqttBrokerStatus.Status = Status.ShadowUpdated;
-                            _mqttBrokerStatus.Message = message;
+                            _mqttBrokerStatus.Message = jsonMessageBody;
                             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
 
@@ -381,16 +381,16 @@ namespace nanoFramework.AwsIot
                         if (e.Topic.IndexOf("rejected") > 0)
                         {
                             _mqttBrokerStatus.Status = Status.ShadowUpdateError;
-                            _mqttBrokerStatus.Message = message;
+                            _mqttBrokerStatus.Message = jsonMessageBody;
                             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
                         else if (e.Topic.IndexOf("accepted") > 0)
                         {
-                            _shadow = (Shadow)JsonConvert.DeserializeObject(message, typeof(Shadow));
+                            _shadow = (Shadow)JsonConvert.DeserializeObject(jsonMessageBody, typeof(Shadow)); // new Shadow(jsonMessageBody);
                             //_shadow = new Shadow(_uniqueId, message); //TODO: Shadow (auto deserialize from JSON)
                             _shadowReceived = true;
                             _mqttBrokerStatus.Status = Status.ShadowReceived;
-                            _mqttBrokerStatus.Message = message;
+                            _mqttBrokerStatus.Message = jsonMessageBody;
                             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
 

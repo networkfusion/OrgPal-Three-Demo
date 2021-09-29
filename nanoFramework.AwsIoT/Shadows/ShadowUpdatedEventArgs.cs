@@ -20,15 +20,16 @@ namespace nanoFramework.AwsIoT.Shadows
         /// <summary>
         /// Constructor for Shadow updated event arguments.
         /// </summary>
-        /// <param name="shadow">The shadow collection.</param>
-        public ShadowUpdateEventArgs(ShadowCollection shadow)
+        /// <param name="shadow">The updated shadow.</param>
+        public ShadowUpdateEventArgs(Shadow shadow) //(ShadowPropertyCollection shadow)
         {
             Shadow = shadow;
         }
 
         /// <summary>
-        /// Shadow collection.
+        /// Shadow.
         /// </summary>
-        public ShadowCollection Shadow { get; set; }
+        public Shadow Shadow { get; set; }
+        //ShadowPropertyCollection Shadow { get; set; }
     }
 }

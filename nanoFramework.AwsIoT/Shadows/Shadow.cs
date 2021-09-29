@@ -19,42 +19,35 @@ namespace nanoFramework.AwsIoT.Shadows
         public Shadow()
         {
             state = new ShadowState();
-            metadata = new ShadowMetadata(); //TODO: doubt this is needed, but better not being null!
+            metadata = new ShadowMetadata();
+            version = 0;
+            clienttoken = string.Empty; //need to account for this later!
+            timestamp = 0; //(int)System.DateTime.UtcNow.ToUnixTimeSeconds(); //should probably be 1970!
         }
 
-        /// <summary>
-        /// Creates an instance of <see cref="Shadow"/>.
-        /// </summary>
-        /// <param name="clientToken">Client Token.</param>
-        /// <remarks>The client token can be no longer than 64 bytes.</remarks>
-        public Shadow(string clientToken) : this()
-        {
-            clienttoken = clientToken;
-        }
+        ///// <summary>
+        ///// Creates an instance of <see cref="Shadow"/>.
+        ///// </summary>
+        ///// <param name="clientToken">Client Token.</param>
+        ///// <remarks>The client token can be no longer than 64 bytes.</remarks>
+        //public Shadow(string clientToken) : this()
+        //{
+        //    clienttoken = clientToken;
+        //    state = new ShadowState();
+        //    metadata = new ShadowMetadata(); //TODO: doubt this is needed, but better not being null!
+        //}
 
-        /// <summary>
-        /// Creates an instance of <see cref="Shadow"/>.
-        /// </summary>
-        /// <param name="clientToken">Client Token.</param>
-        /// <param name="jsonShadow">The json shadow.</param>
-        /// <remarks>The client token can be no longer than 64 bytes.</remarks>
-        public Shadow(string clientToken, string jsonShadow) //We are parsing the json as a string (rather than a serialized class, so we have to decode it!)
-        {
-            clienttoken = clientToken;
-            Hashtable shadowStateProps = (Hashtable)JsonConvert.DeserializeObject(jsonShadow, typeof(Hashtable)); //surely this needs to be the state property first
-            state = new ShadowState((Hashtable)shadowStateProps["desired"], (Hashtable)shadowStateProps["reported"]);
-            metadata = new ShadowMetadata(); //TODO: doubt this is needed, but better not being null!
 
-        }
-
-        /// <summary>
-        /// Creates an instance of <see cref="Shadow"/>.
-        /// </summary>
-        /// <param name="shadowProperties">The shadow properties.</param>
-        public Shadow(ShadowState shadowState)
+        public Shadow(string shadowJsonString)
         {
-            state = shadowState;
-            metadata = new ShadowMetadata(); //TODO: doubt this is needed, but better not being null!
+            Hashtable _shadow = (Hashtable)JsonConvert.DeserializeObject(shadowJsonString, typeof(Hashtable));
+
+            state = new ShadowState((Hashtable)_shadow["state"]);
+            metadata = new ShadowMetadata((Hashtable)_shadow["metadata"]);
+            version = (int) _shadow["version"]; //could be null
+            clienttoken = (string) _shadow["clienttoken"]; //this could be null, or a named shadow?!
+            timestamp = (int)_shadow["timestamp"];
+
         }
 
 #pragma warning disable IDE1006 // Naming Styles, disabled due to being Json specific
@@ -88,29 +81,36 @@ namespace nanoFramework.AwsIoT.Shadows
         /// <summary>
         /// Gets the Shadow as a JSON string.
         /// </summary>
+        /// <param name="fullJsonString"> Optional: Only returns a partial json string for use with updates. unless specified.</param>
         /// <returns>JSON string</returns>
-        /// <remarks>Only returns a partial json string for use with updates.</remarks>
-        public string ToJson()
+        public string ToJson(bool partialShadow = true)
         {
-            //Hashtable ser = new Hashtable();
-            //ser.Add("state", state);
-
-            //if (!string.IsNullOrEmpty(clienttoken))
+            //if (partialShadow)
             //{
-            //    ser.Add("clienttoken", clienttoken);
+                //Hashtable ser = new Hashtable();
+                //ser.Add("state", state);
+
+                //if (!string.IsNullOrEmpty(clienttoken))
+                //{
+                //    ser.Add("clienttoken", clienttoken);
+                //}
+
+                //return JsonConvert.SerializeObject(ser);
+
+                //TODO: The following is a workaround (and hacky at that)!
+                var shadowStringHeader = @"{""state"":""reported""" + JsonConvert.SerializeObject(state.reported);
+                var shadowStringBody = string.Empty;
+                if (!string.IsNullOrEmpty(clienttoken)) //not sure about this one!
+                {
+                    shadowStringBody = $",clientToken:{ clienttoken}";
+                }
+                var shadowStringFooter = "}";
+                return shadowStringHeader + shadowStringBody + shadowStringFooter;
             //}
-
-            //return JsonConvert.SerializeObject(ser);
-
-            //TODO: The following is a workaround (and hacky at that)!
-            var shadowStringHeader = @"{""state"":""reported""" + JsonConvert.SerializeObject(state.reported);
-            var shadowStringBody = string.Empty;
-            if (!string.IsNullOrEmpty(clienttoken)) //not sure about this one!
-            {
-                shadowStringBody = $",clientToken:{ clienttoken}";
-            }
-            var shadowStringFooter = "}";
-            return shadowStringHeader + shadowStringBody + shadowStringFooter;
+            //else
+            //{
+                //JsonConvert.SerializeObject(this);
+            //}
         }
     }
 }
