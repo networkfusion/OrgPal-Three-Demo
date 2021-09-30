@@ -32,7 +32,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 
-namespace OrgPalThreeDemo
+namespace OrgPalThreeDemo.Networking
 {
     /// <summary>
     /// Static class to receive the time from a NTP server.

@@ -8,7 +8,7 @@
 //using System.Threading;
 //using nanoFramework.M2Mqtt.Messages;
 
-//namespace AwsIoT
+//namespace OrgPalThreeDemo.AwsIotCore
 //{
 
 //    /// <summary>
@@ -115,7 +115,7 @@
 //        /// </exception>
 //        public string GetThingShadow(string namedShadow = "")
 //        {
-            
+
 
 //            var topic = $"{ShadowTopicPrefix}{AwsMqtt.ThingName}{shadowTopicPostFix}/get";
 //            if (namedShadow != string.Empty)

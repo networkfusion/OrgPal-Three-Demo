@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace OrgPalThreeDemo.DeviceMessageSchemas
+namespace OrgPalThreeDemo.AwsIotCore.DeviceMessageSchemas
 {
     public class ShadowStateProperties
     {

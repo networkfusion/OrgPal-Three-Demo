@@ -11,6 +11,7 @@ using Windows.Storage;
 using Windows.Storage.Streams;
 using nanoFramework.AwsIot;
 using OrgPalThreeDemo.TempDebugHelpers;
+using OrgPalThreeDemo.Networking;
 
 namespace OrgPalThreeDemo
 {
@@ -35,7 +36,7 @@ namespace OrgPalThreeDemo
         public static void Main()
         {
             Debug.WriteLine($"{SystemInfo.TargetName} AWS MQTT Demo.");
-            Debug.WriteLine();
+            Debug.WriteLine("");
 
             palthree = new Drivers.OnboardDevices();
             adcPalSensor = new MCP342x();
@@ -93,14 +94,14 @@ namespace OrgPalThreeDemo
             //}
             startTime = DateTime.UtcNow; //set now because the clock might have been wrong before ntp is checked.
 
-            Debug.WriteLine($"Start Time: {startTime.ToString("yyyy-MM-dd HH:mm:ss")}");
-
+            Debug.WriteLine($"Time after network available: {startTime.ToString("yyyy-MM-dd HH:mm:ss")}");
+            Debug.WriteLine("");
 
             var connected = false;
             int connectionAttempt = 0;
             while (!connected)
             {
-                Debug.WriteLine($"Connection Attempt {connectionAttempt}");
+                Debug.WriteLine($"MQTT Connection Attempt: {connectionAttempt}");
                 connected = SetupMqtt();
                 if (!connected)
                 {
@@ -108,7 +109,6 @@ namespace OrgPalThreeDemo
                     Thread.Sleep(1000);
                 }
             }
-
 
             Thread.Sleep(Timeout.Infinite);
         }
@@ -173,22 +173,28 @@ namespace OrgPalThreeDemo
 
         static bool SetupMqtt()
         {
+            Debug.Write("Connected to MQTT broker... : ");
             try
             {
-                X509Certificate caCert = new X509Certificate(AwsMqttConnector.RootCA); //commented out as MDP changes mean resources dont currently work//Resources.GetBytes(Resources.BinaryResources.AwsCAroot)); //should this be in secure storage, or is it fine where it is?
-                X509Certificate2 clientCert = new X509Certificate2(AwsMqttConnector.ClientRsaSha256Crt, AwsMqttConnector.ClientRsaKey, ""); //make sure to add a correct pfx certificate
+                X509Certificate caCert = new X509Certificate(AwsIotCore.MqttConnector.RootCA); //commented out as MDP changes mean resources dont currently work//Resources.GetBytes(Resources.BinaryResources.AwsCAroot)); //should this be in secure storage, or is it fine where it is?
+                X509Certificate2 clientCert = new X509Certificate2(AwsIotCore.MqttConnector.ClientRsaSha256Crt, AwsIotCore.MqttConnector.ClientRsaKey, ""); //make sure to add a correct pfx certificate
 
 
-                AwsMqttConnector.Client = new MqttConnectionClient(AwsMqttConnector.Host, AwsMqttConnector.ThingName, clientCert, MqttQoSLevel.AtLeastOnce, caCert);
+                AwsIotCore.MqttConnector.Client = new MqttConnectionClient(AwsIotCore.MqttConnector.Host, AwsIotCore.MqttConnector.ThingName, clientCert, MqttQoSLevel.AtLeastOnce, caCert);
 
-                AwsMqttConnector.Client.Open();
+                bool success = AwsIotCore.MqttConnector.Client.Open();
+                Debug.WriteLine($"{success}");
 
 
+                //TODO: lets split this out into its own function!
                 Thread.Sleep(1000); //ensure that we are ready (and connected)???
-                var shadow = AwsMqttConnector.Client.GetShadow(new CancellationTokenSource(30000).Token);
+                Debug.WriteLine("");
+                Debug.WriteLine($"Attempting to get AWS IOT shadow...");
+                var shadow = AwsIotCore.MqttConnector.Client.GetShadow(new CancellationTokenSource(30000).Token);
                 if (shadow != null)
                 {
-                    Debug.WriteLine($"Get shadow result:");
+                    Debug.WriteLine($"Success!");
+                    Debug.WriteLine($"Received shadow was:");
                     //Debug.WriteLine($"Desired:  {shadow.state.desired.ToJson()}");
                     //Debug.WriteLine($"Reported:  {shadow.state.reported.ToJson()}");
 
@@ -204,8 +210,13 @@ namespace OrgPalThreeDemo
                     Debug.WriteLine($"version={shadow.version}");
                     Debug.WriteLine($"clienttoken={shadow.clienttoken}");
                     Debug.WriteLine("");
-                    Debug.WriteLine($"Get shadow as json (string):");
+                    Debug.WriteLine($"Converted to a json (string):");
                     Debug.WriteLine($"...:  {shadow.ToJson()}"); //TODO: this currently throws an invalid cast exception.
+                    Debug.WriteLine("");
+                }
+                else
+                {
+                    Debug.WriteLine($"Failed!");
                 }
 
                 // register to message received 
@@ -241,7 +252,7 @@ namespace OrgPalThreeDemo
             {
                 try
                 {
-                    var shadowReportedState = new DeviceMessageSchemas.ShadowStateProperties
+                    var shadowReportedState = new AwsIotCore.DeviceMessageSchemas.ShadowStateProperties
                     {
                         operatingSystem = "nanoFramework",
                         platform = SystemInfo.TargetName,
@@ -255,7 +266,7 @@ namespace OrgPalThreeDemo
                     const string shadowUpdateHeader = "{\"state\":{\"reported\":";
                     const string shadowUpdateFooter = "}}";
                     string shadowJson = $"{shadowUpdateHeader}{JsonConvert.SerializeObject(shadowReportedState)}{shadowUpdateFooter}";
-                    bool updateResult = AwsMqttConnector.Client.UpdateReportedState(//new ShadowPropertyCollection(
+                    bool updateResult = AwsIotCore.MqttConnector.Client.UpdateReportedState(//new ShadowPropertyCollection(
                         shadowJson); //);
 
                     Debug.WriteLine($"{!updateResult}"); //Received == false (inverted for UI).
@@ -279,7 +290,7 @@ namespace OrgPalThreeDemo
             {
                 try
                 {
-                    var statusTelemetry = new DeviceMessageSchemas.TelemetryMessage
+                    var statusTelemetry = new AwsIotCore.DeviceMessageSchemas.TelemetryMessage
                     {
                         serialNumber = _serialNumber,
                         sendTimestamp = DateTime.UtcNow,
@@ -292,7 +303,7 @@ namespace OrgPalThreeDemo
                     };
 
                     string sampleData = JsonConvert.SerializeObject(statusTelemetry);
-                    AwsMqttConnector.Client.SendMessage(sampleData); // ($"{AwsMqtt.ThingName}/data", Encoding.UTF8.GetBytes(sampleData), MqttQoSLevel.AtMostOnce, false);
+                    AwsIotCore.MqttConnector.Client.SendMessage(sampleData); // ($"{AwsMqtt.ThingName}/data", Encoding.UTF8.GetBytes(sampleData), MqttQoSLevel.AtMostOnce, false);
 
                     Debug.WriteLine("Message sent: " + sampleData);
                 }
@@ -335,20 +346,23 @@ namespace OrgPalThreeDemo
 
             if (removableDevices.Length > 0)
             {
+                Debug.WriteLine("Reading storage...");
+
                 // get folders on 1st removable device
                 var foldersInDevice = removableDevices[0].GetFolders();
 
                 foreach (var folder in foldersInDevice)
                 {
-                    Debug.WriteLine(folder.DisplayName);
+                    Debug.WriteLine($"Found folder: {folder.DisplayName}");
                 }
 
                 // get files on the root of the 1st removable device
                 var filesInDevice = removableDevices[0].GetFiles();
 
-                foreach(var file in filesInDevice)
+
+                foreach (var file in filesInDevice)
                 {
-                    Debug.WriteLine(file.Name);
+                    Debug.WriteLine($"Found file: {file.Name}");
                     //TODO: we should really check if certs are in the mcu flash before retreiving them from the filesystem (SD).
                     if (file.FileType == "crt")
                     {
@@ -357,7 +371,7 @@ namespace OrgPalThreeDemo
                         var buffer = FileIO.ReadBuffer(file);
                         using (DataReader dataReader = DataReader.FromBuffer(buffer))
                         {
-                            AwsMqttConnector.ClientRsaSha256Crt = dataReader.ReadString(buffer.Length);
+                            AwsIotCore.MqttConnector.ClientRsaSha256Crt = dataReader.ReadString(buffer.Length);
                         }
                         
                         //Should load into secure storage (somewhere) and delete file on removable device?
@@ -367,8 +381,8 @@ namespace OrgPalThreeDemo
                         var buffer = FileIO.ReadBuffer(file);
                         using (DataReader dataReader = DataReader.FromBuffer(buffer))
                         {
-                            AwsMqttConnector.RootCA = new byte[buffer.Length];
-                            dataReader.ReadBytes(AwsMqttConnector.RootCA);
+                            AwsIotCore.MqttConnector.RootCA = new byte[buffer.Length];
+                            dataReader.ReadBytes(AwsIotCore.MqttConnector.RootCA);
                         }
                     }
                     if (file.FileType == "key")
@@ -378,7 +392,7 @@ namespace OrgPalThreeDemo
                         var buffer = FileIO.ReadBuffer(file);
                         using (DataReader dataReader = DataReader.FromBuffer(buffer))
                         {
-                            AwsMqttConnector.ClientRsaKey = dataReader.ReadString(buffer.Length);
+                            AwsIotCore.MqttConnector.ClientRsaKey = dataReader.ReadString(buffer.Length);
                         }
                         
                         //Should load into secure storage (somewhere) and delete file on removable device?
@@ -392,18 +406,18 @@ namespace OrgPalThreeDemo
                             try
                             {
                                 MqttConfigFileSchema config = (MqttConfigFileSchema)JsonConvert.DeserializeObject(dataReader, typeof(MqttConfigFileSchema));
-                                AwsMqttConnector.Host = config.Url;
+                                AwsIotCore.MqttConnector.Host = config.Url;
                                 if (config.Port != null)
                                 {
-                                    AwsMqttConnector.Port = int.Parse(config.Port);
+                                    AwsIotCore.MqttConnector.Port = int.Parse(config.Port);
                                 }
                                 if (config.ThingName != string.Empty || config.ThingName != null)
                                 {
-                                    AwsMqttConnector.ThingName = config.ThingName;
+                                    AwsIotCore.MqttConnector.ThingName = config.ThingName;
                                 }
                                 else
                                 {
-                                    AwsMqttConnector.ThingName = _serialNumber;
+                                    AwsIotCore.MqttConnector.ThingName = _serialNumber;
                                 }
                             }
                             catch (Exception)
@@ -411,12 +425,12 @@ namespace OrgPalThreeDemo
 
                                 goto readMqttConfig; //TODO: sometimes a json deserialize exception happens. For the moment, just try again.
                             }
-
                         }
-
-                        //TODO: if they are on the SD, Should load into (secure) mcu storage and [delete file on removable device]?
                     }
                 }
+
+                //TODO: if the certs are on the SD, they should be loaded into (secure) mcu storage (and delete file on removable device)?
+                Debug.WriteLine(""); //finished loading files.
             }
 
         }
