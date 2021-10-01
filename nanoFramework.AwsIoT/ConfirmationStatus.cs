@@ -6,9 +6,9 @@ namespace nanoFramework.AwsIot
 {
     internal class ConfirmationStatus
     {
-        public ConfirmationStatus(ushort rid)
+        public ConfirmationStatus(ushort responseId)
         {
-            ResponseId = rid;
+            ResponseId = responseId;
             Received = false;
         }
 

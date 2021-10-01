@@ -18,6 +18,7 @@ namespace nanoFramework.AwsIoT.Shadows
         /// </summary>
         public Shadow()
         {
+            //TODO: we can use uppercase letters for properties if we initialise them here...
         }
 
 
@@ -35,7 +36,7 @@ namespace nanoFramework.AwsIoT.Shadows
             }
             if (_shadow["version"] != null)
             {
-                version = (int)_shadow["version"]; //could be null
+                version = (int)_shadow["version"];
             }
             if (_shadow["clienttoken"] != null)
             {
@@ -105,7 +106,7 @@ namespace nanoFramework.AwsIoT.Shadows
                 var shadowStringBody = string.Empty;
                 if (!string.IsNullOrEmpty(clienttoken)) //not sure about this one!
                 {
-                    shadowStringBody = $",clientToken:{ clienttoken}";
+                    shadowStringBody = $",clientToken:{ clienttoken }";
                 }
                 var shadowStringFooter = "}";
                 return shadowStringHeader + shadowStringBody + shadowStringFooter;

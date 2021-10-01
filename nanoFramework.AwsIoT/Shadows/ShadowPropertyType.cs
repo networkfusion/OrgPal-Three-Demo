@@ -9,7 +9,7 @@ namespace nanoFramework.AwsIoT.Shadows
     /// Represents <see cref="Shadow"/> properties
     /// </summary>
     /// <remarks>
-    /// Decodes State and Metadata
+    /// Decodes State and Metadata types.
     /// </remarks>
     public class ShadowPropertyType
     {
@@ -18,6 +18,7 @@ namespace nanoFramework.AwsIoT.Shadows
         /// </summary>
         public ShadowPropertyType()
         {
+            //TODO: we can use uppercase letters for properties if we initialise them here...
         }
 
         /// <summary>
