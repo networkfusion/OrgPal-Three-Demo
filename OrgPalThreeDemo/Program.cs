@@ -12,6 +12,7 @@ using Windows.Storage.Streams;
 using nanoFramework.AwsIot;
 using OrgPalThreeDemo.TempDebugHelpers;
 using OrgPalThreeDemo.Networking;
+using nanoFramework.AwsIoT.Shadows;
 
 namespace OrgPalThreeDemo
 {
@@ -266,8 +267,9 @@ namespace OrgPalThreeDemo
                     const string shadowUpdateHeader = "{\"state\":{\"reported\":";
                     const string shadowUpdateFooter = "}}";
                     string shadowJson = $"{shadowUpdateHeader}{JsonConvert.SerializeObject(shadowReportedState)}{shadowUpdateFooter}";
-                    bool updateResult = AwsIotCore.MqttConnector.Client.UpdateReportedState(//new ShadowPropertyCollection(
-                        shadowJson); //);
+                    Debug.WriteLine($"Shadow current state: {shadowJson}");
+                    var shadow = new Shadow();
+                    bool updateResult = AwsIotCore.MqttConnector.Client.UpdateReportedState(shadow);
 
                     Debug.WriteLine($"{!updateResult}"); //Received == false (inverted for UI).
 

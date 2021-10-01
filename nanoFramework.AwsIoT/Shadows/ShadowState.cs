@@ -26,8 +26,23 @@ namespace nanoFramework.AwsIoT.Shadows
         /// <param name="shadowState">Hashtable for the shadow state</param>
         public ShadowState(Hashtable shadowState) //or should this be a property collection?
         {
-            desired = (Hashtable)shadowState["desired"];
-            reported = (Hashtable)shadowState["reported"];
+            if (shadowState["desired"] != null)
+            {
+                desired = (Hashtable)shadowState["desired"];
+            }
+            else
+            {
+                desired = new Hashtable();
+            }
+
+            if (shadowState["reported"] != null)
+            {
+                reported = (Hashtable)shadowState["reported"];
+            }
+            else
+            {
+                reported = new Hashtable();
+            }
         }
 
 #pragma warning disable IDE1006 // Naming Styles, disabled due to being Json specific

@@ -80,7 +80,6 @@ namespace nanoFramework.AwsIot
         public MqttConnectionClient(string iotCoreUri, string uniqueId, X509Certificate2 clientCert, MqttQoSLevel qosLevel = MqttQoSLevel.AtMostOnce, X509Certificate awsRootCert = null)
         {
             _clientCert = clientCert;
-            //_privateKey = Convert.ToBase64String(clientCert.PrivateKey);
             _iotCoreUri = iotCoreUri;
             _uniqueId = uniqueId;
             _shadowTopic = $"$aws/things/{_uniqueId}/shadow";
@@ -264,7 +263,7 @@ namespace nanoFramework.AwsIot
         /// <param name="reported">The reported properties.</param>
         /// <param name="cancellationToken">A cancellation token. If you use the default one, the confirmation of delivery will not be awaited.</param>
         /// <returns>True for successful message delivery.</returns>
-        public bool UpdateReportedState(string reported, CancellationToken cancellationToken = default, string namedShadow = "") //was ShadowCollection
+        public bool UpdateReportedState(Shadow reported, CancellationToken cancellationToken = default, string namedShadow = "") //was ShadowCollection
         {
             var topic = $"{_shadowTopic}/update";
             if (namedShadow != string.Empty)
@@ -272,7 +271,7 @@ namespace nanoFramework.AwsIot
                 topic = $"{_shadowTopic}/name/{namedShadow}/update";
             }
 
-            string shadow = reported; //.ToJson();
+            string shadow = reported.ToJson(true);
             Debug.WriteLine($"update shadow: {shadow}");
             var rid = _mqttc.Publish(topic, Encoding.UTF8.GetBytes(shadow), MqttQoSLevel.AtLeastOnce, false);
             _mqttBrokerStatus.Status = Status.ShadowUpdated;

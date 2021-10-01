@@ -29,11 +29,47 @@ namespace nanoFramework.AwsIoT.Shadows
         public Shadow(string shadowJsonString)
         {
             Hashtable _shadow = (Hashtable)JsonConvert.DeserializeObject(shadowJsonString, typeof(Hashtable));
-            state = new ShadowState((Hashtable)_shadow["state"]);
-            metadata = new ShadowMetadata((Hashtable)_shadow["metadata"]);
-            version = (int) _shadow["version"]; //could be null
-            clienttoken = (string) _shadow["clienttoken"]; //this could be null, or a named shadow?!
-            timestamp = (int)_shadow["timestamp"];
+
+            if (_shadow["state"] != null)
+            {
+                state = new ShadowState((Hashtable)_shadow["state"]);
+            }
+            else
+            {
+                state = new ShadowState();
+            }
+            if (_shadow["metadata"] != null)
+            {
+                metadata = new ShadowMetadata((Hashtable)_shadow["metadata"]);
+            }
+            else
+            {
+                metadata = new ShadowMetadata();
+            }
+            if (_shadow["version"] != null)
+            {
+                version = (int)_shadow["version"]; //could be null
+            }
+            else
+            {
+                version = 0;
+            }
+            if (_shadow["clienttoken"] != null)
+            {
+                clienttoken = (string)_shadow["clienttoken"]; //this could be null, or a named shadow?!
+            }
+            else
+            {
+                clienttoken = string.Empty;
+            }
+            if (_shadow["timestamp"] != null)
+            {
+                timestamp = (int)_shadow["timestamp"];
+            }
+            else
+            {
+                timestamp = 0;
+            }
 
         }
 
