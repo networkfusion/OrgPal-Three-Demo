@@ -9,29 +9,29 @@ namespace nanoFramework.AwsIoT.Shadows
     /// <summary>
     /// Represents <see cref="Shadow"/> properties
     /// </summary>
-    public class ShadowState
+    public class ShadowPropertyType
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="ShadowState"/>
+        /// Initializes a new instance of <see cref="ShadowPropertyType"/>
         /// </summary>
-        public ShadowState()
+        public ShadowPropertyType()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="ShadowState"/>
+        /// Initializes a new instance of <see cref="ShadowPropertyType"/>
         /// </summary>
         /// <param name="shadowState">Hashtable for the shadow state</param>
-        public ShadowState(Hashtable shadowState) //or should this be a property collection?
+        public ShadowPropertyType(Hashtable shadowProperty) //or should this be a property collection?
         {
-            if (shadowState["desired"] != null)
+            if (shadowProperty["desired"] != null)
             {
-                desired = (Hashtable)shadowState["desired"];
+                desired = (Hashtable)shadowProperty["desired"];
             }
 
-            if (shadowState["reported"] != null)
+            if (shadowProperty["reported"] != null)
             {
-                reported = (Hashtable)shadowState["reported"];
+                reported = (Hashtable)shadowProperty["reported"];
             }
         }
 

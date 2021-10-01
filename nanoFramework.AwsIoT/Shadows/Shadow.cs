@@ -27,11 +27,11 @@ namespace nanoFramework.AwsIoT.Shadows
 
             if (_shadow["state"] != null)
             {
-                state = new ShadowState((Hashtable)_shadow["state"]);
+                state = new ShadowPropertyType((Hashtable)_shadow["state"]);
             }
             if (_shadow["metadata"] != null)
             {
-                metadata = new ShadowMetadata((Hashtable)_shadow["metadata"]);
+                metadata = new ShadowPropertyType((Hashtable)_shadow["metadata"]);
             }
             if (_shadow["version"] != null)
             {
@@ -52,12 +52,12 @@ namespace nanoFramework.AwsIoT.Shadows
         /// <summary>
         /// Gets and sets the <see cref="Shadow"/>  state properties.
         /// </summary>
-        public ShadowState state { get; set; }
+        public ShadowPropertyType state { get; set; }
 
         /// <summary>
         /// Gets and sets the <see cref="Shadow"/> metadata properties.
         /// </summary>
-        public ShadowMetadata metadata { get; set; }
+        public ShadowPropertyType metadata { get; set; }
 
         /// <summary>
         /// Shadow's Version
