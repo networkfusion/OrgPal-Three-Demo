@@ -11,33 +11,33 @@ namespace nanoFramework.AwsIoT.Shadows
     /// <remarks>
     /// Decodes State and Metadata types.
     /// </remarks>
-    public class ShadowPropertyType
+    public class ShadowProperties
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="ShadowPropertyType"/>
+        /// Initializes a new instance of <see cref="ShadowProperties"/>
         /// </summary>
-        public ShadowPropertyType()
+        public ShadowProperties()
         {
-            //TODO: we can use uppercase letters for properties if we initialise them here...
+            //Required for Json deserialization.
         }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="ShadowPropertyType"/>
+        /// Initializes a new instance of <see cref="ShadowProperties"/>
         /// </summary>
-        /// <param name="shadowProperty">Hashtable for the shadow property type</param>
+        /// <param name="shadowProperties">Hashtable for the shadow state properties</param>
         /// <remarks>
-        /// Decodes State and Metadata
+        /// Decodes State or Metadata properties.
         /// </remarks>
-        public ShadowPropertyType(Hashtable shadowProperty) //or should this be a property collection?
+        public ShadowProperties(Hashtable shadowProperties) //or should this be a property collection?
         {
-            if (shadowProperty["desired"] != null)
+            if (shadowProperties["desired"] != null)
             {
-                desired = (Hashtable)shadowProperty["desired"];
+                desired = (Hashtable)shadowProperties["desired"];
             }
 
-            if (shadowProperty["reported"] != null)
+            if (shadowProperties["reported"] != null)
             {
-                reported = (Hashtable)shadowProperty["reported"];
+                reported = (Hashtable)shadowProperties["reported"];
             }
         }
 

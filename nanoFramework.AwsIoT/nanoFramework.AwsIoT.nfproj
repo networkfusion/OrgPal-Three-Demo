@@ -24,7 +24,7 @@
     <Compile Include="MqttConnectionClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Shadows\Shadow.cs" />
-    <Compile Include="Shadows\ShadowPropertyType.cs" />
+    <Compile Include="Shadows\ShadowProperties.cs" />
     <Compile Include="Shadows\ShadowUpdatedEventArgs.cs" />
     <Compile Include="Status.cs" />
     <Compile Include="StatusUpdatedEventArgs.cs" />

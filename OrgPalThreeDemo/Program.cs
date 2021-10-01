@@ -267,11 +267,11 @@ namespace OrgPalThreeDemo
                     const string shadowUpdateHeader = "{\"state\":{\"reported\":";
                     const string shadowUpdateFooter = "}}";
                     string shadowJson = $"{shadowUpdateHeader}{JsonConvert.SerializeObject(shadowReportedState)}{shadowUpdateFooter}";
-                    Debug.WriteLine($"Shadow current state: {shadowJson}");
+                    Debug.WriteLine($"With json: {shadowJson}");
                     var shadow = new Shadow(shadowJson);
                     bool updateResult = AwsIotCore.MqttConnector.Client.UpdateReportedState(shadow);
 
-                    Debug.WriteLine($"{!updateResult}"); //Received == false (inverted for UI).
+                    Debug.WriteLine($"Result was: {!updateResult}"); //Received == false (inverted for UI).
 
                 }
                 catch (Exception ex)

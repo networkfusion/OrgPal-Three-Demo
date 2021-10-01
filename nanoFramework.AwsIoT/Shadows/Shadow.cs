@@ -18,21 +18,21 @@ namespace nanoFramework.AwsIoT.Shadows
         /// </summary>
         public Shadow()
         {
-            //TODO: we can use uppercase letters for properties if we initialise them here...
+            //Required for Json deserialization.
         }
 
 
-        public Shadow(string shadowJsonString)
+        public Shadow(string shadowJsonString) //TODO: Perhaps included client token / unique Id?!
         {
-            Hashtable _shadow = (Hashtable)JsonConvert.DeserializeObject(shadowJsonString, typeof(Hashtable)); //TODO: could probably just decode to this now?!
+            Hashtable _shadow = (Hashtable)JsonConvert.DeserializeObject(shadowJsonString, typeof(Hashtable));
 
             if (_shadow["state"] != null)
             {
-                state = new ShadowPropertyType((Hashtable)_shadow["state"]);
+                state = new ShadowProperties((Hashtable)_shadow["state"]);
             }
             if (_shadow["metadata"] != null)
             {
-                metadata = new ShadowPropertyType((Hashtable)_shadow["metadata"]);
+                metadata = new ShadowProperties((Hashtable)_shadow["metadata"]);
             }
             if (_shadow["version"] != null)
             {
@@ -53,12 +53,12 @@ namespace nanoFramework.AwsIoT.Shadows
         /// <summary>
         /// Gets and sets the <see cref="Shadow"/>  state properties.
         /// </summary>
-        public ShadowPropertyType state { get; set; }
+        public ShadowProperties state { get; set; }
 
         /// <summary>
         /// Gets and sets the <see cref="Shadow"/> metadata properties.
         /// </summary>
-        public ShadowPropertyType metadata { get; set; }
+        public ShadowProperties metadata { get; set; }
 
         /// <summary>
         /// Shadow's Version
