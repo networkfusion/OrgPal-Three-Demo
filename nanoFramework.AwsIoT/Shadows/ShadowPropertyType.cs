@@ -1,7 +1,6 @@
 ﻿// Copyright (c) .Net Foundation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-//using nanoFramework.Json;
 using System.Collections;
 
 namespace nanoFramework.AwsIoT.Shadows
@@ -9,6 +8,9 @@ namespace nanoFramework.AwsIoT.Shadows
     /// <summary>
     /// Represents <see cref="Shadow"/> properties
     /// </summary>
+    /// <remarks>
+    /// Decodes State and Metadata
+    /// </remarks>
     public class ShadowPropertyType
     {
         /// <summary>
@@ -21,7 +23,10 @@ namespace nanoFramework.AwsIoT.Shadows
         /// <summary>
         /// Initializes a new instance of <see cref="ShadowPropertyType"/>
         /// </summary>
-        /// <param name="shadowState">Hashtable for the shadow state</param>
+        /// <param name="shadowProperty">Hashtable for the shadow property type</param>
+        /// <remarks>
+        /// Decodes State and Metadata
+        /// </remarks>
         public ShadowPropertyType(Hashtable shadowProperty) //or should this be a property collection?
         {
             if (shadowProperty["desired"] != null)
