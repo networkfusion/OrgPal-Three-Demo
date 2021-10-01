@@ -18,57 +18,32 @@ namespace nanoFramework.AwsIoT.Shadows
         /// </summary>
         public Shadow()
         {
-            state = new ShadowState();
-            metadata = new ShadowMetadata();
-            version = 0;
-            clienttoken = string.Empty; //need to account for this later!
-            timestamp = 0; //(int)System.DateTime.UtcNow.ToUnixTimeSeconds(); //should probably be 1970!
         }
 
 
         public Shadow(string shadowJsonString)
         {
-            Hashtable _shadow = (Hashtable)JsonConvert.DeserializeObject(shadowJsonString, typeof(Hashtable));
+            Hashtable _shadow = (Hashtable)JsonConvert.DeserializeObject(shadowJsonString, typeof(Hashtable)); //TODO: could probably just decode to this now?!
 
             if (_shadow["state"] != null)
             {
                 state = new ShadowState((Hashtable)_shadow["state"]);
             }
-            else
-            {
-                state = new ShadowState();
-            }
             if (_shadow["metadata"] != null)
             {
                 metadata = new ShadowMetadata((Hashtable)_shadow["metadata"]);
-            }
-            else
-            {
-                metadata = new ShadowMetadata();
             }
             if (_shadow["version"] != null)
             {
                 version = (int)_shadow["version"]; //could be null
             }
-            else
-            {
-                version = 0;
-            }
             if (_shadow["clienttoken"] != null)
             {
                 clienttoken = (string)_shadow["clienttoken"]; //this could be null, or a named shadow?!
             }
-            else
-            {
-                clienttoken = string.Empty;
-            }
             if (_shadow["timestamp"] != null)
             {
                 timestamp = (int)_shadow["timestamp"];
-            }
-            else
-            {
-                timestamp = 0;
             }
 
         }
@@ -92,12 +67,12 @@ namespace nanoFramework.AwsIoT.Shadows
         /// <summary>
         /// Shadow's Client Token
         /// </summary>
-        public string clienttoken { get; set; } //This is optional (may return null)!
+        public string clienttoken { get; set; }
 
         /// <summary>
         /// Shadow's Timestamp
         /// </summary>
-        public int timestamp { get; set; } //TODO: should return datetime! and should actually be a float!
+        public int timestamp { get; set; } //technically this should be a long?!
 
 #pragma warning restore IDE1006 // Naming Styles
 
@@ -110,17 +85,20 @@ namespace nanoFramework.AwsIoT.Shadows
         {
             if (updateShadow)
             {
-                //Hashtable serShadow = new Hashtable();
-                //Hashtable serState = new Hashtable();
-                //Hashtable serReported = state.reported;
-                //serReported.Add("reported", serReported);
-                //serShadow.Add("state", serState);
-                //if (!string.IsNullOrEmpty(clienttoken))
+                //if (state.reported != null)
                 //{
-                //    serShadow.Add("clienttoken", clienttoken);
+                //    Hashtable serShadow = new Hashtable();
+                //    Hashtable serState = new Hashtable();
+
+                //    serState.Add("reported", state.reported);
+                //    serShadow.Add("state", serState);
+                //    if (!string.IsNullOrEmpty(clienttoken))
+                //    {
+                //        serShadow.Add("clienttoken", clienttoken);
+                //    }
+                //    var shadow = JsonConvert.SerializeObject(serShadow);
+                //    return shadow;
                 //}
-                //var shadow = JsonConvert.SerializeObject(serShadow);
-                //return shadow;
 
                 //TODO: The following is a workaround (and hacky at that)!
                 var shadowStringHeader = @"{""state"":""reported""" + JsonConvert.SerializeObject(state.reported);

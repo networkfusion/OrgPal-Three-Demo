@@ -16,8 +16,6 @@ namespace nanoFramework.AwsIoT.Shadows
         /// </summary>
         public ShadowState()
         {
-            desired = new Hashtable();
-            reported = new Hashtable();
         }
 
         /// <summary>
@@ -30,18 +28,10 @@ namespace nanoFramework.AwsIoT.Shadows
             {
                 desired = (Hashtable)shadowState["desired"];
             }
-            else
-            {
-                desired = new Hashtable();
-            }
 
             if (shadowState["reported"] != null)
             {
                 reported = (Hashtable)shadowState["reported"];
-            }
-            else
-            {
-                reported = new Hashtable();
             }
         }
 
@@ -50,12 +40,12 @@ namespace nanoFramework.AwsIoT.Shadows
         /// <summary>
         /// Gets and sets the <see cref="Shadow"/> desired properties.
         /// </summary>
-        public Hashtable desired { get; set; }
+        public Hashtable desired { get; set; } = new Hashtable();
 
         /// <summary>
         /// Gets and sets the <see cref="Shadow"/> reported properties.
         /// </summary>
-        public Hashtable reported { get; set; }
+        public Hashtable reported { get; set; } = new Hashtable();
 
 #pragma warning restore IDE1006 // Naming Styles
 
