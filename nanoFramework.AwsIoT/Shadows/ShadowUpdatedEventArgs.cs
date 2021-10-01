@@ -30,6 +30,6 @@ namespace nanoFramework.AwsIoT.Shadows
         /// Shadow.
         /// </summary>
         public Shadow Shadow { get; set; }
-        //ShadowPropertyCollection Shadow { get; set; }
+
     }
 }

@@ -25,23 +25,10 @@ namespace nanoFramework.AwsIoT.Shadows
             timestamp = 0; //(int)System.DateTime.UtcNow.ToUnixTimeSeconds(); //should probably be 1970!
         }
 
-        ///// <summary>
-        ///// Creates an instance of <see cref="Shadow"/>.
-        ///// </summary>
-        ///// <param name="clientToken">Client Token.</param>
-        ///// <remarks>The client token can be no longer than 64 bytes.</remarks>
-        //public Shadow(string clientToken) : this()
-        //{
-        //    clienttoken = clientToken;
-        //    state = new ShadowState();
-        //    metadata = new ShadowMetadata(); //TODO: doubt this is needed, but better not being null!
-        //}
-
 
         public Shadow(string shadowJsonString)
         {
             Hashtable _shadow = (Hashtable)JsonConvert.DeserializeObject(shadowJsonString, typeof(Hashtable));
-
             state = new ShadowState((Hashtable)_shadow["state"]);
             metadata = new ShadowMetadata((Hashtable)_shadow["metadata"]);
             version = (int) _shadow["version"]; //could be null
@@ -83,19 +70,21 @@ namespace nanoFramework.AwsIoT.Shadows
         /// </summary>
         /// <param name="fullJsonString"> Optional: Only returns a partial json string for use with updates. unless specified.</param>
         /// <returns>JSON string</returns>
-        public string ToJson(bool partialShadow = true)
+        public string ToJson(bool updateShadow = true)
         {
-            if (partialShadow)
+            if (updateShadow)
             {
-                //Hashtable ser = new Hashtable();
-                //ser.Add("state", state);
-
+                //Hashtable serShadow = new Hashtable();
+                //Hashtable serState = new Hashtable();
+                //Hashtable serReported = new Hashtable();
+                //serReported.Add("reported", state.reported);
+                //serShadow.Add("state", serState);
                 //if (!string.IsNullOrEmpty(clienttoken))
                 //{
-                //    ser.Add("clienttoken", clienttoken);
+                //    serShadow.Add("clienttoken", clienttoken);
                 //}
 
-                //return JsonConvert.SerializeObject(ser);
+                //return JsonConvert.SerializeObject(serShadow);
 
                 //TODO: The following is a workaround (and hacky at that)!
                 var shadowStringHeader = @"{""state"":""reported""" + JsonConvert.SerializeObject(state.reported);

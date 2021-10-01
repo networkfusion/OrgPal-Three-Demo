@@ -387,7 +387,7 @@ namespace nanoFramework.AwsIot
                         else if (e.Topic.IndexOf("accepted") > 0)
                         {
                             _shadow = (Shadow)JsonConvert.DeserializeObject(jsonMessageBody, typeof(Shadow)); // new Shadow(jsonMessageBody);
-                            //_shadow = new Shadow(_uniqueId, message); //TODO: Shadow (auto deserialize from JSON)
+                            //_shadow = new Shadow(_uniqueId, jsonMessageBody); //TODO: Shadow (auto deserialize from JSON)
                             _shadowReceived = true;
                             _mqttBrokerStatus.Status = Status.ShadowReceived;
                             _mqttBrokerStatus.Message = jsonMessageBody;
