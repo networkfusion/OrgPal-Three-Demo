@@ -263,7 +263,7 @@ namespace nanoFramework.AwsIot
         /// <param name="reported">The reported properties.</param>
         /// <param name="cancellationToken">A cancellation token. If you use the default one, the confirmation of delivery will not be awaited.</param>
         /// <returns>True for successful message delivery.</returns>
-        public bool UpdateReportedState(Shadow reported, CancellationToken cancellationToken = default, string namedShadow = "") //was ShadowCollection
+        public bool UpdateReportedState(Shadow shadowToSend, CancellationToken cancellationToken = default, string namedShadow = "") //was ShadowCollection
         {
             var topic = $"{_shadowTopic}/update";
             if (namedShadow != string.Empty)
@@ -271,8 +271,8 @@ namespace nanoFramework.AwsIot
                 topic = $"{_shadowTopic}/name/{namedShadow}/update";
             }
 
-            string shadow = reported.ToJson(true);
-            Debug.WriteLine($"update shadow: {shadow}");
+            string shadow = shadowToSend.ToJson(true);
+            Debug.WriteLine($"updatereportedstate shadow content: {shadow}");
             var rid = _mqttc.Publish(topic, Encoding.UTF8.GetBytes(shadow), MqttQoSLevel.AtLeastOnce, false);
             _mqttBrokerStatus.Status = Status.ShadowUpdated;
             _mqttBrokerStatus.Message = string.Empty;

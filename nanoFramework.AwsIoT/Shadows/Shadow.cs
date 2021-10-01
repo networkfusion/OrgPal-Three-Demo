@@ -112,15 +112,15 @@ namespace nanoFramework.AwsIoT.Shadows
             {
                 //Hashtable serShadow = new Hashtable();
                 //Hashtable serState = new Hashtable();
-                //Hashtable serReported = new Hashtable();
-                //serReported.Add("reported", state.reported);
+                //Hashtable serReported = state.reported;
+                //serReported.Add("reported", serReported);
                 //serShadow.Add("state", serState);
                 //if (!string.IsNullOrEmpty(clienttoken))
                 //{
                 //    serShadow.Add("clienttoken", clienttoken);
                 //}
-
-                //return JsonConvert.SerializeObject(serShadow);
+                //var shadow = JsonConvert.SerializeObject(serShadow);
+                //return shadow;
 
                 //TODO: The following is a workaround (and hacky at that)!
                 var shadowStringHeader = @"{""state"":""reported""" + JsonConvert.SerializeObject(state.reported);
