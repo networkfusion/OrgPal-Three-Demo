@@ -199,15 +199,16 @@ namespace OrgPalThreeDemo
                     //Debug.WriteLine($"Desired:  {shadow.state.desired.ToJson()}");
                     //Debug.WriteLine($"Reported:  {shadow.state.reported.ToJson()}");
 
-                    //Debug.WriteLine("state.desired:");
-                    //DebugHelper.DumpHashTable(shadow.state.desired, 1);
-                    //Debug.WriteLine("state.reported:");
-                    //DebugHelper.DumpHashTable(shadow.state.reported, 1);
+                    Debug.WriteLine("state.desired:");
+                    DebugHelper.DumpHashTable(shadow.state.desired, 1);
+                    Debug.WriteLine("state.reported:");
+                    DebugHelper.DumpHashTable(shadow.state.reported, 1);
                     Debug.WriteLine("metadata.desired:");
                     DebugHelper.DumpHashTable(shadow.metadata.desired, 1);
                     Debug.WriteLine("metadata.reported:");
                     DebugHelper.DumpHashTable(shadow.metadata.reported, 1);
-                    Debug.WriteLine($"timestamp={DateTime.FromUnixTimeSeconds(shadow.timestamp)}");
+                    Debug.WriteLine($"timestamp={shadow.timestamp}");
+                    Debug.WriteLine($"as USA date: {DateTime.FromUnixTimeSeconds(shadow.timestamp)}");
                     Debug.WriteLine($"version={shadow.version}");
                     Debug.WriteLine($"clienttoken={shadow.clienttoken}");
                     Debug.WriteLine("");
@@ -258,7 +259,7 @@ namespace OrgPalThreeDemo
                         operatingSystem = "nanoFramework",
                         platform = SystemInfo.TargetName,
                         cpu = SystemInfo.Platform,
-                        serialNumber = "test-device", //"//$"SN{_serialNumber }", //TODO: "SN" should not be needed! and this seems to throw anyway!
+                        serialNumber = $"SN{_serialNumber }", //TODO: "SN" should not be needed! and this seems to throw anyway!
                         bootTimestamp = startTime
                     };
 
@@ -267,7 +268,7 @@ namespace OrgPalThreeDemo
                     const string shadowUpdateHeader = "{\"state\":{\"reported\":";
                     const string shadowUpdateFooter = "}}";
                     string shadowJson = $"{shadowUpdateHeader}{JsonConvert.SerializeObject(shadowReportedState)}{shadowUpdateFooter}";
-                    Debug.WriteLine($"With json: {shadowJson}");
+                    Debug.WriteLine($"  With json: {shadowJson}");
                     var shadow = new Shadow(shadowJson);
                     bool updateResult = AwsIotCore.MqttConnector.Client.UpdateReportedState(shadow);
 

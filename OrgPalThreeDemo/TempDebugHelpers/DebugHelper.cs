@@ -15,12 +15,17 @@ namespace OrgPalThreeDemo.TempDebugHelpers
                 {
                     Debug.Write(GetSpaces(level));
                     Debug.WriteLine($"key={key}");
-                    DumpHashTable((Hashtable)hash[key], level + 1);
+                    DumpHashTable((Hashtable)hash[key], level + 1);                    
                 }
                 else
                 {
                     Debug.Write(GetSpaces(level));
                     Debug.WriteLine($"Key={key},value={hash[key]}");
+                    if (key.ToString() == "timestamp")
+                    {
+                        Debug.Write(GetSpaces(level));
+                        Debug.WriteLine($"as USA date: {DateTime.FromUnixTimeSeconds((int)hash[key])}");
+                    }
                 }
             }
         }
