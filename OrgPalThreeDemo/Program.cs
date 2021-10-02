@@ -259,7 +259,7 @@ namespace OrgPalThreeDemo
                         platform = SystemInfo.TargetName,
                         cpu = SystemInfo.Platform,
                         serialNumber = "test-device", //"//$"SN{_serialNumber }", //TODO: "SN" should not be needed! and this seems to throw anyway!
-                        bootTimestamp = startTime.ToUnixTimeSeconds()
+                        bootTimestamp = startTime
                     };
 
                     Debug.Write($"Updating shadow reported properties... "); //wait for result before writeline.
