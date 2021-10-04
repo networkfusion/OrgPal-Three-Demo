@@ -3,7 +3,7 @@
 
 using System;
 
-namespace nanoFramework.AwsIot
+namespace nanoFramework.AwsIoT
 {
     /// <summary>
     /// Delegate method for status update.

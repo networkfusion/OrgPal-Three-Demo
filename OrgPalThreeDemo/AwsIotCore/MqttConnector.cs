@@ -1,4 +1,4 @@
-﻿using nanoFramework.AwsIot;
+﻿using nanoFramework.AwsIoT;
 
 namespace OrgPalThreeDemo.AwsIotCore
 {

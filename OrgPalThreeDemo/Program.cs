@@ -9,7 +9,7 @@ using nanoFramework.M2Mqtt.Messages; // Only required due to QoS level. Perhaps 
 //using System.Device.Gpio;
 using Windows.Storage;
 using Windows.Storage.Streams;
-using nanoFramework.AwsIot;
+using nanoFramework.AwsIoT;
 using OrgPalThreeDemo.TempDebugHelpers;
 using OrgPalThreeDemo.Networking;
 using nanoFramework.AwsIoT.Shadows;
@@ -183,7 +183,7 @@ namespace OrgPalThreeDemo
 
                 AwsIotCore.MqttConnector.Client = new MqttConnectionClient(AwsIotCore.MqttConnector.Host, AwsIotCore.MqttConnector.ThingName, clientCert, MqttQoSLevel.AtLeastOnce, caCert);
 
-                bool success = AwsIotCore.MqttConnector.Client.Open();
+                bool success = AwsIotCore.MqttConnector.Client.Open("nanoframework/device");
                 Debug.WriteLine($"{success}");
 
 

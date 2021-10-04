@@ -1,7 +1,7 @@
 ﻿// Copyright (c) .Net Foundation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace nanoFramework.AwsIot //TODO: improve for AWS IoT.
+namespace nanoFramework.AwsIoT //TODO: improve for AWS IoT.
 {
     /// <summary>
     /// Connection and event status.
@@ -72,11 +72,6 @@ namespace nanoFramework.AwsIot //TODO: improve for AWS IoT.
         /// Message received.
         /// </summary>
         MessageReceived,
-
-        /// <summary>
-        /// A direct method has been called.
-        /// </summary>
-        DirectMethodCalled,
 
         //TODO: map the following exceptions?!
         ///// Amazon.IotData.Model.

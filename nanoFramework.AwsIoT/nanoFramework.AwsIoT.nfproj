@@ -18,6 +18,7 @@
   </PropertyGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
+    <Compile Include="CloudToDeviceMessage.cs" />
     <Compile Include="ConfirmationStatus.cs" />
     <Compile Include="ConnectionState.cs" />
     <Compile Include="MethodCallback.cs" />

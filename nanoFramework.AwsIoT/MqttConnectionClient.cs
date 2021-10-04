@@ -12,7 +12,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 
-namespace nanoFramework.AwsIot
+namespace nanoFramework.AwsIoT
 {
     // https://github.com/aws/aws-sdk-net/blob/master/sdk/src/Services/IotData/Generated/_netstandard/AmazonIotDataClient.cs
     // https://github.com/aws/aws-iot-device-sdk-embedded-C/tree/master/src
@@ -25,18 +25,10 @@ namespace nanoFramework.AwsIot
     public class MqttConnectionClient : IDisposable
     {
 
-        private readonly string _shadowTopic;
-
-        //const string ShadowReportedPropertiesTopic = "$iothub/shadow/PATCH/properties/reported/";
-        //const string ShadowDesiredPropertiesTopic = "$iothub/shadow/GET/";
-        //const string DirectMethodTopic = "$iothub/methods/POST/";
-
         private readonly string _iotCoreUri; // FQDN
-        private readonly string _uniqueId; //Otherwise known as the Thing Name.
         const int _mqttsPort = 8883; //Default MQTTS port.
         private readonly X509Certificate2 _clientCert; //ClientRsaSha256Crt and ClientRsaKey
         private readonly X509Certificate _awsRootCACert;
-        //private readonly string _privateKey;
 
         private M2Mqtt.MqttClient _mqttc;
         private readonly ConnectionState _mqttBrokerStatus = new ConnectionState();
@@ -45,13 +37,21 @@ namespace nanoFramework.AwsIot
         private readonly object _lock = new object();
         private Timer _timerTokenRenew;
 
-        private readonly string _telemetryTopic;
-        private readonly string _lwtTopic;
-        private readonly string _deviceMessageTopic;
+        private readonly string _shadowTopic;
+        private string _telemetryTopic;
+        private string _lwtTopic;
+        private string _deviceMessageTopic;
 
         private Shadow _shadow;
         private bool _shadowReceived;
 
+        /// <summary>
+        /// The name of the "Thing"
+        /// </summary>
+        /// <remarks>
+        /// Otherwise known as the "clienttoken" or "Device ID"
+        /// </remarks>
+        public string ThingName { get; private set; } //Retriveable to make it easier to set custom topics!
 
         /// <summary>
         /// Device shadow updated event.
@@ -63,10 +63,10 @@ namespace nanoFramework.AwsIot
         /// </summary>
         public event StatusUpdated StatusUpdated;
 
-        ///// <summary>
-        ///// Cloud to device message received event.
-        ///// </summary>
-        //public event CloudToDeviceMessage CloudToDeviceMessage;
+        /// <summary>
+        /// Cloud to device message received event.
+        /// </summary>
+        public event CloudToDeviceMessage CloudToDeviceMessage;
 
 
         /// <summary>
@@ -74,20 +74,20 @@ namespace nanoFramework.AwsIot
         /// </summary>
         /// <param name="iotCoreUri">The AWS IoT Core fully quilified domain name (example: <instance>.<region>.amazonaws.com)</param>
         /// <param name="uniqueId">A unique identity for your device (Device ID / Thing Name).</param>
-        /// <param name="clientCert">The certificate used to connect the device to the MQTT broker (containing both the public and private key).</param>
+        /// <param name="clientCert">The certificate used to connect the device to the MQTT broker (containing both the private certificate and private key).</param>
         /// <param name="qosLevel">The default quality of service level for the delivery of MQTT messages, (defaults to the lowest quality)</param>
         /// /// <param name="awsRootCert">The Root (AWS) certificate for the connection to AWS IoT Core</param>
         public MqttConnectionClient(string iotCoreUri, string uniqueId, X509Certificate2 clientCert, MqttQoSLevel qosLevel = MqttQoSLevel.AtMostOnce, X509Certificate awsRootCert = null)
         {
             _clientCert = clientCert;
             _iotCoreUri = iotCoreUri;
-            _uniqueId = uniqueId;
-            _shadowTopic = $"$aws/things/{_uniqueId}/shadow";
-            _telemetryTopic = $"nanoframework/device/{_uniqueId}/messages/events"; //TODO: we should make this configurable!
-            _lwtTopic = $"nanoframework/device/{_uniqueId}/lwt"; //TODO: should this Last Will and Testiment topic be configurable?!
+            ThingName = uniqueId;
+            _shadowTopic = $"$aws/things/{ThingName}/shadow";
+            _telemetryTopic = $"device/{ThingName}/messages/events";
+            _deviceMessageTopic = $"device/{ThingName}/messages/devicebound";
+            _lwtTopic = $"device/{ThingName}/lwt";
             _mqttBrokerStatus.Status = Status.Disconnected;
             _mqttBrokerStatus.Message = string.Empty;
-            _deviceMessageTopic = $"nanoframework/device/{_uniqueId}/messages/devicebound"; //TODO: should we make this configurable?! e.g. I need "{_uniqueId}/sys/"??? (or do I (since CSL doing its own thing here!)!!)
             QosLevel = qosLevel;
             _awsRootCACert = awsRootCert; //TODO: Should override the default one in resources?!
         }
@@ -112,11 +112,41 @@ namespace nanoFramework.AwsIot
         /// </summary>
         public bool IsConnected => (_mqttc != null) && _mqttc.IsConnected;
 
+
+
+        /// <summary>
+        /// Overrides the default topic prefix of "device"
+        /// </summary>
+        /// <param name="topicPrefix">The topic prefix for telemetry, device messages and LWT.</param>
+        /// <returns>True for a successful connection</returns>
+        public bool Open(string topicPrefix)
+        {
+            _telemetryTopic = $"{topicPrefix.TrimEnd('/')}/{ThingName}/messages/events";
+            _deviceMessageTopic = $"{topicPrefix.TrimEnd('/')}/{ThingName}/messages/devicebound";
+            _lwtTopic = $"{topicPrefix.TrimEnd('/')}/{ThingName}/lwt";
+            return Open();
+        }
+
+        /// <summary>
+        /// Overrides the default connection topics
+        /// </summary>
+        /// <param name="telemetryTopic">The telemetry topic</param>
+        /// <param name="deviceMessageTopic">The device message topic</param>
+        /// <param name="lwtTopic">The last will and testiment topic</param>
+        /// <returns>True for a successful connection</returns>
+        public bool Open(string telemetryTopic, string deviceMessageTopic, string lwtTopic)
+        {
+            _telemetryTopic = telemetryTopic;
+            _deviceMessageTopic = deviceMessageTopic;
+            _lwtTopic = lwtTopic;
+            return Open();
+        }
+
         /// <summary>
         /// Open the connection with AWS IoT Core. This will connect AWS IoT Core (via MQTT) to the device.
         /// </summary>
         /// <returns>True for a successful connection</returns>
-        public bool Open() //TODO: perhaps the override topics should be parameters here?!
+        public bool Open()
         {
             // Creates an MQTT Client with default TLS port 8883 using TLS 1.2 protocol
             _mqttc = new M2Mqtt.MqttClient(
@@ -136,7 +166,7 @@ namespace nanoFramework.AwsIot
 
             // Now connect the device
             _mqttc.Connect(
-                _uniqueId,
+                ThingName,
                 "", //TODO: should this be null?
                 "", //TODO: should this be null?
                 false, //TODO: what does "willretain" actually mean!
@@ -232,10 +262,18 @@ namespace nanoFramework.AwsIot
             return _shadowReceived ? _shadow : null;
         }
 
-        //public bool PublishShadow(CancellationToken cancellationToken = default, string namedShadow = "")
-        //{
+        /// <summary>
+        /// Publishes a Shadow
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <param name="namedShadow"></param>
+        /// <returns></returns>
+        public bool PublishShadow(CancellationToken cancellationToken = default, string namedShadow = "")
+        {
+            //we should possibly use this if the get shadow fails!
+            throw new NotImplementedException();
+        }
 
-        //}
 
         //public bool DeleteShadow(CancellationToken cancellationToken = default, string namedShadow = "")
         //{
@@ -372,6 +410,12 @@ namespace nanoFramework.AwsIot
                             _mqttBrokerStatus.Message = jsonMessageBody;
                             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
+                        //else if (e.Topic.IndexOf("document") > 0) //TODO: probably not required to handle as the full change?!
+                        //{
+                        //    _mqttBrokerStatus.Status = Status.ShadowUpdated;
+                        //    _mqttBrokerStatus.Message = jsonMessageBody;
+                        //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
+                        //}
 
                     }
                     else if (e.Topic.StartsWith($"{_shadowTopic}/get/"))
@@ -394,83 +438,21 @@ namespace nanoFramework.AwsIot
                         }
 
                     }
-                    //else if (e.Topic.StartsWith(DirectMethodTopic))
-                    //{
-                    //    const string C9PatternMainStyle = "<<Main>$>g__";
-                    //    string method = e.Topic.Substring(DirectMethodTopic.Length);
-                    //    string methodName = method.Substring(0, method.IndexOf('/'));
-                    //    int rid = Convert.ToInt32(method.Substring(method.IndexOf('=') + 1));
-                    //    _mqttBrokerStatus.Status = Status.DirectMethodCalled;
-                    //    _mqttBrokerStatus.Message = $"{method}/{message}";
-                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
-                    //    foreach (MethodCallback mt in _methodCallback)
-                    //    {
-                    //        string mtName = mt.Method.Name;
-                    //        if (mtName.Contains(C9PatternMainStyle))
-                    //        {
-                    //            mtName = mtName.Substring(C9PatternMainStyle.Length);
-                    //            mtName = mtName.Substring(0, mtName.IndexOf('|'));
-                    //        }
-                    //        if (mtName == methodName)
-                    //        {
-                    //            try
-                    //            {
-                    //                var res = mt.Invoke(rid, message);
-                    //                _mqttc.Publish($"$iothub/methods/res/200/?$rid={rid}", Encoding.UTF8.GetBytes(res), MqttQoSLevel.AtLeastOnce, false);
-                    //            }
-                    //            catch (Exception ex)
-                    //            {
-                    //                _mqttc.Publish($"$iothub/methods/res/504/?$rid={rid}", Encoding.UTF8.GetBytes($"{{\"Exception:\":\"{ex}\"}}"), MqttQoSLevel.AtLeastOnce, false);
-                    //            }
-                    //        }
-                    //    }
-                    //}
-                    //else if (e.Topic.StartsWith(_deviceMessageTopic))
-                    //{
-                    //    string messageTopic = e.Topic.Substring(_deviceMessageTopic.Length);
-                    //    _mqttBrokerStatus.Status = Status.MessageReceived;
-                    //    _mqttBrokerStatus.Message = $"{messageTopic}/{message}";
-                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
-                    //    CloudToDeviceMessage?.Invoke(this, new CloudToDeviceMessageEventArgs(message, messageTopic));
-                    //}
-                    //else if (e.Topic.StartsWith("$iothub/clientproxy/"))
-                    //{
-                    //    _mqttBrokerStatus.Status = Status.Disconnected;
-                    //    _mqttBrokerStatus.Message = message;
-                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
-                    //}
-                    //else if (e.Topic.StartsWith("$iothub/logmessage/Info"))
-                    //{
-                    //    _mqttBrokerStatus.Status = Status.IoTCoreInformation;
-                    //    _mqttBrokerStatus.Message = message;
-                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
-                    //}
-                    //else if (e.Topic.StartsWith("$iothub/logmessage/HighlightInfo"))
-                    //{
-                    //    _mqttBrokerStatus.Status = Status.IoTCoreHighlightInformation;
-                    //    _mqttBrokerStatus.Message = message;
-                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
-                    //}
-                    //else if (e.Topic.StartsWith("$iothub/logmessage/Error"))
-                    //{
-                    //    _mqttBrokerStatus.Status = Status.IoTCoreError;
-                    //    _mqttBrokerStatus.Message = message;
-                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
-                    //}
-                    //else if (e.Topic.StartsWith("$iothub/logmessage/Warning"))
-                    //{
-                    //    _mqttBrokerStatus.Status = Status.IoTCoreWarning;
-                    //    _mqttBrokerStatus.Message = message;
-                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
-                    //}
-
-                    //else //TODO: Other message type callback or throw?!
-                    //{
-                    //    _mqttBrokerStatus.Status = Status.MessageReceived;
-                    //    _mqttBrokerStatus.Message = e.Message.ToString();
-                    //    Debug.WriteLine(e.Message.ToString());
-                    //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
-                    //}
+                    else if (e.Topic.StartsWith(_deviceMessageTopic))
+                    {
+                        string messageTopic = e.Topic.Substring(_deviceMessageTopic.Length);
+                        _mqttBrokerStatus.Status = Status.MessageReceived;
+                        _mqttBrokerStatus.Message = $"{messageTopic}/{jsonMessageBody}";
+                        StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
+                        CloudToDeviceMessage?.Invoke(this, new CloudToDeviceMessageEventArgs(jsonMessageBody, messageTopic));
+                    }
+                    else //Other (unknown) topic message received!
+                    {
+                        //_mqttBrokerStatus.Status = Status.IoTCoreWarning;
+                        //_mqttBrokerStatus.Message = $"Unknown topic or message: {e.Topic} :: {jsonMessageBody}";
+                        Debug.WriteLine($"Received unknown message on topic: {e.Topic}:.. {jsonMessageBody}");
+                        //StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
+                    }
 
                 }
                 catch (Exception ex)
