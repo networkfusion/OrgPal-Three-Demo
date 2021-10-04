@@ -35,7 +35,7 @@ namespace nanoFramework.AwsIoT
 
 
         /// <summary>
-        /// The properties.
+        /// The Topic.
         /// </summary>
         public string Topic { get; set; }
 

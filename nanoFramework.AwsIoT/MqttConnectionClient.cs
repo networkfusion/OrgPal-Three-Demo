@@ -262,37 +262,28 @@ namespace nanoFramework.AwsIoT
             return _shadowReceived ? _shadow : null;
         }
 
-        /// <summary>
-        /// Publishes a Shadow
-        /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <param name="namedShadow"></param>
-        /// <returns></returns>
-        public bool PublishShadow(CancellationToken cancellationToken = default, string namedShadow = "")
-        {
-            //we should possibly use this if the get shadow fails!
-            throw new NotImplementedException();
-        }
+        ///// <summary>
+        ///// Publishes a Shadow
+        ///// </summary>
+        ///// <param name="cancellationToken"></param>
+        ///// <param name="namedShadow"></param>
+        ///// <returns></returns>
+        //public bool PublishShadow(CancellationToken cancellationToken = default, string namedShadow = "")
+        //{
+        //    //we could possibily use this method (or reserve it for the future) but need a good reason!
+        //    throw new NotImplementedException();
+        //}
 
-
+        ///// <summary>
+        ///// Deletes a Shadow
+        ///// </summary>
+        ///// <param name="cancellationToken"></param>
+        ///// <param name="namedShadow"></param>
+        ///// <returns></returns>
         //public bool DeleteShadow(CancellationToken cancellationToken = default, string namedShadow = "")
         //{
-        //    var topic = $"{_shadowTopic}/delete";
-        //    if (namedShadow != string.Empty)
-        //    {
-        //        topic = $"{_shadowTopic}/name/{namedShadow}/update";
-        //    }
-        //    //AwsMqtt.Client.Subscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" }, new MqttQoSLevel[] { MqttQoSLevel.AtMostOnce, MqttQoSLevel.AtMostOnce });
-        //    _mqttc.Publish(topic, Encoding.UTF8.GetBytes(""), MqttQoSLevel.AtLeastOnce, false);
-
-        //    //while (!_shadowReceived && !cancellationToken.IsCancellationRequested)
-        //    //{
-        //    //    cancellationToken.WaitHandle.WaitOne(200, true);
-        //    //}
-
-        //    //return _shadowReceived ? _shadow : null;
-        //    return false; //TODO: confirm action took place! (ShadowDeleted)
-        //    //AwsMqtt.Client.Unsubscribe(new string[] { $"{topic}/accepted", $"{topic}/rejected" });
+        //    //we could possibily use this method (or reserve it for the future) but need a good reason!
+        //    throw new NotImplementedException();
         //}
 
         /// <summary>

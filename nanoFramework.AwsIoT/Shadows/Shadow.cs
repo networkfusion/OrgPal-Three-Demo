@@ -14,14 +14,17 @@ namespace nanoFramework.AwsIoT.Shadows
     {
 
         /// <summary>
-        /// Creates an instance of <see cref="Shadow"/>.
+        /// Default constructor.
         /// </summary>
         public Shadow()
         {
             //Required for Json deserialization.
         }
 
-
+        /// <summary>
+        /// /// Creates an instance of <see cref="Shadow"/>.
+        /// </summary>
+        /// <param name="shadowJsonString">Shadow as a JSON string</param>
         public Shadow(string shadowJsonString) //TODO: Perhaps included client token / unique Id?!
         {
             Hashtable _shadow = (Hashtable)JsonConvert.DeserializeObject(shadowJsonString, typeof(Hashtable));
@@ -73,7 +76,7 @@ namespace nanoFramework.AwsIoT.Shadows
         /// <summary>
         /// Shadow's Timestamp
         /// </summary>
-        public int timestamp { get; set; } //technically this should be a long?!
+        public int timestamp { get; set; } //TODO: technically this should be a long?! (but Json lib does not like it!)
 
 #pragma warning restore IDE1006 // Naming Styles
 
