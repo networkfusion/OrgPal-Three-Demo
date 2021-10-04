@@ -405,7 +405,7 @@ namespace nanoFramework.AwsIoT
                             _mqttBrokerStatus.Message = jsonMessageBody;
                             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
-                        //else if (e.Topic.IndexOf("/document") > 0) //TODO: probably not required to handle as the full change?!
+                        //else if (e.Topic.IndexOf("/documents") > 0) //TODO: probably not required to handle as the full change?!
                         //{
                         //    Debug.WriteLine($"Reached {_shadowTopic}/document");
                         //    _mqttBrokerStatus.Status = Status.ShadowUpdated;
