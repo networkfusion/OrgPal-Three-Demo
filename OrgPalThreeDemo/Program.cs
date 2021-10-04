@@ -174,7 +174,7 @@ namespace OrgPalThreeDemo
 
         static bool SetupMqtt()
         {
-            Debug.Write("Connected to MQTT broker... : ");
+            Debug.Write("Program: Connected to MQTT broker... : ");
             try
             {
                 X509Certificate caCert = new X509Certificate(AwsIotCore.MqttConnector.RootCA); //commented out as MDP changes mean resources dont currently work//Resources.GetBytes(Resources.BinaryResources.AwsCAroot)); //should this be in secure storage, or is it fine where it is?
@@ -221,19 +221,20 @@ namespace OrgPalThreeDemo
                     Debug.WriteLine($"Failed!");
                 }
 
-                // register to message received 
-                //AwsMqtt.Client.MqttMsgPublishReceived += Client_MqttMsgPublishReceived;
 
-                // subscribe to the topic with QoS 1
-                //AwsMqtt.Client.Subscribe(new string[] { $"{AwsMqtt.ThingName}/sys" }, new MqttQoSLevel[] { MqttQoSLevel.AtMostOnce });
                 Thread telemetryThread = new Thread(new ThreadStart(TelemetryLoop));
                 telemetryThread.Start();
 
 
-                Thread shadowThread = new Thread(new ThreadStart(ShadowLoop)); //TODO: currently throws exception on subscribe!
-                shadowThread.Start();
+                Thread sendShadowThread = new Thread(new ThreadStart(SendUpdateShadowLoop));
+                sendShadowThread.Start();
 
 
+
+                // Register to messages received:
+
+                AwsIotCore.MqttConnector.Client.CloudToDeviceMessage += Client_CloudToDeviceMessageReceived;
+                AwsIotCore.MqttConnector.Client.ShadowUpdated += Client_ShadowUpdated;
 
                 return true;
             }
@@ -248,7 +249,13 @@ namespace OrgPalThreeDemo
 
         }
 
-        static void ShadowLoop()
+        private static void Client_ShadowUpdated(object sender, ShadowUpdateEventArgs e)
+        {
+            //TODO: check against the current shadowReportedState class (or something)!
+            Debug.WriteLine("Program: Received a shadow update!");
+        }
+
+        static void SendUpdateShadowLoop()
         {
             for ( ; ; )
             {
@@ -320,21 +327,18 @@ namespace OrgPalThreeDemo
             }
         }
 
-        //static void Client_MqttMsgPublishReceived(object sender, MqttMsgPublishEventArgs e)
-        //{
-        //    try
-        //    {
-        //        string Message = new string(Encoding.UTF8.GetChars(e.Message));
-        //        Debug.WriteLine("Message received: " + Message);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Debug.WriteLine("Message received ex: " + ex);
-        //        SetupMqtt();
-        //    }
-
-        //    //should we handle the shadow received messages here?!
-        //}
+        static void Client_CloudToDeviceMessageReceived(object sender, CloudToDeviceMessageEventArgs e)
+        {
+            try
+            {
+                Debug.WriteLine($"Command and Control Message received: {e.Message}");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Message received ex: " + ex);
+                SetupMqtt();
+            }
+        }
 
         private static void ReadStorage()
         {

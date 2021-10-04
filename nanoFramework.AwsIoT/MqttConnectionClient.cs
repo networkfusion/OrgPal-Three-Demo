@@ -388,46 +388,63 @@ namespace nanoFramework.AwsIoT
                     string jsonMessageBody = Encoding.UTF8.GetString(e.Message, 0, e.Message.Length);
                     Debug.WriteLine($"Decoded message was: {jsonMessageBody}");
 
-                    if (e.Topic.StartsWith($"{_shadowTopic}/update/"))
+                    if (e.Topic.StartsWith($"{_shadowTopic}/update"))
                     {
-                        Debug.WriteLine($"Reached {_shadowTopic}/update/");
-                        if (e.Topic.IndexOf("rejected") > 0)
+                        //TODO: we might have to be more specific with subscribed topics here... I think receiving some of these could cost money, even if they are irrelevent!
+                        Debug.WriteLine($"Reached {_shadowTopic}/update");
+                        if (e.Topic.IndexOf("/rejected") > 0)
                         {
+                            Debug.WriteLine($"Reached {_shadowTopic}/rejected");
                             _mqttBrokerStatus.Status = Status.ShadowUpdateError;
                             _mqttBrokerStatus.Message = jsonMessageBody;
                             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
-                        else if (e.Topic.IndexOf("delta") > 0)
+                        else if (e.Topic.IndexOf("/delta") > 0) //TODO: if this worked correctly, it should be a partial update!
                         {
+                            Debug.WriteLine($"Reached {_shadowTopic}/delta");
                             ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(new Shadow(jsonMessageBody))); //ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(new ShadowCollection(jsonMessageBody)));
                             _mqttBrokerStatus.Status = Status.ShadowUpdateReceived;
                             _mqttBrokerStatus.Message = jsonMessageBody;
                             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
-                        else if (e.Topic.IndexOf("accepted") > 0) //TODO: this should not be required, since a delta should take precidence (but what if there is no delta?!)...
+                        else if (e.Topic.IndexOf("/accepted") > 0) //TODO: this should not be required, since a delta should take precidence (but what if there is no delta?!)...
                         {
+                            Debug.WriteLine($"Reached {_shadowTopic}/accepted");
                             _mqttBrokerStatus.Status = Status.ShadowUpdated;
                             _mqttBrokerStatus.Message = jsonMessageBody;
                             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
-                        //else if (e.Topic.IndexOf("document") > 0) //TODO: probably not required to handle as the full change?!
+                        //else if (e.Topic.IndexOf("/document") > 0) //TODO: probably not required to handle as the full change?!
                         //{
+                        //    Debug.WriteLine($"Reached {_shadowTopic}/document");
                         //    _mqttBrokerStatus.Status = Status.ShadowUpdated;
                         //    _mqttBrokerStatus.Message = jsonMessageBody;
                         //    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         //}
+                        else
+                        {
+                            if (string.IsNullOrEmpty(jsonMessageBody)) //!!! AWS is so wasteful... this cost money !!!
+                            {
+                                Debug.WriteLine($"Received an empty message on: {e.Topic}");
+                            }
+                            else
+                            {
+                                Debug.WriteLine($"Received a message on: {e.Topic} that is not handled: {jsonMessageBody}");
+                            }
+
+                        }
 
                     }
-                    else if (e.Topic.StartsWith($"{_shadowTopic}/get/"))
+                    else if (e.Topic.StartsWith($"{_shadowTopic}/get"))
                     {
-                        Debug.WriteLine($"Reached {_shadowTopic}/get/");
-                        if (e.Topic.IndexOf("rejected") > 0)
+                        Debug.WriteLine($"Reached {_shadowTopic}/get");
+                        if (e.Topic.IndexOf("/rejected") > 0)
                         {
                             _mqttBrokerStatus.Status = Status.ShadowUpdateError;
                             _mqttBrokerStatus.Message = jsonMessageBody;
                             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
-                        else if (e.Topic.IndexOf("accepted") > 0)
+                        else if (e.Topic.IndexOf("/accepted") > 0)
                         {
                             _shadow = (Shadow)JsonConvert.DeserializeObject(jsonMessageBody, typeof(Shadow)); // new Shadow(jsonMessageBody);
                             //_shadow = new Shadow(_uniqueId, jsonMessageBody); //TODO: Shadow (auto deserialize from JSON)
@@ -436,7 +453,18 @@ namespace nanoFramework.AwsIoT
                             _mqttBrokerStatus.Message = jsonMessageBody;
                             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
+                        else
+                        {
+                            if (string.IsNullOrEmpty(jsonMessageBody)) //!!! AWS is so wasteful... this cost money !!!
+                            {
+                                Debug.WriteLine($"Received an empty message on: {e.Topic}");
+                            }
+                            else
+                            {
+                                Debug.WriteLine($"Received a message on: {e.Topic} that is not handled: {jsonMessageBody}");
+                            }
 
+                        }
                     }
                     else if (e.Topic.StartsWith(_deviceMessageTopic))
                     {
@@ -448,10 +476,12 @@ namespace nanoFramework.AwsIoT
                     }
                     else //Other (unknown) topic message received!
                     {
-                        //_mqttBrokerStatus.Status = Status.IoTCoreWarning;
-                        //_mqttBrokerStatus.Message = $"Unknown topic or message: {e.Topic} :: {jsonMessageBody}";
+                        _mqttBrokerStatus.Status = Status.IoTCoreWarning;
+                        _mqttBrokerStatus.Message = $"Unknown topic or message: {e.Topic} :: {jsonMessageBody}";
+
                         Debug.WriteLine($"Received unknown message on topic: {e.Topic}:.. {jsonMessageBody}");
-                        //StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
+
+                        StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                     }
 
                 }
