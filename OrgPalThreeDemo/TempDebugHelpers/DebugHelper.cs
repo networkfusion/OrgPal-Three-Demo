@@ -24,7 +24,7 @@ namespace OrgPalThreeDemo.TempDebugHelpers
                     if (key.ToString() == "timestamp")
                     {
                         Debug.Write(GetSpaces(level));
-                        Debug.WriteLine($"as USA date: {DateTime.FromUnixTimeSeconds((int)hash[key])}");
+                        Debug.WriteLine($"as ISO date: {DateTime.FromUnixTimeSeconds((int)hash[key]).ToString("yyyy-MM-ddTHH:mm:ssZ")}"); //TODO: should work with "o", but doesnt!
                     }
                 }
             }

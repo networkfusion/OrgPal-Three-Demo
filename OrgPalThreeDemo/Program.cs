@@ -208,7 +208,7 @@ namespace OrgPalThreeDemo
                     Debug.WriteLine("metadata.reported:");
                     DebugHelper.DumpHashTable(shadow.metadata.reported, 1);
                     Debug.WriteLine($"timestamp={shadow.timestamp}");
-                    Debug.WriteLine($"as USA date: {DateTime.FromUnixTimeSeconds(shadow.timestamp)}");
+                    Debug.WriteLine($"as ISO date: {DateTime.FromUnixTimeSeconds(shadow.timestamp).ToString("yyyy-MM-ddTHH:mm:ssZ")}"); //TODO: should work with "o", but doesnt!
                     Debug.WriteLine($"version={shadow.version}");
                     Debug.WriteLine($"clienttoken={shadow.clienttoken}");
                     Debug.WriteLine("");
