@@ -24,6 +24,18 @@ namespace nanoFramework.AwsIoT
     /// </summary>
     public class MqttConnectionClient : IDisposable
     {
+        /// <summary>
+        /// The QoS Level
+        /// </summary>
+        /// <remarks>
+        /// AWS Only supports levels 0 and 1.
+        /// </remarks>
+        public enum QoSLevel
+        {
+            AtMostOnce = MqttQoSLevel.AtMostOnce,
+            AtLeastOnce = MqttQoSLevel.AtLeastOnce
+
+        }
 
         private readonly string _iotCoreUri; // FQDN
         const int _mqttsPort = 8883; //Default MQTTS port.
@@ -77,7 +89,7 @@ namespace nanoFramework.AwsIoT
         /// <param name="clientCert">The certificate used to connect the device to the MQTT broker (containing both the private certificate and private key).</param>
         /// <param name="qosLevel">The default quality of service level for the delivery of MQTT messages, (defaults to the lowest quality)</param>
         /// /// <param name="awsRootCert">The Root (AWS) certificate for the connection to AWS IoT Core</param>
-        public MqttConnectionClient(string iotCoreUri, string uniqueId, X509Certificate2 clientCert, MqttQoSLevel qosLevel = MqttQoSLevel.AtMostOnce, X509Certificate awsRootCert = null)
+        public MqttConnectionClient(string iotCoreUri, string uniqueId, X509Certificate2 clientCert, QoSLevel qosLevel = QoSLevel.AtMostOnce, X509Certificate awsRootCert = null)
         {
             _clientCert = clientCert;
             _iotCoreUri = iotCoreUri;
@@ -88,7 +100,7 @@ namespace nanoFramework.AwsIoT
             _lwtTopic = $"device/{ThingName}/lwt";
             _mqttBrokerStatus.Status = Status.Disconnected;
             _mqttBrokerStatus.Message = string.Empty;
-            QosLevel = qosLevel;
+            QosLevel = (MqttQoSLevel)qosLevel;
             _awsRootCACert = awsRootCert; //TODO: Should override the default one in resources?!
         }
 
@@ -149,7 +161,7 @@ namespace nanoFramework.AwsIoT
         public bool Open()
         {
             // Creates an MQTT Client with default TLS port 8883 using TLS 1.2 protocol
-            _mqttc = new M2Mqtt.MqttClient(
+            _mqttc = new MqttClient(
                 _iotCoreUri,
                 _mqttsPort,
                 true,
@@ -167,11 +179,12 @@ namespace nanoFramework.AwsIoT
             // Now connect the device
             _mqttc.Connect(
                 ThingName,
-                "", //TODO: should this be null?
-                "", //TODO: should this be null?
-                false, //TODO: what does "willretain" actually mean!
-                MqttQoSLevel.ExactlyOnce, //TODO: guessing that this is the "default" QOS level?!
-                false, _lwtTopic,
+                null,
+                null,
+                false, //TODO: what does "willretain" actually mean! I am guessing that it is whether the LwT is used...
+                MqttQoSLevel.AtLeastOnce,
+                false, //TODO: but if "willretain" is that... what is "willflag" doing?
+                _lwtTopic,
                 "MQTT connection was unexpectedly disconnected!",
                 true, //TODO: this "should" handle persistant connections, and should be configurable?!
                 60
@@ -409,21 +422,21 @@ namespace nanoFramework.AwsIoT
                         else if (e.Topic.Contains("/documents"))
                         {
                             //TODO: probably not required to handle as the full change?!
-                            Debug.WriteLine($"ReceivedHandler Reached (update-documents): {e.Topic}");
-                            Debug.WriteLine("Ignoring as not required (uses delta instead)!");
+                            //Debug.WriteLine($"ReceivedHandler Reached (update-documents): {e.Topic}");
+                            //Debug.WriteLine("Ignoring as not required (uses delta instead)!");
                         }
-                        else
-                        {
-                            if (string.IsNullOrEmpty(jsonMessageBody)) //!!! AWS is so wasteful... this cost money !!!
-                            {
-                                Debug.WriteLine($"!!! ReceivedHandler (update shadow)  Received an empty message on: {e.Topic}");
-                            }
-                            else
-                            {
-                                Debug.WriteLine($"!!! ReceivedHandler (update shadow) Received a message on: {e.Topic} that is not handled: {jsonMessageBody}");
-                            }
+                        //else //Since we are also sending on this topic, this code is not helpful!
+                        //{
+                        //    if (string.IsNullOrEmpty(jsonMessageBody)) //!!! AWS is so wasteful... this cost money !!!
+                        //    {
+                        //        Debug.WriteLine($"!!! ReceivedHandler (update shadow)  Received an empty message on: {e.Topic}");
+                        //    }
+                        //    else
+                        //    {
+                        //        Debug.WriteLine($"!!! ReceivedHandler (update shadow) Received a message on: {e.Topic} that is not handled: {jsonMessageBody}");
+                        //    }
 
-                        }
+                        //}
 
                     }
                     else if (e.Topic.StartsWith($"{_shadowTopic}/get")) //TODO: does this take into account named shadows?
@@ -446,18 +459,18 @@ namespace nanoFramework.AwsIoT
                             _mqttBrokerStatus.Message = jsonMessageBody;
                             ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(_shadow));
                         }
-                        else
-                        {
-                            if (string.IsNullOrEmpty(jsonMessageBody)) //!!! AWS is so wasteful... this cost money !!!
-                            {
-                                Debug.WriteLine($"!!! ReceivedHandler (get shadow) Received an empty message on: {e.Topic}");
-                            }
-                            else
-                            {
-                                Debug.WriteLine($"!!! ReceivedHandler (get shadow) Received a message on: {e.Topic} that is not handled: {jsonMessageBody}");
-                            }
+                        //else //Since we are also sending on this topic, this code is not helpful!
+                        //{
+                        //    if (string.IsNullOrEmpty(jsonMessageBody)) //!!! AWS is so wasteful... this cost money !!!
+                        //    {
+                        //        Debug.WriteLine($"!!! ReceivedHandler (get shadow) Received an empty message on: {e.Topic}");
+                        //    }
+                        //    else
+                        //    {
+                        //        Debug.WriteLine($"!!! ReceivedHandler (get shadow) Received a message on: {e.Topic} that is not handled: {jsonMessageBody}");
+                        //    }
 
-                        }
+                        //}
                     }
                     else if (e.Topic.StartsWith(_deviceMessageTopic))
                     {
@@ -477,10 +490,10 @@ namespace nanoFramework.AwsIoT
                         StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                     }
                 }
-                else
-                {
-                    Debug.WriteLine($"!!! ReceivedHandler subscribed topic {e.Topic}: Message received was empty!");
-                }
+                //else  //Since we are also sending on this topics, this code is not helpful!
+                //{
+                //    Debug.WriteLine($"!!! ReceivedHandler subscribed topic {e.Topic}: Message received was empty!");
+                //}
 
             }
             catch (Exception ex)

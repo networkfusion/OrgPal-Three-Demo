@@ -5,7 +5,6 @@ using System;
 using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
-using nanoFramework.M2Mqtt.Messages; // Only required due to QoS level. Perhaps this should be inherited through the Aws lib?!
 //using System.Device.Gpio;
 using Windows.Storage;
 using Windows.Storage.Streams;
@@ -181,7 +180,7 @@ namespace OrgPalThreeDemo
                 X509Certificate2 clientCert = new X509Certificate2(AwsIotCore.MqttConnector.ClientRsaSha256Crt, AwsIotCore.MqttConnector.ClientRsaKey, ""); //make sure to add a correct pfx certificate
 
 
-                AwsIotCore.MqttConnector.Client = new MqttConnectionClient(AwsIotCore.MqttConnector.Host, AwsIotCore.MqttConnector.ThingName, clientCert, MqttQoSLevel.AtLeastOnce, caCert);
+                AwsIotCore.MqttConnector.Client = new MqttConnectionClient(AwsIotCore.MqttConnector.Host, AwsIotCore.MqttConnector.ThingName, clientCert, MqttConnectionClient.QoSLevel.AtLeastOnce, caCert);
 
                 bool success = AwsIotCore.MqttConnector.Client.Open("nanoframework/device");
                 Debug.WriteLine($"{success}");
