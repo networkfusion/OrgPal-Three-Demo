@@ -182,7 +182,7 @@ namespace nanoFramework.AwsIoT
                 _mqttc.Subscribe(
                     new[] {
                         $"{_deviceMessageTopic}/#",
-                        $"{ _shadowTopic }/#", //TODO: make this topic specific as costs money to download messages from unrequired ones?!
+                        $"{ _shadowTopic }/#",
                     },
                     new[] {
                         MqttQoSLevel.AtLeastOnce,
@@ -224,7 +224,7 @@ namespace nanoFramework.AwsIoT
             {
                 _mqttc.Unsubscribe(new[] {
                     $"{_deviceMessageTopic}/#",
-                    $"{ _shadowTopic }/#",  //TODO: make this topic specific as costs money to download messages from unrequired ones?!
+                    $"{ _shadowTopic }/#",
                     });
                 _mqttc.Disconnect();
                 // Make sure all get disconnected, cleared (TODO: 1 second arbitary value specified)
@@ -380,18 +380,18 @@ namespace nanoFramework.AwsIoT
                 {
                     Debug.WriteLine($"ReceivedHandler message was: {jsonMessageBody}");
 
-                if (e.Topic.StartsWith($"{_shadowTopic}/update"))
-                {
-                    //TODO: we might have to be more specific with subscribed topics here... I think receiving some of these could cost money, even if they are irrelevent!
-                    Debug.WriteLine($"ReceivedHandler Reached (update): {e.Topic}");
-                        if (e.Topic.Contains("rejected")) //TODO: IndexOf does not work properly!
+                    if (e.Topic.StartsWith($"{_shadowTopic}/update")) //TODO: does this take into account named shadows?
+                    {
+                        //TODO: we might have to be more specific with subscribed topics here... I think receiving some of these could cost money, even if they are irrelevent!
+                        Debug.WriteLine($"ReceivedHandler Reached (update): {e.Topic}");
+                        if (e.Topic.Contains("/rejected")) //TODO: IndexOf does not work properly!
                         {
                             Debug.WriteLine($"ReceivedHandler Reached (update-rejected): {e.Topic}");
                             _mqttBrokerStatus.Status = Status.ShadowUpdateError;
                             _mqttBrokerStatus.Message = jsonMessageBody;
                             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
-                        else if (e.Topic.Contains("delta"))  //TODO: IndexOf does not work properly! //TODO: if this worked correctly, it should be a partial update!
+                        else if (e.Topic.Contains("/delta"))  //TODO: IndexOf does not work properly! //TODO: if this worked correctly, it should be a partial update!
                         {
                             Debug.WriteLine($"ReceivedHandler Reached (update-delta): {e.Topic}");
                             ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(new Shadow(jsonMessageBody))); //ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(new ShadowCollection(jsonMessageBody)));
@@ -399,7 +399,7 @@ namespace nanoFramework.AwsIoT
                             _mqttBrokerStatus.Message = jsonMessageBody;
                             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
-                        else if (e.Topic.Contains("accepted"))  //TODO: IndexOf does not work properly! //TODO: this should not be required, since a delta should take precidence (but what if there is no delta?!)...
+                        else if (e.Topic.Contains("/accepted"))  //TODO: IndexOf does not work properly! //TODO: this should not be required, since a delta should take precidence (but what if there is no delta?!)...
                         {
                             Debug.WriteLine($"ReceivedHandler Reached (update-accepted): {e.Topic}");
                             _mqttBrokerStatus.Status = Status.ShadowUpdated;
@@ -425,61 +425,61 @@ namespace nanoFramework.AwsIoT
 
                         }
 
-                }
-                else if (e.Topic.StartsWith($"{_shadowTopic}/get"))
-                {
-                    Debug.WriteLine($"ReceivedHandler Reached (get): {_shadowTopic}");
-                    if (e.Topic.Contains("rejected"))
-                    {
-                        Debug.WriteLine($"ReceivedHandler Reached (get-rejected): {e.Topic}");
-                        _mqttBrokerStatus.Status = Status.ShadowUpdateError;
-                        _mqttBrokerStatus.Message = jsonMessageBody;
-                        StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                     }
-                    else if (e.Topic.Contains("accepted"))
+                    else if (e.Topic.StartsWith($"{_shadowTopic}/get")) //TODO: does this take into account named shadows?
                     {
-                        Debug.WriteLine($"ReceivedHandler Reached (get-accepted): {e.Topic}");
-                        _shadow = (Shadow)JsonConvert.DeserializeObject(jsonMessageBody, typeof(Shadow)); // new Shadow(jsonMessageBody);
-                                                                                                          //_shadow = new Shadow(_uniqueId, jsonMessageBody); //TODO: Shadow (auto deserialize from JSON)
-                        _shadowReceived = true;
-                        _mqttBrokerStatus.Status = Status.ShadowReceived;
-                        _mqttBrokerStatus.Message = jsonMessageBody;
-                        ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(_shadow));
-                    }
-                    else
-                    {
-                        if (string.IsNullOrEmpty(jsonMessageBody)) //!!! AWS is so wasteful... this cost money !!!
+                        Debug.WriteLine($"ReceivedHandler Reached (get): {_shadowTopic}");
+                        if (e.Topic.Contains("rejected"))
                         {
-                            Debug.WriteLine($"!!! ReceivedHandler (get shadow) Received an empty message on: {e.Topic}");
+                            Debug.WriteLine($"ReceivedHandler Reached (get-rejected): {e.Topic}");
+                            _mqttBrokerStatus.Status = Status.ShadowUpdateError;
+                            _mqttBrokerStatus.Message = jsonMessageBody;
+                            StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
+                        }
+                        else if (e.Topic.Contains("accepted"))
+                        {
+                            Debug.WriteLine($"ReceivedHandler Reached (get-accepted): {e.Topic}");
+                            _shadow = (Shadow)JsonConvert.DeserializeObject(jsonMessageBody, typeof(Shadow)); // new Shadow(jsonMessageBody);
+                                                                                                              //_shadow = new Shadow(_uniqueId, jsonMessageBody); //TODO: Shadow (auto deserialize from JSON)
+                            _shadowReceived = true;
+                            _mqttBrokerStatus.Status = Status.ShadowReceived;
+                            _mqttBrokerStatus.Message = jsonMessageBody;
+                            ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(_shadow));
                         }
                         else
                         {
-                            Debug.WriteLine($"!!! ReceivedHandler (get shadow) Received a message on: {e.Topic} that is not handled: {jsonMessageBody}");
+                            if (string.IsNullOrEmpty(jsonMessageBody)) //!!! AWS is so wasteful... this cost money !!!
+                            {
+                                Debug.WriteLine($"!!! ReceivedHandler (get shadow) Received an empty message on: {e.Topic}");
+                            }
+                            else
+                            {
+                                Debug.WriteLine($"!!! ReceivedHandler (get shadow) Received a message on: {e.Topic} that is not handled: {jsonMessageBody}");
+                            }
+
                         }
-
                     }
-                }
-                else if (e.Topic.StartsWith(_deviceMessageTopic))
-                {
-                    string messageTopic = e.Topic.Substring(_deviceMessageTopic.Length);
-                    _mqttBrokerStatus.Status = Status.MessageReceived;
-                    _mqttBrokerStatus.Message = $"{messageTopic}/{jsonMessageBody}";
-                    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
-                    CloudToDeviceMessage?.Invoke(this, new CloudToDeviceMessageEventArgs(jsonMessageBody, messageTopic));
-                }
-                else //Other (unknown) topic message received!
-                {
-                    _mqttBrokerStatus.Status = Status.IoTCoreWarning;
-                    _mqttBrokerStatus.Message = $"Unknown topic or message: {e.Topic} :: {jsonMessageBody}";
+                    else if (e.Topic.StartsWith(_deviceMessageTopic))
+                    {
+                        string messageTopic = e.Topic.Substring(_deviceMessageTopic.Length);
+                        _mqttBrokerStatus.Status = Status.MessageReceived;
+                        _mqttBrokerStatus.Message = $"{messageTopic}/{jsonMessageBody}";
+                        StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
+                        CloudToDeviceMessage?.Invoke(this, new CloudToDeviceMessageEventArgs(jsonMessageBody, messageTopic));
+                    }
+                    else //Other (unknown) topic message received!
+                    {
+                        _mqttBrokerStatus.Status = Status.IoTCoreWarning;
+                        _mqttBrokerStatus.Message = $"Unknown topic or message: {e.Topic} :: {jsonMessageBody}";
 
-                    Debug.WriteLine($"!!! ReceivedHandler (unknown handler) Received a message on: {e.Topic} that is not handled: {jsonMessageBody}");
+                        Debug.WriteLine($"!!! ReceivedHandler (unknown handler) Received a message on: {e.Topic} that is not handled: {jsonMessageBody}");
 
-                    StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
-                }
+                        StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
+                    }
                 }
                 else
                 {
-                    Debug.WriteLine($"MqttClient subscribed topic {e.Topic}: Message received was empty!");
+                    Debug.WriteLine($"!!! ReceivedHandler subscribed topic {e.Topic}: Message received was empty!");
                 }
 
             }
