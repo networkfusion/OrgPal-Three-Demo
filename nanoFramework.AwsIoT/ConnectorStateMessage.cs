@@ -6,7 +6,7 @@ namespace nanoFramework.AwsIoT //TODO: improve for AWS IoT.
     /// <summary>
     /// Connection and event status.
     /// </summary>
-    public enum Status
+    public enum ConnectorStateMessage
     {
         /// <summary>
         /// Connection happened.

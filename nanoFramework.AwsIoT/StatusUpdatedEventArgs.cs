@@ -21,14 +21,14 @@ namespace nanoFramework.AwsIoT
         /// Constructor for status updated arguments.
         /// </summary>
         /// <param name="status">The status.</param>
-        public StatusUpdatedEventArgs(ConnectionState status)
+        public StatusUpdatedEventArgs(ConnectorState status)
         {
-            Status = new ConnectionState(status);
+            Status = new ConnectorState(status);
         }
 
         /// <summary>
         /// The IoT Core status.
         /// </summary>
-        public ConnectionState Status { get; set; }
+        public ConnectorState Status { get; set; }
     }
 }

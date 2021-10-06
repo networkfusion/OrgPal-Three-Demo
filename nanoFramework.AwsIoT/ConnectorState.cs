@@ -6,9 +6,9 @@ namespace nanoFramework.AwsIoT
     /// <summary>
     /// Connection status.
     /// </summary>
-    public class ConnectionState
+    public class ConnectorState
     {
-        internal ConnectionState(ConnectionState status)
+        internal ConnectorState(ConnectorState status)
         {
             State = status.State;
             Message = status.Message;
@@ -17,13 +17,13 @@ namespace nanoFramework.AwsIoT
         /// <summary>
         /// Default constructor.
         /// </summary>
-        public ConnectionState()
+        public ConnectorState()
         { }
 
         /// <summary>
         /// The status.
         /// </summary>
-        public Status State { get; set; }
+        public ConnectorStateMessage State { get; set; }
 
         /// <summary>
         /// The associated message if any.

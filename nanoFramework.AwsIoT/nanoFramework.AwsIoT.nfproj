@@ -29,14 +29,14 @@
   <ItemGroup>
     <Compile Include="CloudToDeviceMessage.cs" />
     <Compile Include="ConfirmationStatus.cs" />
-    <Compile Include="ConnectionState.cs" />
+    <Compile Include="ConnectorState.cs" />
     <Compile Include="MethodCallback.cs" />
     <Compile Include="MqttConnectionClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Shadows\Shadow.cs" />
     <Compile Include="Shadows\ShadowProperties.cs" />
     <Compile Include="Shadows\ShadowUpdatedEventArgs.cs" />
-    <Compile Include="Status.cs" />
+    <Compile Include="ConnectorStateMessage.cs" />
     <Compile Include="StatusUpdatedEventArgs.cs" />
     <Compile Include="Tests\program.cs" />
     <Compile Include="WebsocketConnectionClient.cs" />

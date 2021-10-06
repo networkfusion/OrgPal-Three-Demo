@@ -43,7 +43,7 @@ namespace nanoFramework.AwsIoT
         private readonly X509Certificate _awsRootCACert;
 
         private M2Mqtt.MqttClient _mqttc;
-        private readonly ConnectionState _mqttBrokerStatus = new ConnectionState();
+        private readonly ConnectorState _mqttBrokerStatus = new ConnectorState();
         private readonly ArrayList _methodCallback = new ArrayList();
         private readonly ArrayList _waitForConfirmation = new ArrayList();
         private readonly object _lock = new object();
@@ -98,7 +98,7 @@ namespace nanoFramework.AwsIoT
             _telemetryTopic = $"device/{ThingName}/messages/events";
             _deviceMessageTopic = $"device/{ThingName}/messages/devicebound";
             _lwtTopic = $"device/{ThingName}/lwt";
-            _mqttBrokerStatus.State = Status.Disconnected;
+            _mqttBrokerStatus.State = ConnectorStateMessage.Disconnected;
             _mqttBrokerStatus.Message = string.Empty;
             QosLevel = (MqttQoSLevel)qosLevel;
             _awsRootCACert = awsRootCert; //TODO: Should override the default one in resources?!
@@ -112,7 +112,7 @@ namespace nanoFramework.AwsIoT
         /// <summary>
         /// The latest connection status.
         /// </summary>
-        public ConnectionState ConnectionStatus => new ConnectionState(_mqttBrokerStatus);
+        public ConnectorState ConnectionStatus => new ConnectorState(_mqttBrokerStatus);
 
         /// <summary>
         /// The default quality of service level.
@@ -203,7 +203,7 @@ namespace nanoFramework.AwsIoT
                     }
                 );
 
-                _mqttBrokerStatus.State = Status.Connected;
+                _mqttBrokerStatus.State = ConnectorStateMessage.Connected;
                 _mqttBrokerStatus.Message = string.Empty;
                 StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                 // We will renew after 10 minutes before midnight just in case:
@@ -316,7 +316,7 @@ namespace nanoFramework.AwsIoT
             string shadow = shadowToSend.ToJson(true);
             Debug.WriteLine($"updatereportedstate shadow content: {shadow}");
             var rid = _mqttc.Publish(topic, Encoding.UTF8.GetBytes(shadow), MqttQoSLevel.AtLeastOnce, false);
-            _mqttBrokerStatus.State = Status.ShadowUpdated;
+            _mqttBrokerStatus.State = ConnectorStateMessage.ShadowUpdated;
             _mqttBrokerStatus.Message = string.Empty;
             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
 
@@ -400,7 +400,7 @@ namespace nanoFramework.AwsIoT
                         if (e.Topic.Contains("/rejected")) //TODO: IndexOf does not work properly!
                         {
                             Debug.WriteLine($"ReceivedHandler Reached (update-rejected): {e.Topic}");
-                            _mqttBrokerStatus.State = Status.ShadowUpdateError;
+                            _mqttBrokerStatus.State = ConnectorStateMessage.ShadowUpdateError;
                             _mqttBrokerStatus.Message = jsonMessageBody;
                             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
@@ -408,14 +408,14 @@ namespace nanoFramework.AwsIoT
                         {
                             Debug.WriteLine($"ReceivedHandler Reached (update-delta): {e.Topic}");
                             ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(new Shadow(jsonMessageBody))); //ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(new ShadowCollection(jsonMessageBody)));
-                            _mqttBrokerStatus.State = Status.ShadowUpdateReceived;
+                            _mqttBrokerStatus.State = ConnectorStateMessage.ShadowUpdateReceived;
                             _mqttBrokerStatus.Message = jsonMessageBody;
                             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
                         else if (e.Topic.Contains("/accepted"))  //TODO: IndexOf does not work properly! //TODO: this should not be required, since a delta should take precidence (but what if there is no delta?!)...
                         {
                             Debug.WriteLine($"ReceivedHandler Reached (update-accepted): {e.Topic}");
-                            _mqttBrokerStatus.State = Status.ShadowUpdated;
+                            _mqttBrokerStatus.State = ConnectorStateMessage.ShadowUpdated;
                             _mqttBrokerStatus.Message = jsonMessageBody;
                             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
@@ -445,7 +445,7 @@ namespace nanoFramework.AwsIoT
                         if (e.Topic.Contains("rejected"))
                         {
                             Debug.WriteLine($"ReceivedHandler Reached (get-rejected): {e.Topic}");
-                            _mqttBrokerStatus.State = Status.ShadowUpdateError;
+                            _mqttBrokerStatus.State = ConnectorStateMessage.ShadowUpdateError;
                             _mqttBrokerStatus.Message = jsonMessageBody;
                             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
@@ -455,7 +455,7 @@ namespace nanoFramework.AwsIoT
                             _shadow = (Shadow)JsonConvert.DeserializeObject(jsonMessageBody, typeof(Shadow)); // new Shadow(jsonMessageBody);
                                                                                                               //_shadow = new Shadow(_uniqueId, jsonMessageBody); //TODO: Shadow (auto deserialize from JSON)
                             _shadowReceived = true;
-                            _mqttBrokerStatus.State = Status.ShadowReceived;
+                            _mqttBrokerStatus.State = ConnectorStateMessage.ShadowReceived;
                             _mqttBrokerStatus.Message = jsonMessageBody;
                             ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(_shadow));
                         }
@@ -475,14 +475,14 @@ namespace nanoFramework.AwsIoT
                     else if (e.Topic.StartsWith(_deviceMessageTopic))
                     {
                         string messageTopic = e.Topic.Substring(_deviceMessageTopic.Length);
-                        _mqttBrokerStatus.State = Status.MessageReceived;
+                        _mqttBrokerStatus.State = ConnectorStateMessage.MessageReceived;
                         _mqttBrokerStatus.Message = $"{messageTopic}/{jsonMessageBody}";
                         StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         CloudToDeviceMessage?.Invoke(this, new CloudToDeviceMessageEventArgs(jsonMessageBody, messageTopic));
                     }
                     else //Other (unknown) topic message received!
                     {
-                        _mqttBrokerStatus.State = Status.IoTCoreWarning;
+                        _mqttBrokerStatus.State = ConnectorStateMessage.IoTCoreWarning;
                         _mqttBrokerStatus.Message = $"Unknown topic or message: {e.Topic} :: {jsonMessageBody}";
 
                         Debug.WriteLine($"!!! ReceivedHandler (unknown handler) Received a message on: {e.Topic} that is not handled: {jsonMessageBody}");
@@ -499,7 +499,7 @@ namespace nanoFramework.AwsIoT
             catch (Exception ex)
             {
                 Debug.WriteLine($"Exception in event: {ex}");
-                _mqttBrokerStatus.State = Status.InternalError;
+                _mqttBrokerStatus.State = ConnectorStateMessage.InternalError;
                 _mqttBrokerStatus.Message = ex.ToString();
                 StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
             }
@@ -529,7 +529,7 @@ namespace nanoFramework.AwsIoT
 
         private void ClientConnectionClosed(object sender, EventArgs e)
         {
-            _mqttBrokerStatus.State = Status.Disconnected;
+            _mqttBrokerStatus.State = ConnectorStateMessage.Disconnected;
             _mqttBrokerStatus.Message = string.Empty;
             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
         }
