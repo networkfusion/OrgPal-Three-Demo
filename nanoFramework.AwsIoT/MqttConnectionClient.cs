@@ -14,21 +14,23 @@ using System.Threading;
 
 namespace nanoFramework.AwsIoT
 {
-    // https://github.com/aws/aws-sdk-net/blob/master/sdk/src/Services/IotData/Generated/_netstandard/AmazonIotDataClient.cs
-    // https://github.com/aws/aws-iot-device-sdk-embedded-C/tree/master/src
-    // https://docs.aws.amazon.com/iot/latest/developerguide/device-shadow-mqtt.html
-
-
     /// <summary>
     /// AWS IoT Core MQTT Connection Client for .NET nanoFramework
     /// </summary>
+    /// <remarks>
+    /// https://github.com/aws/aws-sdk-net/blob/master/sdk/src/Services/IotData/Generated/_netstandard/AmazonIotDataClient.cs
+    /// https://github.com/aws/aws-iot-device-sdk-embedded-C/tree/master/src
+    /// https://docs.aws.amazon.com/iot/latest/developerguide/device-shadow-mqtt.html
+    /// </remarks>
     public class MqttConnectionClient : IDisposable
     {
         /// <summary>
         /// The QoS Level
         /// </summary>
         /// <remarks>
-        /// AWS Only supports levels 0 and 1.
+        /// AWS Only supports levels:
+        /// - AtMostOnce (0)
+        /// - AtLeastOnce (1)
         /// </remarks>
         public enum QoSLevel
         {

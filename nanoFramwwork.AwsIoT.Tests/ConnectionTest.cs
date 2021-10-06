@@ -1,4 +1,20 @@
-﻿//using System;
+using nanoFramework.TestFramework;
+using System;
+
+namespace nanoFramwwork.AwsIoT.Tests
+{
+    [TestClass]
+    public class Test1
+    {
+        [TestMethod]
+        public void TestMethod1()
+        {
+        }
+    }
+}
+
+
+//using System;
 //using System.Diagnostics;
 //using System.Security.Cryptography.X509Certificates;
 //using System.Threading;
@@ -52,3 +68,4 @@
 //        }
 //    }
 //}
+

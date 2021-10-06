@@ -281,7 +281,7 @@ namespace OrgPalThreeDemo
                         operatingSystem = "nanoFramework",
                         platform = SystemInfo.TargetName,
                         cpu = SystemInfo.Platform,
-                        serialNumber = $"SN{_serialNumber }", //TODO: "SN" should not be needed! and this seems to throw anyway!
+                        serialNumber = $"SN_{_serialNumber }", //TODO: "SN" should not be needed! but might help in the long run anyway?!
                         bootTimestamp = startTime
                     };
 
@@ -317,9 +317,9 @@ namespace OrgPalThreeDemo
                 {
                     var statusTelemetry = new AwsIotCore.DeviceMessageSchemas.TelemetryMessage
                     {
-                        serialNumber = _serialNumber,
+                        serialNumber = $"SN_{_serialNumber }", //TODO: "SN" should not be needed! but might help in the long run anyway?!
                         sendTimestamp = DateTime.UtcNow,
-                        messageNumber = messagesSent += 1,
+                        messageNumber = messagesSent += 1, //TODO: we need to reset if reaches max int otherwise who knows what will happen!
                         batteryVoltage = (float)palthree.GetBatteryUnregulatedVoltage(),
                         enclosureTemperature = (float)palthree.GetTemperatureOnBoard(),
                         memoryFree = nanoFramework.Runtime.Native.GC.Run(false),

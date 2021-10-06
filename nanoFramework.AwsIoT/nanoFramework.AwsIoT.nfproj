@@ -38,7 +38,6 @@
     <Compile Include="Shadows\ShadowUpdatedEventArgs.cs" />
     <Compile Include="ConnectorStateMessage.cs" />
     <Compile Include="StatusUpdatedEventArgs.cs" />
-    <Compile Include="Tests\program.cs" />
     <Compile Include="WebsocketConnectionClient.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -91,11 +90,6 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="README.md" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Tests\GetAcceptedShadowJsonExampleMessage.txt" />
-    <Content Include="Tests\UpdateAcceptedShadowExampleMessageJson.txt" />
-    <Content Include="Tests\UpdateAcceptedShadowExampleDocumentJson.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\nanoFramework.Json\nanoFramework.Json.nfproj" />
