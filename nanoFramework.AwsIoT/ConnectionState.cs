@@ -10,7 +10,7 @@ namespace nanoFramework.AwsIoT
     {
         internal ConnectionState(ConnectionState status)
         {
-            Status = status.Status;
+            State = status.State;
             Message = status.Message;
         }
 
@@ -23,7 +23,7 @@ namespace nanoFramework.AwsIoT
         /// <summary>
         /// The status.
         /// </summary>
-        public Status Status { get; set; }
+        public Status State { get; set; }
 
         /// <summary>
         /// The associated message if any.

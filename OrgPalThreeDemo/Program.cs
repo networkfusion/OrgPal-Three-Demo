@@ -185,44 +185,32 @@ namespace OrgPalThreeDemo
                 bool success = AwsIotCore.MqttConnector.Client.Open("nanoframework/device");
                 Debug.WriteLine($"{success}");
 
-                
+
                 // Register to messages received:
                 AwsIotCore.MqttConnector.Client.CloudToDeviceMessage += Client_CloudToDeviceMessageReceived;
                 AwsIotCore.MqttConnector.Client.StatusUpdated += Client_StatusUpdated;
                 AwsIotCore.MqttConnector.Client.ShadowUpdated += Client_ShadowUpdated;
 
-                //TODO: lets split this out into its own function!
                 Thread.Sleep(1000); //ensure that we are ready (and connected)???
                 Debug.WriteLine("");
-                Debug.WriteLine($"Attempting to get AWS IOT shadow...");
+                Debug.WriteLine($"Attempting to get AWS IOT shadow... Result was: ");
                 var shadow = AwsIotCore.MqttConnector.Client.GetShadow(new CancellationTokenSource(30000).Token);
                 if (shadow != null)
                 {
-                    Debug.WriteLine($"Success!");
-                    Debug.WriteLine($"Received shadow was:");
+                    Debug.WriteLine("Success!");
+                    DecodeShadowAsHashtable(shadow);
                     //Debug.WriteLine($"Desired:  {shadow.state.desired.ToJson()}");
                     //Debug.WriteLine($"Reported:  {shadow.state.reported.ToJson()}");
 
-                    Debug.WriteLine("state.desired:");
-                    DebugHelper.DumpHashTable(shadow.state.desired, 1);
-                    Debug.WriteLine("state.reported:");
-                    DebugHelper.DumpHashTable(shadow.state.reported, 1);
-                    Debug.WriteLine("metadata.desired:");
-                    DebugHelper.DumpHashTable(shadow.metadata.desired, 1);
-                    Debug.WriteLine("metadata.reported:");
-                    DebugHelper.DumpHashTable(shadow.metadata.reported, 1);
-                    Debug.WriteLine($"timestamp={shadow.timestamp}");
-                    Debug.WriteLine($"as ISO date: {DateTime.FromUnixTimeSeconds(shadow.timestamp).ToString("yyyy-MM-ddTHH:mm:ssZ")}"); //TODO: should work with "o", but doesnt!
-                    Debug.WriteLine($"version={shadow.version}");
-                    Debug.WriteLine($"clienttoken={shadow.clienttoken}");
-                    Debug.WriteLine("");
-                    Debug.WriteLine($"Converted to a json (string):");
-                    Debug.WriteLine($"...:  {shadow.ToJson()}"); //TODO: this currently throws an invalid cast exception.
+                    Debug.WriteLine($"Converted shadow to a json (string):");
+                    Debug.WriteLine("------------------");
+                    Debug.WriteLine($"{shadow.ToJson()}");
+                    Debug.WriteLine("------------------");
                     Debug.WriteLine("");
                 }
                 else
                 {
-                    Debug.WriteLine($"Failed!");
+                    Debug.WriteLine("Failed!");
                 }
 
 
@@ -243,21 +231,48 @@ namespace OrgPalThreeDemo
 
         }
 
+        private static void DecodeShadowAsHashtable(Shadow shadow)
+        {
+            Debug.WriteLine("Decoded shadow as Hashtable was:");
+            Debug.WriteLine("------------------");
+            Debug.WriteLine("state.desired:");
+            DebugHelper.DumpHashTable(shadow.state.desired, 1);
+            Debug.WriteLine("state.reported:");
+            DebugHelper.DumpHashTable(shadow.state.reported, 1);
+            Debug.WriteLine("metadata.desired:");
+            DebugHelper.DumpHashTable(shadow.metadata.desired, 1);
+            Debug.WriteLine("metadata.reported:");
+            DebugHelper.DumpHashTable(shadow.metadata.reported, 1);
+            Debug.WriteLine($"timestamp={shadow.timestamp}");
+            Debug.WriteLine($"as ISO date: {DateTime.FromUnixTimeSeconds(shadow.timestamp).ToString("yyyy-MM-ddTHH:mm:ssZ")}"); //TODO: should work with "o", but doesnt!
+            Debug.WriteLine($"version={shadow.version}");
+            Debug.WriteLine($"clienttoken={shadow.clienttoken}");
+            Debug.WriteLine("------------------");
+            Debug.WriteLine("");
+        }
+
         private static void Client_ShadowUpdated(object sender, ShadowUpdateEventArgs e)
         {
-            //TODO: check against the current shadowReportedState class (or something)!
+            //TODO: check against the last received shadow (or something)!
             Debug.WriteLine("Program: Received a shadow update!");
+            //Debug.WriteLine("------------------");
+            //DecodeShadow(e.Shadow);
+            //Debug.WriteLine("------------------");
         }
 
         private static void Client_StatusUpdated(object sender, StatusUpdatedEventArgs e)
         {
             //TODO: handle it properly!
-            Debug.WriteLine("Program: Received a status update!");
+            Debug.Write($"Program: Received a status update: {e.Status.State}"); //TODO: preferabily as a string?!
+            if (!string.IsNullOrEmpty(e.Status.Message))
+            {
+                Debug.WriteLine($" with message {e.Status.Message}"); //TODO: does this need converting?
+            }
         }
 
         static void SendUpdateShadowLoop()
         {
-            for ( ; ; )
+            for (; ; )
             {
                 try
                 {
@@ -296,7 +311,7 @@ namespace OrgPalThreeDemo
 
         static void TelemetryLoop()
         {
-            for ( ; ; )
+            for (; ; )
             {
                 try
                 {
@@ -380,7 +395,7 @@ namespace OrgPalThreeDemo
                         {
                             AwsIotCore.MqttConnector.ClientRsaSha256Crt = dataReader.ReadString(buffer.Length);
                         }
-                        
+
                         //Should load into secure storage (somewhere) and delete file on removable device?
                     }
                     if (file.FileType == "der")
@@ -401,7 +416,7 @@ namespace OrgPalThreeDemo
                         {
                             AwsIotCore.MqttConnector.ClientRsaKey = dataReader.ReadString(buffer.Length);
                         }
-                        
+
                         //Should load into secure storage (somewhere) and delete file on removable device?
                     }
                     if (file.Name == "mqttconfig.json")
@@ -409,7 +424,7 @@ namespace OrgPalThreeDemo
                         var buffer = FileIO.ReadBuffer(file);
                         using (DataReader dataReader = DataReader.FromBuffer(buffer))
                         {
-                            readMqttConfig:
+                        readMqttConfig:
                             try
                             {
                                 MqttConfigFileSchema config = (MqttConfigFileSchema)JsonConvert.DeserializeObject(dataReader, typeof(MqttConfigFileSchema));
