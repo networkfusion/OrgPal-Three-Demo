@@ -7,24 +7,38 @@ namespace nanoFramwwork.AwsIoT.Tests
     public class ShadowTests
     {
         [TestMethod]
-        public void get_shadow_to_class()
+        public void get_shadow_json_to_class()
         {
+            var json = ShadowJsonMessageExamples.Get_AcceptedShadow;
         }
 
         [TestMethod]
-        public void get_shadow_to_json()
+        public void get_shadow_class_to_json()
         {
+            //technicallly un-necessary, but a good check!
+            // need to make sure the above method passes before attempting this!
         }
 
         [TestMethod]
-        public void update_shadow_to_class()
+        public void update_shadow_recieved_json_to_class()
         {
+            var json = ShadowJsonMessageExamples.Update_AcceptedShadow;
         }
 
         [TestMethod]
-        public void update_shadow_to_json()
+        public void create_update_shadow_to_send_class()
         {
+            //technicallly un-necessary, but a good check!
+            //in the realworld, this would be a different class.
+            // need to make sure the above method passes before attempting this!
         }
+
+        [TestMethod]
+        public void update_delta_shadow_received_json_to_class()
+        {
+            //TODO: there is no reference for this (yet).
+        }
+
     }
 }
 
