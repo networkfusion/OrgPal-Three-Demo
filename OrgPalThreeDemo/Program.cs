@@ -234,6 +234,7 @@ namespace OrgPalThreeDemo
                 // Register to messages received:
 
                 AwsIotCore.MqttConnector.Client.CloudToDeviceMessage += Client_CloudToDeviceMessageReceived;
+                AwsIotCore.MqttConnector.Client.StatusUpdated += Client_StatusUpdated;
                 AwsIotCore.MqttConnector.Client.ShadowUpdated += Client_ShadowUpdated;
 
                 return true;
@@ -253,6 +254,12 @@ namespace OrgPalThreeDemo
         {
             //TODO: check against the current shadowReportedState class (or something)!
             Debug.WriteLine("Program: Received a shadow update!");
+        }
+
+        private static void Client_StatusUpdated(object sender, StatusUpdatedEventArgs e)
+        {
+            //TODO: handle it properly!
+            Debug.WriteLine("Program: Received a status update!");
         }
 
         static void SendUpdateShadowLoop()

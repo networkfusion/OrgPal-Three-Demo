@@ -95,6 +95,7 @@
   <ItemGroup>
     <Content Include="Tests\GetAcceptedShadowJsonExampleMessage.txt" />
     <Content Include="Tests\UpdateAcceptedShadowExampleMessageJson.txt" />
+    <Content Include="Tests\UpdateAcceptedShadowExampleDocumentJson.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\nanoFramework.Json\nanoFramework.Json.nfproj" />
