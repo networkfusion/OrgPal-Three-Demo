@@ -4,10 +4,25 @@ using System;
 namespace nanoFramwwork.AwsIoT.Tests
 {
     [TestClass]
-    public class Test1
+    public class ShadowTests
     {
         [TestMethod]
-        public void TestMethod1()
+        public void get_shadow_to_class()
+        {
+        }
+
+        [TestMethod]
+        public void get_shadow_to_json()
+        {
+        }
+
+        [TestMethod]
+        public void update_shadow_to_class()
+        {
+        }
+
+        [TestMethod]
+        public void update_shadow_to_json()
         {
         }
     }
