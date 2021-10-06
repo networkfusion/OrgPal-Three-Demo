@@ -182,7 +182,7 @@ namespace nanoFramework.AwsIoT
                 _mqttc.Subscribe(
                     new[] {
                         $"{_deviceMessageTopic}/#",
-                        $"{ _shadowTopic }/#",
+                        $"{ _shadowTopic }/#", //TODO: make this topic specific as costs money to download messages from unrequired ones?!
                     },
                     new[] {
                         MqttQoSLevel.AtLeastOnce,
@@ -224,7 +224,7 @@ namespace nanoFramework.AwsIoT
             {
                 _mqttc.Unsubscribe(new[] {
                     $"{_deviceMessageTopic}/#",
-                    $"{ _shadowTopic }/#",
+                    $"{ _shadowTopic }/#",  //TODO: make this topic specific as costs money to download messages from unrequired ones?!
                     });
                 _mqttc.Disconnect();
                 // Make sure all get disconnected, cleared (TODO: 1 second arbitary value specified)
@@ -262,29 +262,29 @@ namespace nanoFramework.AwsIoT
             return _shadowReceived ? _shadow : null;
         }
 
-        ///// <summary>
-        ///// Publishes a Shadow
-        ///// </summary>
-        ///// <param name="cancellationToken"></param>
-        ///// <param name="namedShadow"></param>
-        ///// <returns></returns>
-        //public bool PublishShadow(CancellationToken cancellationToken = default, string namedShadow = "")
-        //{
-        //    //we could possibily use this method (or reserve it for the future) but need a good reason!
-        //    throw new NotImplementedException();
-        //}
+        /// <summary>
+        /// Publishes a Shadow
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <param name="namedShadow"></param>
+        /// <returns></returns>
+        public bool PublishShadow(CancellationToken cancellationToken = default, string namedShadow = "")
+        {
+            //we could possibily use this method (or reserve it for the future) but need a good reason!
+            throw new NotImplementedException();
+        }
 
-        ///// <summary>
-        ///// Deletes a Shadow
-        ///// </summary>
-        ///// <param name="cancellationToken"></param>
-        ///// <param name="namedShadow"></param>
-        ///// <returns></returns>
-        //public bool DeleteShadow(CancellationToken cancellationToken = default, string namedShadow = "")
-        //{
-        //    //we could possibily use this method (or reserve it for the future) but need a good reason!
-        //    throw new NotImplementedException();
-        //}
+        /// <summary>
+        /// Deletes a Shadow
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <param name="namedShadow"></param>
+        /// <returns></returns>
+        public bool DeleteShadow(CancellationToken cancellationToken = default, string namedShadow = "")
+        {
+            //we could possibily use this method (or reserve it for the future) but need a good reason!
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Update the device shadow reported state.
@@ -406,10 +406,12 @@ namespace nanoFramework.AwsIoT
                             _mqttBrokerStatus.Message = jsonMessageBody;
                             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
-                        //else if (e.Topic.IndexOf("/documents") > 0) //TODO: probably not required to handle as the full change?!
-                        //{
-                        //    Debug.WriteLine($"ReceivedHandler Reached (update-documents): {e.Topic}");
-                        //}
+                        else if (e.Topic.Contains("/documents"))
+                        {
+                            //TODO: probably not required to handle as the full change?!
+                            Debug.WriteLine($"ReceivedHandler Reached (update-documents): {e.Topic}");
+                            Debug.WriteLine("Ignoring as not required (uses delta instead)!");
+                        }
                         else
                         {
                             if (string.IsNullOrEmpty(jsonMessageBody)) //!!! AWS is so wasteful... this cost money !!!

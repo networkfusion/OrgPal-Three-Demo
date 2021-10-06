@@ -186,6 +186,11 @@ namespace OrgPalThreeDemo
                 bool success = AwsIotCore.MqttConnector.Client.Open("nanoframework/device");
                 Debug.WriteLine($"{success}");
 
+                
+                // Register to messages received:
+                AwsIotCore.MqttConnector.Client.CloudToDeviceMessage += Client_CloudToDeviceMessageReceived;
+                AwsIotCore.MqttConnector.Client.StatusUpdated += Client_StatusUpdated;
+                AwsIotCore.MqttConnector.Client.ShadowUpdated += Client_ShadowUpdated;
 
                 //TODO: lets split this out into its own function!
                 Thread.Sleep(1000); //ensure that we are ready (and connected)???
@@ -229,14 +234,6 @@ namespace OrgPalThreeDemo
                 Thread sendShadowThread = new Thread(new ThreadStart(SendUpdateShadowLoop));
                 sendShadowThread.Start();
 
-
-
-                // Register to messages received:
-
-                AwsIotCore.MqttConnector.Client.CloudToDeviceMessage += Client_CloudToDeviceMessageReceived;
-                AwsIotCore.MqttConnector.Client.StatusUpdated += Client_StatusUpdated;
-                AwsIotCore.MqttConnector.Client.ShadowUpdated += Client_ShadowUpdated;
-
                 return true;
             }
             catch (Exception e)
@@ -244,9 +241,6 @@ namespace OrgPalThreeDemo
                 Debug.WriteLine(e.Message.ToString());
                 return false;
             }
-            
-
-
 
         }
 
