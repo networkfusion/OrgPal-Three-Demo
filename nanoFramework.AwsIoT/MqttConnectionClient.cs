@@ -344,23 +344,23 @@ namespace nanoFramework.AwsIoT
                 return false; //Received == false
         }
 
-        /// <summary>
-        /// Add a callback method.
-        /// </summary>
-        /// <param name="methodCallback">The callback method to add.</param>
-        public void AddMethodCallback(MethodCallback methodCallback)
-        {
-            _methodCallback.Add(methodCallback);
-        }
+        ///// <summary>
+        ///// Add a callback method.
+        ///// </summary>
+        ///// <param name="methodCallback">The callback method to add.</param>
+        //public void AddMethodCallback(MethodCallback methodCallback)
+        //{
+        //    _methodCallback.Add(methodCallback);
+        //}
 
-        /// <summary>
-        /// Remove a callback method.
-        /// </summary>
-        /// <param name="methodCallback">The callback method to remove.</param>
-        public void RemoveMethodCallback(MethodCallback methodCallback)
-        {
-            _methodCallback.Remove(methodCallback);
-        }
+        ///// <summary>
+        ///// Remove a callback method.
+        ///// </summary>
+        ///// <param name="methodCallback">The callback method to remove.</param>
+        //public void RemoveMethodCallback(MethodCallback methodCallback)
+        //{
+        //    _methodCallback.Remove(methodCallback);
+        //}
 
         /// <summary>
         /// Send a message to Aws IoT Core.
