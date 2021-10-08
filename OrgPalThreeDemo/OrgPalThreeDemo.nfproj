@@ -19,7 +19,6 @@
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
     <Compile Include="AwsIotCore\MqttConnector.cs" />
-    <Compile Include="AwsIotCore\AwsShadow.cs" />
     <Compile Include="Drivers\LCD.cs" />
     <Compile Include="Drivers\MCP342x.cs" />
     <Compile Include="Drivers\OnboardDevices.cs" />

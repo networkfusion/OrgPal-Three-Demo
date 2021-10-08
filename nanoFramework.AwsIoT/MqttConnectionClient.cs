@@ -278,36 +278,6 @@ namespace nanoFramework.AwsIoT
         }
 
         /// <summary>
-        /// Publishes a Shadow
-        /// </summary>
-        /// <param name="cancellationToken">A cancellation token</param>
-        /// <param name="namedShadow">A named shadow</param>
-        /// <returns>True for success</returns>
-        /// <remarks>
-        /// Not yet implemented and will return an exception.
-        /// </remarks>
-        public bool PublishShadow(CancellationToken cancellationToken = default, string namedShadow = "")
-        {
-            //we could possibily use this method (or reserve it for the future) but need a good reason!
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Deletes a Shadow
-        /// </summary>
-        /// <param name="cancellationToken">A cancellation token</param>
-        /// <param name="namedShadow"></param>
-        /// <returns>True for success</returns>
-        /// <remarks>
-        /// Not yet implemented and will return an exception.
-        /// </remarks>
-        public bool DeleteShadow(CancellationToken cancellationToken = default, string namedShadow = "")
-        {
-            //we could possibily use this method (or reserve it for the future) but need a good reason!
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
         /// Update the device shadow reported state.
         /// </summary>
         /// <param name="reported">The reported properties.</param>

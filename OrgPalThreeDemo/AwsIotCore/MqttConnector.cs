@@ -13,6 +13,5 @@ namespace OrgPalThreeDemo.AwsIotCore
         public static string ClientRsaKey = string.Empty; //Device private key copied from AWS
         public static byte[] RootCA; //AWS root CA
         public static MqttConnectionClient Client;
-        //public static AwsShadow Shadow = new AwsShadow();
     }
 }
