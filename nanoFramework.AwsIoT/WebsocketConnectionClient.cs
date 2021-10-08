@@ -7,6 +7,10 @@ namespace nanoFramework.AwsIoT.Devices.Client
     /// </summary>
     public class WebsocketConnectionClient// : IDisposable
     {
+
+        /// <summary>
+        /// Creates a new WebSocket Connection Client
+        /// </summary>
         WebsocketConnectionClient()
         {
             //TODO: implement!

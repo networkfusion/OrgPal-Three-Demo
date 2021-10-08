@@ -18,9 +18,9 @@ namespace nanoFramework.AwsIoT
     /// AWS IoT Core MQTT Connection Client for .NET nanoFramework
     /// </summary>
     /// <remarks>
-    /// https://github.com/aws/aws-sdk-net/blob/master/sdk/src/Services/IotData/Generated/_netstandard/AmazonIotDataClient.cs
-    /// https://github.com/aws/aws-iot-device-sdk-embedded-C/tree/master/src
-    /// https://docs.aws.amazon.com/iot/latest/developerguide/device-shadow-mqtt.html
+    /// <seealso cref="https://github.com/aws/aws-sdk-net/blob/master/sdk/src/Services/IotData/Generated/_netstandard/AmazonIotDataClient.cs"/>
+    /// <seealso cref="https://github.com/aws/aws-iot-device-sdk-embedded-C/tree/master/src"/>
+    /// <seealso cref="https://docs.aws.amazon.com/iot/latest/developerguide/device-shadow-mqtt.html"/>
     /// </remarks>
     public class MqttConnectionClient : IDisposable
     {
@@ -41,7 +41,7 @@ namespace nanoFramework.AwsIoT
 
         private readonly string _iotCoreUri; // FQDN
         const int _mqttsPort = 8883; //Default MQTTS port.
-        private readonly X509Certificate2 _clientCert; //ClientRsaSha256Crt and ClientRsaKey
+        private readonly X509Certificate2 _clientCert; //Combined ClientRsaSha256Crt and ClientRsaKey
         private readonly X509Certificate _awsRootCACert;
 
         private M2Mqtt.MqttClient _mqttc;
@@ -280,9 +280,12 @@ namespace nanoFramework.AwsIoT
         /// <summary>
         /// Publishes a Shadow
         /// </summary>
-        /// <param name="cancellationToken"></param>
-        /// <param name="namedShadow"></param>
-        /// <returns></returns>
+        /// <param name="cancellationToken">A cancellation token</param>
+        /// <param name="namedShadow">A named shadow</param>
+        /// <returns>True for success</returns>
+        /// <remarks>
+        /// Not yet implemented and will return an exception.
+        /// </remarks>
         public bool PublishShadow(CancellationToken cancellationToken = default, string namedShadow = "")
         {
             //we could possibily use this method (or reserve it for the future) but need a good reason!
@@ -292,9 +295,12 @@ namespace nanoFramework.AwsIoT
         /// <summary>
         /// Deletes a Shadow
         /// </summary>
-        /// <param name="cancellationToken"></param>
+        /// <param name="cancellationToken">A cancellation token</param>
         /// <param name="namedShadow"></param>
-        /// <returns></returns>
+        /// <returns>True for success</returns>
+        /// <remarks>
+        /// Not yet implemented and will return an exception.
+        /// </remarks>
         public bool DeleteShadow(CancellationToken cancellationToken = default, string namedShadow = "")
         {
             //we could possibily use this method (or reserve it for the future) but need a good reason!
@@ -399,14 +405,14 @@ namespace nanoFramework.AwsIoT
                     {
                         //TODO: we might have to be more specific with subscribed topics here... I think receiving some of these could cost money, even if they are irrelevent!
                         Debug.WriteLine($"ReceivedHandler Reached (update): {e.Topic}");
-                        if (e.Topic.Contains("/rejected")) //TODO: IndexOf does not work properly!
+                        if (e.Topic.Contains("/rejected"))
                         {
                             Debug.WriteLine($"ReceivedHandler Reached (update-rejected): {e.Topic}");
                             _mqttBrokerStatus.State = ConnectorStateMessage.ShadowUpdateError;
                             _mqttBrokerStatus.Message = jsonMessageBody;
                             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
-                        else if (e.Topic.Contains("/delta"))  //TODO: IndexOf does not work properly! //TODO: if this worked correctly, it should be a partial update!
+                        else if (e.Topic.Contains("/delta")) //TODO: if this worked correctly, it should be a partial update!
                         {
                             Debug.WriteLine($"ReceivedHandler Reached (update-delta): {e.Topic}");
                             ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(new Shadow(jsonMessageBody))); //ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(new ShadowCollection(jsonMessageBody)));
@@ -414,7 +420,7 @@ namespace nanoFramework.AwsIoT
                             _mqttBrokerStatus.Message = jsonMessageBody;
                             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
-                        else if (e.Topic.Contains("/accepted"))  //TODO: IndexOf does not work properly! //TODO: this should not be required, since a delta should take precidence (but what if there is no delta?!)...
+                        else if (e.Topic.Contains("/accepted")) //TODO: this should not be required, since a delta should take precidence (but what if there is no delta?!)...
                         {
                             Debug.WriteLine($"ReceivedHandler Reached (update-accepted): {e.Topic}");
                             _mqttBrokerStatus.State = ConnectorStateMessage.ShadowUpdated;
@@ -429,15 +435,6 @@ namespace nanoFramework.AwsIoT
                         }
                         //else //Since we are also sending on this topic, this code is not helpful!
                         //{
-                        //    if (string.IsNullOrEmpty(jsonMessageBody)) //!!! AWS is so wasteful... this cost money !!!
-                        //    {
-                        //        Debug.WriteLine($"!!! ReceivedHandler (update shadow)  Received an empty message on: {e.Topic}");
-                        //    }
-                        //    else
-                        //    {
-                        //        Debug.WriteLine($"!!! ReceivedHandler (update shadow) Received a message on: {e.Topic} that is not handled: {jsonMessageBody}");
-                        //    }
-
                         //}
 
                     }
@@ -463,15 +460,6 @@ namespace nanoFramework.AwsIoT
                         }
                         //else //Since we are also sending on this topic, this code is not helpful!
                         //{
-                        //    if (string.IsNullOrEmpty(jsonMessageBody)) //!!! AWS is so wasteful... this cost money !!!
-                        //    {
-                        //        Debug.WriteLine($"!!! ReceivedHandler (get shadow) Received an empty message on: {e.Topic}");
-                        //    }
-                        //    else
-                        //    {
-                        //        Debug.WriteLine($"!!! ReceivedHandler (get shadow) Received a message on: {e.Topic} that is not handled: {jsonMessageBody}");
-                        //    }
-
                         //}
                     }
                     else if (e.Topic.StartsWith(_deviceMessageTopic))
@@ -494,7 +482,6 @@ namespace nanoFramework.AwsIoT
                 }
                 //else  //Since we are also sending on this topics, this code is not helpful!
                 //{
-                //    Debug.WriteLine($"!!! ReceivedHandler subscribed topic {e.Topic}: Message received was empty!");
                 //}
 
             }
