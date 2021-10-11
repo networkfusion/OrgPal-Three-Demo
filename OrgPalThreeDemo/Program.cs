@@ -117,8 +117,6 @@ namespace OrgPalThreeDemo
             }
 
 #if ORGPAL_THREE
-            lcd.Display($"{startTime.ToString("yyyy-MM-dd HH:mm")}", $"IP: {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}"); //Time shortened to fit on display (excludes seconds)
-            Thread.Sleep(5000); //TODO: UX only
             Thread lcdUpdateThread = new Thread(new ThreadStart(LcdUpdate_Thread));
             lcdUpdateThread.Start();
 #endif
@@ -131,15 +129,15 @@ namespace OrgPalThreeDemo
         {
             for ( ; ; )
             {
-                //lcd.BacklightOn = true;
-                //lcd.Clear(); //Unneccessary - wipes the display, but causes lag!
-                //Instead we will make sure all lines are 16 chars:
-                
-                var pcbTempC = $"PCB Temp: { palthree.GetTemperatureOnBoard().ToString("n2")}C";
-                var pcbVoltage = $"Voltage: { palthree.GetBatteryUnregulatedVoltage().ToString("n2")}VDC";
+                //lcd.BacklightOn = true; //TODO: this causes display corruption!
+                //TODO: create a menu handler to scroll through the display!
+                lcd.Display($"{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm")}", //Time shortened to fit on display (excludes seconds)
+                    $"IP: {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
 
-                lcd.Display(pcbTempC, pcbVoltage);
-                Thread.Sleep(10000); //TODO: arbitary value... what should the update rate be?!
+
+                //lcd.Display($"PCB Temp: { palthree.GetTemperatureOnBoard().ToString("n2")}C",
+                //    $"Voltage: { palthree.GetBatteryUnregulatedVoltage().ToString("n2")}VDC");
+                Thread.Sleep(1000); //TODO: arbitary value... what should the update rate be?!
                 //lcd.BacklightOn = false;
             }
         }
@@ -391,7 +389,7 @@ namespace OrgPalThreeDemo
             }
         }
 
-        private static void ReadStorage()
+        private static void ReadStorage() //TODO: this can fail on redeploy or exiting debug!!!
         {
             // Get the logical root folder for all removable storage devices
             // in nanoFramework the drive letters are fixed, being:
