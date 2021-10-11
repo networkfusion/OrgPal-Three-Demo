@@ -29,7 +29,7 @@ namespace OrgPalThreeDemo
         private static string _serialNumber;
 
         private static DateTime startTime = DateTime.UtcNow;
-        private static int messagesSent = 0;
+        private static uint messagesSent = 0;
         public const int shadowSendInterval = 600000; //10 minutes...  TODO: increase shadow interval to 3600000 for 1 hour when happy!
         public const int telemetrySendInterval = 60000; //1 minute... TODO: does not take into account delays or execution time!
 
@@ -316,6 +316,13 @@ namespace OrgPalThreeDemo
             {
                 try
                 {
+
+                    if (messagesSent > uint.MaxValue)
+                    {
+                        //reset message number
+                        messagesSent = 0;
+                    }
+
                     var statusTelemetry = new AwsIotCore.DeviceMessageSchemas.TelemetryMessage
                     {
                         serialNumber = $"SN_{_serialNumber }", //TODO: "SN" should not be needed! but might help in the long run anyway?!
