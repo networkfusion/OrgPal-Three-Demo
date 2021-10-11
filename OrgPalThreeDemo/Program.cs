@@ -328,12 +328,12 @@ namespace OrgPalThreeDemo
                         serialNumber = $"SN_{_serialNumber }", //TODO: "SN" should not be needed! but might help in the long run anyway?!
                         sendTimestamp = DateTime.UtcNow,
                         messageNumber = messagesSent += 1, //TODO: we need to reset if reaches max int otherwise who knows what will happen!
-                        batteryVoltage = (float)palthree.GetBatteryUnregulatedVoltage(),
-                        enclosureTemperature = (float)palthree.GetTemperatureOnBoard(),
-                        memoryFree = nanoFramework.Runtime.Native.GC.Run(false),
-                        mcuTemperature = palthree.GetMcuTemperature(),
-                        airTemperature = adcPalSensor.GetTemperatureFromPT100(),
-                        //thermistorTemperature = adcPalSensor.GetTemperatureFromThermistorNTC1000() //Commented out as causes PRT to be null for some reason!
+                        batteryVoltage = palthree.GetBatteryUnregulatedVoltage(),
+                        enclosureTemperatureCelsius = palthree.GetTemperatureOnBoard(),
+                        memoryFreeBytes = nanoFramework.Runtime.Native.GC.Run(false),
+                        mcuTemperatureCelsius = palthree.GetMcuTemperature(),
+                        airTemperatureCelsius = adcPalSensor.GetTemperatureFromPT100(),
+                        //thermistorTemperatureCelsius = adcPalSensor.GetTemperatureFromThermistorNTC1000() //Commented out as causes PRT to be null for some reason!
                     };
 
                     string sampleData = JsonConvert.SerializeObject(statusTelemetry);
