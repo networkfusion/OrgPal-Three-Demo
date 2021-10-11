@@ -19,12 +19,13 @@
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
     <Compile Include="AwsIotCore\MqttConnector.cs" />
-    <Compile Include="Drivers\LCD.cs" />
-    <Compile Include="Drivers\AdcExpansionBoard.cs" />
-    <Compile Include="Drivers\OnboardDevices.cs" />
-    <Compile Include="Drivers\PalHelper.cs" />
-    <Compile Include="Drivers\PalThreePins.cs" />
-    <Compile Include="Drivers\PCF85263.cs" />
+    <Compile Include="OrgPal.Three\CharacterDisplay.cs" />
+    <Compile Include="OrgPal.Three\AdcExpansionBoard.cs" />
+    <Compile Include="OrgPal.Three\OnboardAdcDevice.cs" />
+    <Compile Include="OrgPal.Three\Buttons.cs" />
+    <Compile Include="OrgPal.Three\Helper.cs" />
+    <Compile Include="OrgPal.Three\Pinout.cs" />
+    <Compile Include="OrgPal.Three\PCF85263.cs" />
     <Compile Include="Networking\ManagedNtpClient.cs" />
     <Compile Include="Networking\NetworkHelper.cs" />
     <Compile Include="Peripherals\HMT330.cs" />

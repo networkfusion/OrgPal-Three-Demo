@@ -1,7 +1,7 @@
 ﻿//using System;
 //using Windows.Devices.I2c;
 
-//namespace PalThree
+//namespace OrgPal.Three
 //{
 //    /// <summary>
 //    /// Driver for RTC PCF85263 with key functions implemented for time, alarm and some system functions.

@@ -1,9 +1,9 @@
 ﻿
 using System;
 
-namespace PalThree
+namespace OrgPal.Three
 {
-    public static class PalThreePins
+    public static class Pinout
     {
         public static class GpioPin
         {

@@ -18,8 +18,7 @@ using OrgPalThreeDemo.Networking;
 using nanoFramework.AwsIoT.Shadows;
 
 #if ORGPAL_THREE
-using PalThree;
-//using System.Device.Gpio;
+using OrgPal.Three;
 #endif
 
 namespace OrgPalThreeDemo
@@ -27,14 +26,10 @@ namespace OrgPalThreeDemo
     public class Program
     {
 #if ORGPAL_THREE
-        //private static GpioController gpioController;
-
-        //private static GpioPin _userButton;
-        //private static GpioPin _muxWakeButtonFlowControl;
-        //private static GpioPin _wakeButton;
-        private static Drivers.OnboardDevices palthree;
-        private static LCD lcd;
-        private static AdcExpansionBoard adcPalSensor;
+        private static Buttons palthreeButtons;
+        private static OnboardAdcDevice palthreeInternalAdc;
+        private static CharacterDisplay palthreeDisplay;
+        private static AdcExpansionBoard palAdcExpBoard;
 #endif
 
         private static string _serialNumber;
@@ -50,32 +45,15 @@ namespace OrgPalThreeDemo
             Debug.WriteLine("");
 
 #if ORGPAL_THREE
-            palthree = new Drivers.OnboardDevices();
-            adcPalSensor = new AdcExpansionBoard();
+            palthreeButtons = new Buttons();
+            palthreeInternalAdc = new OnboardAdcDevice();
+            palAdcExpBoard = new AdcExpansionBoard();
 
-            //gpioController = new GpioController();
-
-            //_userButton = gpioController.OpenPin(PalThreePins.GpioPin.BUTTON_USER_BOOT1_PK7); //TODO: perhaps should use IoT.Devices.Button
-            //_userButton.SetPinMode(PinMode.Input); //TODO: we definitely need to debounce this!
-            //_userButton.ValueChanged += User_Boot1_Button_ValueChanged;
-
-            ////the buttons are multiplexed so that the board can be woken up by user, or by the RTC
-            ////so to get that interrupt to fire you need to do this:
-            //// TODO: work out which buttons and why!
-            //_muxWakeButtonFlowControl = gpioController.OpenPin(PalThreePins.GpioPin.MUX_EXT_BUTTON_WAKE_PE4);
-            //_muxWakeButtonFlowControl.SetPinMode(PinMode.Output);
-            //_muxWakeButtonFlowControl.Write(PinValue.High);
-            //_muxWakeButtonFlowControl.ValueChanged += MuxWakeButtonFlowControl_ValueChanged;
-
-            ////_wakeButton = gpioController.OpenPin(PalThreePins.GpioPin.BUTTON_WAKE_PA0);
-            ////_wakeButton.SetPinMode(PinMode.Input);
-            ////_wakeButton.ValueChanged += WakeButton_ValueChanged;
-
-            lcd = new LCD
+            palthreeDisplay = new CharacterDisplay
             {
                 BacklightOn = true
             };
-            lcd.Display("Initializing,", "Please Wait...");
+            palthreeDisplay.Update("Initializing,", "Please Wait...");
 
 #endif
 
@@ -131,7 +109,7 @@ namespace OrgPalThreeDemo
             {
                 //lcd.BacklightOn = true; //TODO: this causes display corruption!
                 //TODO: create a menu handler to scroll through the display!
-                lcd.Display($"{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm")}", //Time shortened to fit on display (excludes seconds)
+                palthreeDisplay.Update($"{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm")}", //Time shortened to fit on display (excludes seconds)
                     $"IP: {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
 
 
@@ -142,26 +120,6 @@ namespace OrgPalThreeDemo
             }
         }
 
-        //private static void MuxWakeButtonFlowControl_ValueChanged(object sender, PinValueChangedEventArgs e)
-        //{
-        //    Debug.WriteLine("Handle MuxWakeButton Flow...!");
-        //}
-
-        //private static void WakeButton_ValueChanged(object sender, PinValueChangedEventArgs e)
-        //{
-        //    Debug.WriteLine("Handle WakeFlow -Should be MUX?-...!");
-        //}
-
-        //TODO: this event seems to fire endlessly (probably MUX>?!
-        //private static void User_Boot1_Button_ValueChanged(object sender, PinValueChangedEventArgs e)
-        //{
-        //    if (e.ChangeType == PinEventTypes.Rising) //button pressed.
-        //    {
-        //        Debug.WriteLine("USER/BOOT1 button pressed...!");
-        //        Thread lcdShowThread = new Thread(new ThreadStart(LcdUpdate_Thread));
-        //        lcdShowThread.Start();
-        //    }
-        //}
 #endif
 
         private static void SetupNetwork()
@@ -353,11 +311,11 @@ namespace OrgPalThreeDemo
                         messageNumber = messagesSent += 1, //TODO: we need to reset if reaches max int otherwise who knows what will happen!
                         memoryFreeBytes = nanoFramework.Runtime.Native.GC.Run(false),
 #if ORGPAL_THREE
-                        batteryVoltage = palthree.GetBatteryUnregulatedVoltage(),
-                        enclosureTemperatureCelsius = palthree.GetTemperatureOnBoard(),
-                        mcuTemperatureCelsius = palthree.GetMcuTemperature(),
-                        airTemperatureCelsius = adcPalSensor.GetTemperatureFromPT100(),
-                        //thermistorTemperatureCelsius = adcPalSensor.GetTemperatureFromThermistorNTC1000() //Commented out as causes PRT to be null for some reason!
+                        batteryVoltage = palthreeInternalAdc.GetBatteryUnregulatedVoltage(),
+                        enclosureTemperatureCelsius = palthreeInternalAdc.GetTemperatureOnBoard(),
+                        mcuTemperatureCelsius = palthreeInternalAdc.GetMcuTemperature(),
+                        airTemperatureCelsius = palAdcExpBoard.GetTemperatureFromPT100(),
+                        //thermistorTemperatureCelsius = palAdcExpBoard.GetTemperatureFromThermistorNTC1000() //Commented out as causes PRT to be null for some reason!
 #endif
                     };
 

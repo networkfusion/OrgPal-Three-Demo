@@ -8,10 +8,10 @@ using System.Threading;
 using System.Device.Gpio;
 using System.Device.I2c;
 
-namespace PalThree
+namespace OrgPal.Three
 {
 
-    public class LCD : IDisposable
+    public class CharacterDisplay : IDisposable
     {
         // For PCF8574 chip, I2C address range: 0x38 - 0x3F (Dec:   56-63)
         // For PCF8574T chip, I2C address range: 0x20-0x27  (Dec:    32-38)
@@ -75,10 +75,10 @@ namespace PalThree
         }
 
 
-        public LCD(int I2CId = PalThreePins.I2cBus.I2C3, byte mainAddress = LCD_ADDRESS_MAIN)
+        public CharacterDisplay(int I2CId = Pinout.I2cBus.I2C3, byte mainAddress = LCD_ADDRESS_MAIN)
         {
             //lcdPowerOnOff = PalHelper.GpioPort(PalThreePins.GpioPin.POWER_LCD_ON_OFF, PinMode.Output, PinValue.High);
-            lcdPowerOnOff = new GpioController().OpenPin(PalThreePins.GpioPin.POWER_LCD_ON_OFF, PinMode.Output);
+            lcdPowerOnOff = new GpioController().OpenPin(Pinout.GpioPin.POWER_LCD_ON_OFF, PinMode.Output);
             lcdPowerOnOff.Write(PinValue.High);
 
             config = new I2cConnectionSettings(I2CId, mainAddress, I2cBusSpeed.FastMode);
@@ -158,7 +158,7 @@ namespace PalThree
         }
 
 
-        public void Display(string line1, string line2)
+        public void Update(string line1, string line2)
         {
             while (line1.Length < 16)
             {
@@ -168,10 +168,10 @@ namespace PalThree
             {
                 line2 += " ";
             }
-            Display(line1 + line2);
+            Update(line1 + line2);
         }
 
-        public void Display(string text) //, byte line = 0) //TODO: does not handle empty lines or CRLF!!
+        public void Update(string text) //, byte line = 0) //TODO: does not handle empty lines or CRLF!!
         {
             int lines = text.Length > 16 ? 2 : 1;
             if (lines < 2)
@@ -206,10 +206,10 @@ namespace PalThree
         }
 
 
-        public void ShowText(string text) //, byte line = 0)
+        public void RefreshText(string text) //, byte line = 0)
         {
             this.Clear();
-            Display(text); //, line);
+            Update(text); //, line);
         }
 
 

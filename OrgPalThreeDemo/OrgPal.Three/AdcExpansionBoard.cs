@@ -4,7 +4,7 @@ using System.Threading;
 using System.Device.I2c;
 using Iot.Device.Mcp3428;
 
-namespace PalThree
+namespace OrgPal.Three
 {
 
     /// <summary>
@@ -32,7 +32,7 @@ namespace PalThree
             Four = 3
         }
 
-        public AdcExpansionBoard(int I2CId = PalThreePins.I2cBus.I2C2, ushort i2cAddress = 0x68)
+        public AdcExpansionBoard(int I2CId = Pinout.I2cBus.I2C2, ushort i2cAddress = 0x68)
         {
             // Adress Options 0x68, 0x6A, 0x6C or 0x6E
             
