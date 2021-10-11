@@ -13,7 +13,8 @@ namespace OrgPalThreeDemo.AwsIotCore.DeviceMessageSchemas
         public float enclosureTemperature { get; set; } //will need to change to double
         public float mcuTemperature { get; set; } //will need to change to double
         public uint memoryFree { get; set; }
-        public float airTemperature { get; set; } //will need to change to double
+        public double airTemperature { get; set; } = double.NaN;
+        public double thermistorTemperature { get; set; } = double.NaN;
 #pragma warning restore IDE1006 // Naming Styles
     }
 }

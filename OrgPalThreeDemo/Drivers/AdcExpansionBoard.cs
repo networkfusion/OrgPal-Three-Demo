@@ -39,15 +39,21 @@ namespace PalThree
             I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(I2CId, i2cAddress));
             sensor = new Mcp3428(i2cDevice, AdcMode.OneShot, AdcResolution.Bit16, AdcGain.X1);
 
-            TemperatureCoefficient = 1.250f; //not sure why this is better... 0c correct 30c 0.5c off...
-            //TemperatureCoefficient = 0.385f;// 0.00385 Ohms/Ohm/ºC
+            PT100TemperatureCoefficient = 1.250f; //not sure why this is better... 0c correct 30c 0.5c off...
+            //PT100TemperatureCoefficient = 0.385f;// 0.00385 Ohms/Ohm/ºC
+
+            //Default Vishay NTCALUG01A103F specs
+            //B25/85-value  3435 to 4190 K 
+            NTC_A = 0.0011415995549162692f;
+            NTC_B = 0.000232134233116422f;
+            NTC_C = 9.520031026040015e-8f;
         }
 
         public float NTC_A { get; set; }
         public float NTC_B { get; set; }
         public float NTC_C { get; set; }
 
-        public float TemperatureCoefficient
+        public float PT100TemperatureCoefficient
         {
             get;
             set;
@@ -64,31 +70,37 @@ namespace PalThree
         }
 
 
+        /// <summary>
+        /// Gets the temperature value from a NTC1000 Thermistor
+        /// </summary>
+        /// <returns>Temperature in celsius</returns>
+        /// <remarks>
+        /// Sensor wired to:
+        /// RT P1
+        /// RT P2
+        /// </remarks>
         public double GetTemperatureFromThermistorNTC1000()
         {
             var channel = Channel.Two; //NTC Thermistor is only avaialble on CH2+
+
             sensor.Mode = AdcMode.Continuous;
+            sensor.ReadChannel((int)channel); //ensure continuous mode is definitely enabled.
 
-            //Vishay NTCALUG01A103F specs
-            //B25/85-value  3435 to 4190 K 
-            NTC_A = 0.0011415995549162692f;
-            NTC_B = 0.000232134233116422f;
-            NTC_C = 9.520031026040015e-8f;
-
+            //wait 30ms to ensure sensor has "settled".
+            Thread.Sleep(30);
+            
             //calculate temperature from resistance
-            double volts = 0;
-            //do 3 readings just to make sure sampling is good
-            for (int i = 0; i < 3; i++)
-            {
-                Thread.Sleep(100);
-                volts = ReadVolts(channel);
+            double volts = ReadVolts(channel);
 
-            }
-
-            double thermistorResistance = volts * 10000f / (3.3f - volts);//3.3 V for thermistor, 10K resistor/thermistor
+            double thermistorResistance = volts * 10000f / (3.3f - volts);//3.3 V for thermistor, 10K resistor/thermistor //TODO: read the internal voltage?!
             double lnR = Math.Log(thermistorResistance);
             double Tk = 1 / (NTC_A + NTC_B * lnR + NTC_C * (lnR * lnR * lnR));
             double tempC = Tk - 273.15f;
+
+            //put the IC in low power mode, thus set on OneShot and read to write config
+            sensor.Mode = AdcMode.OneShot;
+            sensor.ReadChannel((int)channel); //ensure we are back in oneshot mode.
+
             return tempC;
 
         }
@@ -99,26 +111,26 @@ namespace PalThree
         /// </summary>
         /// <remarks>
         /// 3-wire PT100 connection on the PalSensors Rev B and later board
-        /// Connect the single color wire to both  EX+ and SIG+  (bridge with cable or connector or jumper)
+        /// Connect the single color wire to both  EX+ and SIG+  (if necessary bridge with cable or connector or jumper)
+        /// Connect the 2 same color wires to the EX- and SIG- individually
+        /// 
+        /// 4-wire PT100 connection on the PalSensors Rev B and later board
+        /// Connect the 2 same color wire to both  EX+ and SIG+ individually
         /// Connect the 2 same color wires to the EX- and SIG- individually
         /// </remarks>
-        /// <returns></returns>
+        /// <returns>Temperature in celsius</returns>
         public double GetTemperatureFromPT100()
         {
-            var channel = Channel.One; //pt100 is only avaialble on CH1+/CH1
+            var channel = Channel.One; //pt100 is only avaialble on CH1+/CH1-
 
             sensor.Mode = AdcMode.Continuous;
-            sensor.ReadChannel((int)channel);
+            sensor.ReadChannel((int)channel); //ensure continuous mode is definitely enabled.
 
-            Thread.Sleep(100); //let the ADC settle
+            //wait 30ms to ensure sensor has "settled".
+            Thread.Sleep(30); //let the ADC settle
 
-            //float tempValue = 0;
-            ////do 2-3 readings just to make sure sampling is good
-            //for (int i = 0; i < 2; i++)
-            //{
-            double tempValue = GetTemperature(channel) + TemperatureCoefficient;
+            double tempValue = GetTemperature(channel) + PT100TemperatureCoefficient;
 
-            //}
             //put the IC in low power mode, thus set on OneShot and read to write config
             sensor.Mode = AdcMode.OneShot;
             sensor.ReadChannel((int)channel); //ensure we are back in oneshot mode.
@@ -142,23 +154,23 @@ namespace PalThree
         /// <summary>
         /// Reads the selected input channel and converts to voltage units
         /// </summary>
-        /// <returns>Voltage representated as a double</returns>
+        /// <returns>Voltage representated</returns>
         public double ReadVolts(Channel channel)
         {
             double adcValue = sensor.ReadChannel((int)channel);
-            Debug.WriteLine("rawADC: " + adcValue.ToString() + " GainDiv: " + sensor.InputGain);
+            Debug.WriteLine($"channel: {channel} rawADC: {adcValue} GainDiv: {sensor.InputGain}");
             //if (adcValue > maxADCValue)
             //    adcValue -= maxADCValue * 2;
 
             //double volts = (adcValue * lsbVolts) / sensor.InputGain;
 
-            //if (channel == 3)
+            //if (channel == Channel.Three)
             //{
             //    volts *= 2.5;
             //    if (volts > 3.9)
             //        volts += 0.085;//add offset for board
             //}
-            //else if (channel == 4)
+            //else if (channel == Channel.Four)
             //{
             //    volts *= 25;
             //    if (volts > 3.9)

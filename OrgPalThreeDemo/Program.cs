@@ -325,7 +325,8 @@ namespace OrgPalThreeDemo
                         enclosureTemperature = (float)palthree.GetTemperatureOnBoard(),
                         memoryFree = nanoFramework.Runtime.Native.GC.Run(false),
                         mcuTemperature = palthree.GetMcuTemperature(),
-                        airTemperature = (float)adcPalSensor.GetTemperatureFromPT100()
+                        airTemperature = adcPalSensor.GetTemperatureFromPT100(),
+                        //thermistorTemperature = adcPalSensor.GetTemperatureFromThermistorNTC1000() //Commented out as causes PRT to be null for some reason!
                     };
 
                     string sampleData = JsonConvert.SerializeObject(statusTelemetry);
