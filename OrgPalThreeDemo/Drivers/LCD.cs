@@ -158,7 +158,20 @@ namespace PalThree
         }
 
 
-        public void Display(string text) //, byte line = 0)
+        public void Display(string line1, string line2)
+        {
+            while (line1.Length < 16)
+            {
+                line1 += " ";
+            }
+            while (line2.Length < 16)
+            {
+                line2 += " ";
+            }
+            Display(line1 + line2);
+        }
+
+        public void Display(string text) //, byte line = 0) //TODO: does not handle empty lines or CRLF!!
         {
             int lines = text.Length > 16 ? 2 : 1;
             if (lines < 2)

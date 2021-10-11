@@ -19,7 +19,7 @@ using nanoFramework.AwsIoT.Shadows;
 
 #if ORGPAL_THREE
 using PalThree;
-using System.Device.Gpio;
+//using System.Device.Gpio;
 #endif
 
 namespace OrgPalThreeDemo
@@ -27,9 +27,9 @@ namespace OrgPalThreeDemo
     public class Program
     {
 #if ORGPAL_THREE
-        private static GpioController gpioController;
+        //private static GpioController gpioController;
 
-        private static GpioPin _userButton;
+        //private static GpioPin _userButton;
         //private static GpioPin _muxWakeButtonFlowControl;
         //private static GpioPin _wakeButton;
         private static Drivers.OnboardDevices palthree;
@@ -53,11 +53,11 @@ namespace OrgPalThreeDemo
             palthree = new Drivers.OnboardDevices();
             adcPalSensor = new AdcExpansionBoard();
 
-            gpioController = new GpioController();
+            //gpioController = new GpioController();
 
-            _userButton = gpioController.OpenPin(PalThreePins.GpioPin.BUTTON_USER_BOOT1_PK7); //TODO: perhaps should use IoT.Devices.Button
-            _userButton.SetPinMode(PinMode.Input); //TODO: we definitely need to debounce this!
-            _userButton.ValueChanged += User_Boot1_Button_ValueChanged;
+            //_userButton = gpioController.OpenPin(PalThreePins.GpioPin.BUTTON_USER_BOOT1_PK7); //TODO: perhaps should use IoT.Devices.Button
+            //_userButton.SetPinMode(PinMode.Input); //TODO: we definitely need to debounce this!
+            //_userButton.ValueChanged += User_Boot1_Button_ValueChanged;
 
             ////the buttons are multiplexed so that the board can be woken up by user, or by the RTC
             ////so to get that interrupt to fire you need to do this:
@@ -75,14 +75,8 @@ namespace OrgPalThreeDemo
             {
                 BacklightOn = true
             };
-            lcd.Display("Please Wait...");
+            lcd.Display("Initializing,", "Please Wait...");
 
-            //Thread.Sleep(500); //arbitry delay, totally un-neccessary, except for user experience!
-
-            lcd.Display($"Voltage: {palthree.GetBatteryUnregulatedVoltage().ToString("n2")} \n PCB-Temp: {palthree.GetTemperatureOnBoard().ToString("n2")}"); //, 0);
-
-            //Thread.Sleep(5000); //lcdBacklightTimeout (should be in driver!)
-            //lcd.BacklightOn = false;
 #endif
 
             foreach (byte b in nanoFramework.Hardware.Stm32.Utilities.UniqueDeviceId) //STM32 devices only!
@@ -122,10 +116,34 @@ namespace OrgPalThreeDemo
                 }
             }
 
+#if ORGPAL_THREE
+            lcd.Display($"{startTime.ToString("yyyy-MM-dd HH:mm")}", $"IP: {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}"); //Time shortened to fit on display (excludes seconds)
+            Thread.Sleep(5000); //TODO: UX only
+            Thread lcdUpdateThread = new Thread(new ThreadStart(LcdUpdate_Thread));
+            lcdUpdateThread.Start();
+#endif
+
             Thread.Sleep(Timeout.Infinite);
         }
 
 #if ORGPAL_THREE
+        private static void LcdUpdate_Thread() //TODO: backlight timeout should be in driver!
+        {
+            for ( ; ; )
+            {
+                //lcd.BacklightOn = true;
+                //lcd.Clear(); //Unneccessary - wipes the display, but causes lag!
+                //Instead we will make sure all lines are 16 chars:
+                
+                var pcbTempC = $"PCB Temp: { palthree.GetTemperatureOnBoard().ToString("n2")}C";
+                var pcbVoltage = $"Voltage: { palthree.GetBatteryUnregulatedVoltage().ToString("n2")}VDC";
+
+                lcd.Display(pcbTempC, pcbVoltage);
+                Thread.Sleep(10000); //TODO: arbitary value... what should the update rate be?!
+                //lcd.BacklightOn = false;
+            }
+        }
+
         //private static void MuxWakeButtonFlowControl_ValueChanged(object sender, PinValueChangedEventArgs e)
         //{
         //    Debug.WriteLine("Handle MuxWakeButton Flow...!");
@@ -136,23 +154,16 @@ namespace OrgPalThreeDemo
         //    Debug.WriteLine("Handle WakeFlow -Should be MUX?-...!");
         //}
 
-        private static void User_Boot1_Button_ValueChanged(object sender, PinValueChangedEventArgs e)
-        {
-            Debug.WriteLine("USER/BOOT1 button pressed...!");
-            //if (lcd.BacklightOn == false)
-            //{
-            //    //TODO: this has display corruption!!!
-            //    if (e.ChangeType == PinEventTypes.Rising)
-            //    {
-            //        lcd.BacklightOn = true;
-            //        lcd.Clear();
-            //        lcd.Display($"Voltage: {palthree.GetBatteryUnregulatedVoltage().ToString("n2")} \n Temp: {palthree.GetTemperatureOnBoard().ToString("n2")}"); //, 0);
-
-            //        Thread.Sleep(5000);
-            //        lcd.BacklightOn = false;
-            //    }
-            //}
-        }
+        //TODO: this event seems to fire endlessly (probably MUX>?!
+        //private static void User_Boot1_Button_ValueChanged(object sender, PinValueChangedEventArgs e)
+        //{
+        //    if (e.ChangeType == PinEventTypes.Rising) //button pressed.
+        //    {
+        //        Debug.WriteLine("USER/BOOT1 button pressed...!");
+        //        Thread lcdShowThread = new Thread(new ThreadStart(LcdUpdate_Thread));
+        //        lcdShowThread.Start();
+        //    }
+        //}
 #endif
 
         private static void SetupNetwork()
