@@ -1,11 +1,15 @@
-﻿using nanoFramework.Json;
+﻿// Copyright (c) NetworkFusion. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+// These defines allow this program to be built for multiple targets. Make sure to use the one you need
+#define ORGPAL_THREE //Comment this out for any other STM32 target!
+
+using nanoFramework.Json;
 using nanoFramework.Runtime.Native;
-using PalThree;
 using System;
 using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
-//using System.Device.Gpio;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using nanoFramework.AwsIoT;
@@ -13,24 +17,31 @@ using OrgPalThreeDemo.TempDebugHelpers;
 using OrgPalThreeDemo.Networking;
 using nanoFramework.AwsIoT.Shadows;
 
+#if ORGPAL_THREE
+using PalThree;
+using System.Device.Gpio;
+#endif
+
 namespace OrgPalThreeDemo
 {
     public class Program
     {
-        //private static GpioController gpioController;
+#if ORGPAL_THREE
+        private static GpioController gpioController;
 
-        //private static GpioPin _muxFlowControl;
+        private static GpioPin _userButton;
+        //private static GpioPin _muxWakeButtonFlowControl;
         //private static GpioPin _wakeButton;
-        //private static GpioPin _userButton;
         private static Drivers.OnboardDevices palthree;
         private static LCD lcd;
         private static AdcExpansionBoard adcPalSensor;
+#endif
 
         private static string _serialNumber;
 
         private static DateTime startTime = DateTime.UtcNow;
         private static uint messagesSent = 0;
-        public const int shadowSendInterval = 600000; //10 minutes...  TODO: increase shadow interval to 3600000 for 1 hour when happy!
+        public const int shadowSendInterval = 600000; //10 minutes...  TODO: increase shadow update interval to 24 hours when happy! since delta is received as and when neccessary 
         public const int telemetrySendInterval = 60000; //1 minute... TODO: does not take into account delays or execution time!
 
         public static void Main()
@@ -38,27 +49,27 @@ namespace OrgPalThreeDemo
             Debug.WriteLine($"{SystemInfo.TargetName} AWS MQTT Demo.");
             Debug.WriteLine("");
 
+#if ORGPAL_THREE
             palthree = new Drivers.OnboardDevices();
-
             adcPalSensor = new AdcExpansionBoard();
 
-            //gpioController = new GpioController();
+            gpioController = new GpioController();
 
+            _userButton = gpioController.OpenPin(PalThreePins.GpioPin.BUTTON_USER_BOOT1_PK7); //TODO: perhaps should use IoT.Devices.Button
+            _userButton.SetPinMode(PinMode.Input); //TODO: we definitely need to debounce this!
+            _userButton.ValueChanged += User_Boot1_Button_ValueChanged;
 
-            //the buttons are multiplexed so that the board can wake up by user, or by the RTC
-            //so to get that interrupt to fire you need to do this
-            //_muxFlowControl = gpioController.OpenPin(PalThreePins.GpioPin.MUX_EXT_BUTTON_WAKE_PE4);
-            //_muxFlowControl.SetPinMode(PinMode.Output);
-            //_muxFlowControl.Write(PinValue.High);
-            //_muxFlowControl.ValueChanged += MuxFlowControl_ValueChanged;
+            ////the buttons are multiplexed so that the board can be woken up by user, or by the RTC
+            ////so to get that interrupt to fire you need to do this:
+            //// TODO: work out which buttons and why!
+            //_muxWakeButtonFlowControl = gpioController.OpenPin(PalThreePins.GpioPin.MUX_EXT_BUTTON_WAKE_PE4);
+            //_muxWakeButtonFlowControl.SetPinMode(PinMode.Output);
+            //_muxWakeButtonFlowControl.Write(PinValue.High);
+            //_muxWakeButtonFlowControl.ValueChanged += MuxWakeButtonFlowControl_ValueChanged;
 
-            //_userButton = gpioController.OpenPin(PalThreePins.GpioPin.BUTTON_USER_WAKE_PE6);
-            //_userButton.SetPinMode(PinMode.Input);
-            //_userButton.ValueChanged += UserButton_ValueChanged;
-
-            //_wakeButton = gpioController.OpenPin(PalThreePins.GpioPin.BUTTON_WAKE_PA0);
-            //_wakeButton.SetPinMode(PinMode.Input);
-            //_wakeButton.ValueChanged += WakeButton_ValueChanged;
+            ////_wakeButton = gpioController.OpenPin(PalThreePins.GpioPin.BUTTON_WAKE_PA0);
+            ////_wakeButton.SetPinMode(PinMode.Input);
+            ////_wakeButton.ValueChanged += WakeButton_ValueChanged;
 
             lcd = new LCD
             {
@@ -66,15 +77,15 @@ namespace OrgPalThreeDemo
             };
             lcd.Display("Please Wait...");
 
-            //Thread.Sleep(1000);
+            //Thread.Sleep(500); //arbitry delay, totally un-neccessary, except for user experience!
 
             lcd.Display($"Voltage: {palthree.GetBatteryUnregulatedVoltage().ToString("n2")} \n PCB-Temp: {palthree.GetTemperatureOnBoard().ToString("n2")}"); //, 0);
 
-            //Thread.Sleep(5000);
+            //Thread.Sleep(5000); //lcdBacklightTimeout (should be in driver!)
             //lcd.BacklightOn = false;
+#endif
 
-
-            foreach (byte b in nanoFramework.Hardware.Stm32.Utilities.UniqueDeviceId)
+            foreach (byte b in nanoFramework.Hardware.Stm32.Utilities.UniqueDeviceId) //STM32 devices only!
             {
                 _serialNumber += b.ToString("X2"); //Generates a unique ID for the device.
             }
@@ -114,32 +125,35 @@ namespace OrgPalThreeDemo
             Thread.Sleep(Timeout.Infinite);
         }
 
-        //private static void MuxFlowControl_ValueChanged(object sender, PinValueChangedEventArgs e)
+#if ORGPAL_THREE
+        //private static void MuxWakeButtonFlowControl_ValueChanged(object sender, PinValueChangedEventArgs e)
         //{
-        //    Debug.WriteLine("Handle Mux Flow...!");
+        //    Debug.WriteLine("Handle MuxWakeButton Flow...!");
         //}
 
         //private static void WakeButton_ValueChanged(object sender, PinValueChangedEventArgs e)
         //{
-        //    if (lcd.BacklightOn == false)
-        //    {
-        //        //TODO: this has display corruption!!!
-        //        if (e.ChangeType == PinEventTypes.Rising)
-        //        {
-        //            lcd.BacklightOn = true;
-        //            lcd.Clear();
-        //            lcd.Display($"Voltage: {palthree.GetBatteryUnregulatedVoltage().ToString("n2")} \n Temp: {palthree.GetTemperatureOnBoard().ToString("n2")}"); //, 0);
-
-        //            Thread.Sleep(5000);
-        //            lcd.BacklightOn = false;
-        //        }
-        //    }
+        //    Debug.WriteLine("Handle WakeFlow -Should be MUX?-...!");
         //}
 
-        //private static void UserButton_ValueChanged(object sender, GpioPinValueChangedEventArgs e)
-        //{
+        private static void User_Boot1_Button_ValueChanged(object sender, PinValueChangedEventArgs e)
+        {
+            Debug.WriteLine("USER/BOOT1 button pressed...!");
+            //if (lcd.BacklightOn == false)
+            //{
+            //    //TODO: this has display corruption!!!
+            //    if (e.ChangeType == PinEventTypes.Rising)
+            //    {
+            //        lcd.BacklightOn = true;
+            //        lcd.Clear();
+            //        lcd.Display($"Voltage: {palthree.GetBatteryUnregulatedVoltage().ToString("n2")} \n Temp: {palthree.GetTemperatureOnBoard().ToString("n2")}"); //, 0);
 
-        //}
+            //        Thread.Sleep(5000);
+            //        lcd.BacklightOn = false;
+            //    }
+            //}
+        }
+#endif
 
         private static void SetupNetwork()
         {
@@ -177,7 +191,7 @@ namespace OrgPalThreeDemo
             Debug.Write("Program: Connected to MQTT broker... : ");
             try
             {
-                X509Certificate caCert = new X509Certificate(AwsIotCore.MqttConnector.RootCA); //commented out as MDP changes mean resources dont currently work//Resources.GetBytes(Resources.BinaryResources.AwsCAroot)); //should this be in secure storage, or is it fine where it is?
+                X509Certificate caCert = new X509Certificate(AwsIotCore.MqttConnector.RootCA); //commented out as alternative: //Resources.GetBytes(Resources.BinaryResources.AwsCAroot)); //should this be in secure storage, or is it fine where it is?
                 X509Certificate2 clientCert = new X509Certificate2(AwsIotCore.MqttConnector.ClientRsaSha256Crt, AwsIotCore.MqttConnector.ClientRsaKey, ""); //make sure to add a correct pfx certificate
 
 
@@ -328,12 +342,14 @@ namespace OrgPalThreeDemo
                         serialNumber = $"SN_{_serialNumber }", //TODO: "SN" should not be needed! but might help in the long run anyway?!
                         sendTimestamp = DateTime.UtcNow,
                         messageNumber = messagesSent += 1, //TODO: we need to reset if reaches max int otherwise who knows what will happen!
+                        memoryFreeBytes = nanoFramework.Runtime.Native.GC.Run(false),
+#if ORGPAL_THREE
                         batteryVoltage = palthree.GetBatteryUnregulatedVoltage(),
                         enclosureTemperatureCelsius = palthree.GetTemperatureOnBoard(),
-                        memoryFreeBytes = nanoFramework.Runtime.Native.GC.Run(false),
                         mcuTemperatureCelsius = palthree.GetMcuTemperature(),
                         airTemperatureCelsius = adcPalSensor.GetTemperatureFromPT100(),
                         //thermistorTemperatureCelsius = adcPalSensor.GetTemperatureFromThermistorNTC1000() //Commented out as causes PRT to be null for some reason!
+#endif
                     };
 
                     string sampleData = JsonConvert.SerializeObject(statusTelemetry);
