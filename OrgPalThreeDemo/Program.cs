@@ -24,7 +24,7 @@ namespace OrgPalThreeDemo
         //private static GpioPin _userButton;
         private static Drivers.OnboardDevices palthree;
         private static LCD lcd;
-        private static MCP342x adcPalSensor;
+        private static AdcExpansionBoard adcPalSensor;
 
         private static string _serialNumber;
 
@@ -39,7 +39,8 @@ namespace OrgPalThreeDemo
             Debug.WriteLine("");
 
             palthree = new Drivers.OnboardDevices();
-            adcPalSensor = new MCP342x();
+
+            adcPalSensor = new AdcExpansionBoard();
 
             //gpioController = new GpioController();
 
