@@ -76,7 +76,10 @@ namespace nanoFramework.AwsIoT.Shadows
         /// <summary>
         /// Shadow's Timestamp
         /// </summary>
-        public int timestamp { get; set; } //TODO: technically this should be a long?! (but Json lib does not like it!)
+        /// <remarks>
+        /// Unix Timestamp as 32bit signed integer.
+        /// </remarks>
+        public int timestamp { get; set; }
 
 #pragma warning restore IDE1006 // Naming Styles
 
