@@ -3,7 +3,7 @@
 
 using System;
 
-namespace nanoFramework.AwsIoT
+namespace nanoFramework.Aws.IoTCore.Devices
 {
     /// <summary>
     /// Cloud to device delegate function used for callback.

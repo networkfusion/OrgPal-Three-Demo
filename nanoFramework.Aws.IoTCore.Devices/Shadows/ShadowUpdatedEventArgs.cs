@@ -3,7 +3,7 @@
 
 using System;
 
-namespace nanoFramework.AwsIoT.Shadows
+namespace nanoFramework.Aws.IoTCore.Devices.Shadows
 {
     /// <summary>
     /// Delegate for Shadow updated event.

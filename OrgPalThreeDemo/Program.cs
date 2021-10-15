@@ -12,10 +12,10 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Windows.Storage;
 using Windows.Storage.Streams;
-using nanoFramework.AwsIoT;
+using nanoFramework.Aws.IoTCore.Devices;
 using OrgPalThreeDemo.TempDebugHelpers;
 using OrgPalThreeDemo.Networking;
-using nanoFramework.AwsIoT.Shadows;
+using nanoFramework.Aws.IoTCore.Devices.Shadows;
 
 #if ORGPAL_THREE
 using OrgPal.Three;

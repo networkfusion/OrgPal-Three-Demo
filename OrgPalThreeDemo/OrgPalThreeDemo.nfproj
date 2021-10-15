@@ -161,7 +161,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\nanoFramework.AwsIoT\nanoFramework.AwsIoT.nfproj" />
+    <ProjectReference Include="..\nanoFramework.Aws.IoTCore.Devices\nanoFramework.Aws.IoTCore.Devices.nfproj" />
   </ItemGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.CSharp.targets')" />
   <ProjectExtensions>

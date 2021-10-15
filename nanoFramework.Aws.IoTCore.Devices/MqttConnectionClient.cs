@@ -1,7 +1,7 @@
 ﻿// Copyright (c) .Net Foundation. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using nanoFramework.AwsIoT.Shadows;
+using nanoFramework.Aws.IoTCore.Devices.Shadows;
 using nanoFramework.Json;
 using nanoFramework.M2Mqtt;
 using nanoFramework.M2Mqtt.Messages;
@@ -12,7 +12,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 
-namespace nanoFramework.AwsIoT
+namespace nanoFramework.Aws.IoTCore.Devices
 {
     /// <summary>
     /// AWS IoT Core MQTT Connection Client for .NET nanoFramework

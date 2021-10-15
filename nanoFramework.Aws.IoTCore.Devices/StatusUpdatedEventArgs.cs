@@ -3,7 +3,7 @@
 
 using System;
 
-namespace nanoFramework.AwsIoT
+namespace nanoFramework.Aws.IoTCore.Devices
 {
     /// <summary>
     /// Delegate method for status update.

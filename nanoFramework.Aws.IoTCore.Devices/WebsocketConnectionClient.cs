@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace nanoFramework.AwsIoT.Devices.Client
+namespace nanoFramework.Aws.IoTCore.Devices.Devices.Client
 {
     /// <summary>
     /// AWS IoT Core Websocket Connection Client for .NET nanoFramework

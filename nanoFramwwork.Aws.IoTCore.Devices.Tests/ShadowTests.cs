@@ -1,7 +1,7 @@
 using nanoFramework.TestFramework;
 using System;
 
-namespace nanoFramwwork.AwsIoT.Tests
+namespace nanoFramwwork.Aws.IoTCore.Devices.Tests
 {
     [TestClass]
     public class ShadowTests
@@ -47,7 +47,7 @@ namespace nanoFramwwork.AwsIoT.Tests
 //using System.Diagnostics;
 //using System.Security.Cryptography.X509Certificates;
 //using System.Threading;
-//using nanoFramework.AwsIot;
+//using nanoFramework.Aws.IoTCore.Devices;
 
 //namespace nanoFramework.Aws.Tests
 //{

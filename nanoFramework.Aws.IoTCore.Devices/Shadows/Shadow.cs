@@ -4,7 +4,7 @@
 using System.Collections;
 using nanoFramework.Json;
 
-namespace nanoFramework.AwsIoT.Shadows
+namespace nanoFramework.Aws.IoTCore.Devices.Shadows
 {
     /// <summary>
     /// Shadow Representation.
