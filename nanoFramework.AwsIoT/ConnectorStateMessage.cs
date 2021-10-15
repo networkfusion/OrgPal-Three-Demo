@@ -74,30 +74,41 @@ namespace nanoFramework.AwsIoT //TODO: improve for AWS IoT.
         MessageReceived,
 
         //TODO: map the following exceptions?!
-        ///// Amazon.IotData.Model.
-        ///// <exception cref="InternalFailureException">
-        ///// An unexpected error has occurred.
-        ///// </exception>
-        ///// <exception cref="InvalidRequestException">
-        ///// The request is not valid.
-        ///// </exception>
-        ///// <exception cref="MethodNotAllowedException">
-        ///// The specified combination of HTTP verb and URI is not supported.
-        ///// </exception>
-        ///// <exception cref="ResourceNotFoundException">
-        ///// The specified resource does not exist.
-        ///// </exception>
-        ///// <exception cref="ServiceUnavailableException">
-        ///// The service is temporarily unavailable.
-        ///// </exception>
-        ///// <exception cref="ThrottlingException">
-        ///// The rate exceeds the limit.
-        ///// </exception>
-        ///// <exception cref="UnauthorizedException">
-        ///// You are not authorized to perform this operation.
-        ///// </exception>
-        ///// <exception cref="UnsupportedDocumentEncodingException">
-        ///// The document encoding is not supported.
-        ///// </exception>
+
+        // /// <summary>
+        // /// The request is not valid.
+        // /// <summary>
+        // InvalidRequest,
+
+        // /// </summary>
+        // /// The specified combination of HTTP verb and URI is not supported.
+        // /// <summary>
+        // MethodNotAllowed,
+
+        // /// </summary>
+        // /// The specified resource does not exist.
+        // /// <summary>
+        // ResourceNotFound,
+
+        // /// </summary>
+        // /// The service is temporarily unavailable.
+        // /// <summary>
+        // ServiceUnavailable,
+
+        // /// </summary>
+        // /// The rate exceeds the limit.
+        // /// <summary>
+        // Throttling,
+
+        // /// </summary>
+        // /// You are not authorized to perform this operation.
+        // /// <summary>
+        // Unauthorized,
+
+        // /// </summary>
+        // /// The document encoding is not supported.
+        // /// <summary>
+        // UnsupportedDocumentEncoding,
+
     }
 }

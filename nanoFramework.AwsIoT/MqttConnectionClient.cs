@@ -90,7 +90,7 @@ namespace nanoFramework.AwsIoT
         /// <param name="uniqueId">A unique identity for your device (Device ID / Thing Name).</param>
         /// <param name="clientCert">The certificate used to connect the device to the MQTT broker (containing both the private certificate and private key).</param>
         /// <param name="qosLevel">The default quality of service level for the delivery of MQTT messages, (defaults to the lowest quality)</param>
-        /// /// <param name="awsRootCert">The Root (AWS) certificate for the connection to AWS IoT Core</param>
+        /// <param name="awsRootCert">The Root (AWS) certificate for the connection to AWS IoT Core</param>
         public MqttConnectionClient(string iotCoreUri, string uniqueId, X509Certificate2 clientCert, QoSLevel qosLevel = QoSLevel.AtMostOnce, X509Certificate awsRootCert = null)
         {
             _clientCert = clientCert;
@@ -269,7 +269,7 @@ namespace nanoFramework.AwsIoT
 
             _mqttc.Publish(topic, Encoding.UTF8.GetBytes(""), MqttQoSLevel.AtLeastOnce, false);
 
-            while (!_shadowReceived && !cancellationToken.IsCancellationRequested) // TODO: not firing (or receiving message?!)
+            while (!_shadowReceived && !cancellationToken.IsCancellationRequested)
             {
                 cancellationToken.WaitHandle.WaitOne(200, true);
             }
@@ -314,24 +314,6 @@ namespace nanoFramework.AwsIoT
                 return false; //Received == false
         }
 
-        ///// <summary>
-        ///// Add a callback method.
-        ///// </summary>
-        ///// <param name="methodCallback">The callback method to add.</param>
-        //public void AddMethodCallback(MethodCallback methodCallback)
-        //{
-        //    _methodCallback.Add(methodCallback);
-        //}
-
-        ///// <summary>
-        ///// Remove a callback method.
-        ///// </summary>
-        ///// <param name="methodCallback">The callback method to remove.</param>
-        //public void RemoveMethodCallback(MethodCallback methodCallback)
-        //{
-        //    _methodCallback.Remove(methodCallback);
-        //}
-
         /// <summary>
         /// Send a message to Aws IoT Core.
         /// </summary>
@@ -359,7 +341,7 @@ namespace nanoFramework.AwsIoT
             return false;
         }
 
-        private void ClientMqttMsgReceived(object sender, MqttMsgPublishEventArgs e) //TODO: can we also add subscriptions publically?!! 
+        private void ClientMqttMsgReceived(object sender, MqttMsgPublishEventArgs e) //TODO: can we also add subscriptions publiclly?!! 
         {
             //TODO: we might need to be more specific with topics to ensure reduced costs!
             Debug.WriteLine($"MsgReceivedHandler: received message on a subscribed topic: {e.Topic}");
@@ -371,7 +353,7 @@ namespace nanoFramework.AwsIoT
                 {
                     Debug.WriteLine($"ReceivedHandler message was: {jsonMessageBody}");
 
-                    if (e.Topic.StartsWith($"{_shadowTopic}/update")) //TODO: does this take into account named shadows?
+                    if (e.Topic.StartsWith($"{_shadowTopic}/update") || (e.Topic.StartsWith($"{_shadowTopic}/name") && e.Topic.Contains("/update"))) //TODO: check correctness!
                     {
                         //TODO: we might have to be more specific with subscribed topics here... I think receiving some of these could cost money, even if they are irrelevent!
                         Debug.WriteLine($"ReceivedHandler Reached (update): {e.Topic}");
@@ -408,17 +390,17 @@ namespace nanoFramework.AwsIoT
                         //}
 
                     }
-                    else if (e.Topic.StartsWith($"{_shadowTopic}/get")) //TODO: does this take into account named shadows?
+                    else if (e.Topic.StartsWith($"{_shadowTopic}/get") || (e.Topic.StartsWith($"{_shadowTopic}/name") && e.Topic.Contains("/get"))) //TODO: check correctness!
                     {
                         Debug.WriteLine($"ReceivedHandler Reached (get): {_shadowTopic}");
-                        if (e.Topic.Contains("rejected"))
+                        if (e.Topic.Contains("/rejected"))
                         {
                             Debug.WriteLine($"ReceivedHandler Reached (get-rejected): {e.Topic}");
                             _mqttBrokerStatus.State = ConnectorStateMessage.ShadowUpdateError;
                             _mqttBrokerStatus.Message = jsonMessageBody;
                             StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                         }
-                        else if (e.Topic.Contains("accepted"))
+                        else if (e.Topic.Contains("/accepted"))
                         {
                             Debug.WriteLine($"ReceivedHandler Reached (get-accepted): {e.Topic}");
                             _shadow = (Shadow)JsonConvert.DeserializeObject(jsonMessageBody, typeof(Shadow)); // new Shadow(jsonMessageBody);
@@ -428,7 +410,7 @@ namespace nanoFramework.AwsIoT
                             _mqttBrokerStatus.Message = jsonMessageBody;
                             ShadowUpdated?.Invoke(this, new ShadowUpdateEventArgs(_shadow));
                         }
-                        //else //Since we are also sending on this topic, this code is not helpful!
+                        //else //Since we are also sending on this topic, this code is not helpful for anything other than debugging!
                         //{
                         //}
                     }
@@ -450,7 +432,7 @@ namespace nanoFramework.AwsIoT
                         StatusUpdated?.Invoke(this, new StatusUpdatedEventArgs(_mqttBrokerStatus));
                     }
                 }
-                //else  //Since we are also sending on this topics, this code is not helpful!
+                //else  //Since we are also sending on this topics, this code is not helpful for anything other than debugging!
                 //{
                 //}
 
@@ -506,7 +488,7 @@ namespace nanoFramework.AwsIoT
                 Close();
                 while (_mqttc.IsConnected)
                 {
-                    Thread.Sleep(100);
+                    Thread.Sleep(100); //TODO: arbitry value, explain why.
 
                 }
 
