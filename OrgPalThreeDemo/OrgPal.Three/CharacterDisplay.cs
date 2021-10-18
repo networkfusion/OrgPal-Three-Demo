@@ -272,7 +272,19 @@ namespace OrgPal.Three
         }
 
 
+        /// <inheritdoc/>
         public void Dispose()
+        {
+            // Cleanup
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="disposing"></param>
+        protected virtual void Dispose(bool disposing)
         {
             if (I2C != null)
                 I2C.Dispose();
@@ -280,6 +292,15 @@ namespace OrgPal.Three
             lcdPowerOnOff.Write(PinValue.Low);
             lcdPowerOnOff.Dispose();
             lcdPowerOnOff = null;
+
+        }
+
+        /// <summary>
+        /// Deconstructor
+        /// </summary>
+        ~CharacterDisplay()
+        {
+            Dispose(false);
         }
 
         //public void PrintChar(byte custChar)
