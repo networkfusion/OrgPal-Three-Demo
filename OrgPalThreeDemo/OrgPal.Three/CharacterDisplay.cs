@@ -1,8 +1,4 @@
-﻿// Adapted from Micro Liquid Crystal Library http://microliquidcrystal.codeplex.com
-// Could likely be improved using https://github.com/dotnet/iot/blob/main/src/devices/CharacterLcd/samples/Pcf8574tSample.cs
-// and https://github.com/dotnet/iot/tree/main/src/devices/Pcx857x
-
-using System;
+﻿using System;
 using System.Text;
 using System.Threading;
 using System.Device.Gpio;
@@ -10,7 +6,13 @@ using System.Device.I2c;
 
 namespace OrgPal.Three
 {
-
+    /// <summary>
+    /// LCD Character Display
+    /// </summary>
+    /// <remarks>
+    /// Based on an I2C controller https://github.com/dotnet/iot/tree/main/src/devices/Pcx857x
+    /// But actual display (via I2C) is a 1602A! https://www.openhacks.com/uploadsproductos/eone-1602a1.pdf -- https://github.com/k-moskwa/kmAvrLedBar/blob/327e662199ec53ddb2edf2fbe96dba01f4ce4d25/src/kmLCD/kmLiquidCrystal.c
+    /// </remarks>
     public class CharacterDisplay : IDisposable
     {
         // For PCF8574 chip, I2C address range: 0x38 - 0x3F (Dec:   56-63)
@@ -18,28 +20,132 @@ namespace OrgPal.Three
         const byte LCD_ADDRESS_MAIN = 0x3F;
         const byte LCD_ADDRESS_DEFAULT = 0x27; // 0X27 on other models depnding of soldered a0,a1,a2
 
-        // commands
-        const byte LCD_CLEARDISPLAY = 0x01;
-        const byte LCD_ENTRYMODESET = 0x04;
-        const byte LCD_DISPLAYCONTROL = 0x08;
-        const byte LCD_FUNCTIONSET = 0x20;
-        const byte LCD_SETCGRAMADDR = 0x40;
-        const byte LCD_SETDDRAMADDR = 0x80;
 
-        // flags for display entry mode
-        const byte LCD_ENTRYLEFT = 0x02;
-        const byte LCD_ENTRYSHIFTDECREMENT = 0x00;
+        /// <summary>
+        /// Command
+        /// </summary>
+        [Flags]
+        private enum LcdInstruction
+        {
+            None = 0x00,
+            /// <summary>
+            /// Write "0x20" to DDRAM and set DDRAM address to "0x00" from AC
+            /// </summary>
+            ClearDisplay = 0x01, // Delay 1.52ms
+            /// <summary>
+            /// Set DDRAM address to "0x00" from AC and return cursor to its original position if shifted.
+            /// The contents of DDRAM are not changed.
+            /// </summary>
+            ReturnHome = 0x02, // Delay 1.52ms
+            /// <summary>
+            /// Sets cursor move direction and specifies display shift.
+            /// These operations are performed during data write and read.
+            /// </summary>
+            EntryModeSet = 0x04, // Delay 37us
+            /// <summary>
+            /// Sets the display mode
+            /// </summary>
+            /// <remarks>
+            /// As flags:
+            /// 0x00 = Entire display off???
+            /// 0x01 = Cursor position on
+            /// 0x02 = Cursor On
+            /// 0x04 = Entire display on
+            /// </remarks>
+            DisplayMode = 0x08, // Delay 37us
+            /// <summary>
+            /// Set cursor moving and display shift control bit, and direction,
+            /// without changing DDRAM data.
+            /// </summary>
+            /// <remarks>
+            /// 0x04 = R/L
+            /// 0x08 = S/C
+            /// </remarks>
+            CursorDisplayShift = 0x10, // Delay 37us
+            /// <summary>
+            /// DL: interface data is 8/4 bits
+            /// </summary>
+            /// <remarks>
+            /// 0x08 = Number of lines is 2/1
+            /// 0x10 = Font Size is 5x11/5x8
+            /// </remarks>
+            FunctionSet = 0x20, // Delay 37us
+            /// <summary>
+            /// Set CGRAM in  address counter
+            /// </summary>
+            SetCGRAMAddress = 0x40, // Delay 37us
+            /// <summary>
+            /// Set DDRAM in  address counter
+            /// </summary>
+            SetDDRAMAddress = 0x80, // Delay 37us
+            /// <summary>
+            /// Checks whether the display is currently busy.
+            /// The content of address counter can also be read.
+            /// </summary>
+            /// <remarks>
+            /// 0x80 = ReadBusy flag
+            /// 0x40-0x01 = Address counter
+            /// </remarks>
+            ReadBusyFlagAndAddress = 0x100, // Delay 0us
+            /// <summary>
+            /// Write data to internal RAM (DDRAM/CGRAM)
+            /// </summary>
+            /// <remarks>
+            /// First 8 bytes of RAM, e.g.
+            /// 0x00 to 0x80
+            /// </remarks>
+            WriteDataToRam = 0x200, // Delay 37us
+            /// <summary>
+            /// Read data from internal RAM (DDRAM/CGRAM).
+            /// </summary>
+            /// <remarks>
+            /// First 8 bytes of RAM, e.g.
+            /// 0x00 to 0x80
+            /// </remarks>
+            ReadDataFromRam = 0x300, // Delay 37us
+        }
 
-        // flags for display on/off control
-        const byte LCD_DISPLAYON = 0x04;
-        const byte LCD_CURSOROFF = 0x00;
-        const byte LCD_BLINKOFF = 0x00;
+        //////////// TODO: sort below out! ////////////
 
-        // flags for function set
-        const byte LCD_4BITMODE = 0x00;
-        const byte LCD_2LINE = 0x08;
-        const byte LCD_5x8DOTS = 0x00;
+        /// <summary>
+        /// Display entry mode
+        /// </summary>
+        [Flags]
+        private enum LcdEntryMode : byte
+        {
+            ENTRYLEFT = 0x02,
+            ENTRYSHIFTDECREMENT = 0x00,
+        }
 
+        /// <summary>
+        /// display on/off control
+        /// </summary>
+        [Flags]
+        private enum LcdCursor : byte
+        {
+
+            /// 0x00 = Entire display off???
+            /// 0x01 = Cursor position on
+            /// 0x02 = Cursor On
+            /// 0x04 = Entire display on
+            DISPLAYON = 0x04,
+            CURSOROFF = 0x00,
+            BLINKOFF = 0x00,
+        }
+
+        /// <summary>
+        /// function set
+        /// </summary>
+        [Flags]
+        private enum LcdFuctionSet : byte
+        {
+        _4BITMODE = 0x00,
+        _2LINE = 0x08,
+        _5x8DOTS = 0x00,
+        }
+
+
+        //TODO: I2C values for GPIO???
         // flags for backlight control
         const byte LCD_NOBACKLIGHT = 0x00;
         const byte LCD_BACKLIGHT = 0b00001000;  // Turn On Backlight
@@ -114,14 +220,14 @@ namespace OrgPal.Three
             Write4bits(0x02 << 4);
 
             // set # lines, font size, etc.
-            SendCommand((byte)(LCD_FUNCTIONSET | LCD_4BITMODE | LCD_2LINE | LCD_5x8DOTS));
+            SendCommand((byte)LcdInstruction.FunctionSet | (byte)LcdFuctionSet._4BITMODE | (byte)LcdFuctionSet._2LINE | (byte)LcdFuctionSet._5x8DOTS);
 
             // turn the display on with no cursor or blinking default
             //turning it on does not turn on the backlight
-            SendCommand((byte)(LCD_DISPLAYCONTROL | LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF));
+            SendCommand((byte)LcdInstruction.DisplayMode | (byte)LcdCursor.DISPLAYON | (byte)LcdCursor.CURSOROFF | (byte)LcdCursor.BLINKOFF);
 
             // Initialize to default text direction (for roman languages)
-            SendCommand((byte)(LCD_ENTRYMODESET | LCD_ENTRYLEFT | LCD_ENTRYSHIFTDECREMENT));
+            SendCommand((byte)LcdInstruction.EntryModeSet | (byte)LcdEntryMode.ENTRYLEFT | (byte)LcdEntryMode.ENTRYSHIFTDECREMENT);
 
             Clear();
 
@@ -131,7 +237,7 @@ namespace OrgPal.Three
 
         public void Clear()
         {
-            SendCommand(LCD_CLEARDISPLAY);// clear display, set cursor position to zero
+            SendCommand((byte)LcdInstruction.ClearDisplay);// clear display, set cursor position to zero
             Thread.Sleep(250);  // command needs time! (but possibly less than this...)
         }
 
@@ -142,7 +248,7 @@ namespace OrgPal.Three
             if (row > 1)
                 row = 0;//default to first row
 
-            SendCommand((byte)(LCD_SETDDRAMADDR | (col + row_offsets[row])));
+            SendCommand((byte)((byte)LcdInstruction.SetDDRAMAddress | (col + row_offsets[row])));
         }
 
 
@@ -150,7 +256,7 @@ namespace OrgPal.Three
         {
             //Fill the first 8 CGRAM with custom characters
             location &= 0x7;
-            SendCommand((byte)(LCD_SETCGRAMADDR | (location << 3)));
+            SendCommand((byte)((byte)LcdInstruction.SetCGRAMAddress | (location << 3)));
             for (int i = 0; i < 7; i++)
             {
                 SendData(charmap[i]);
