@@ -348,18 +348,26 @@ namespace OrgPalThreeDemo
             }
         }
 
-        private static void ReadStorage(string path = "D:") //TODO: this can fail on redeploy or exiting debug!!!
+        private static void ReadStorage(string path = "") //TODO: this can fail on redeploy or exiting debug!!!
         {
-            // Get the logical root folder for all removable storage devices
-            // in nanoFramework the drive letters are fixed, being:
+            // in nanoFramework, currently the drive letters are fixed, being:
             // D: SD Card
             // E: USB Mass Storage Device
-            //StorageFolder externalDevices = KnownFolders.RemovableDevices;
 
-            // list all removable storage devices
-            //var removableDevices = externalDevices.GetFolders();
+            if (string.IsNullOrEmpty(path)) //Generally only "should" happen on initialization.
+            {
+                // list all removable drives
+                var removableDrives = Directory.GetLogicalDrives();
+                foreach (var drive in removableDrives)
+                {
+                    Debug.WriteLine($"Found logical drive {drive}");
+                    //path = drive; 
+                }
+                //TODO: techincally we should handle more than one drive... but for the moment, we are just going to handle the first one!
+                path = removableDrives[0];
+            }
 
-            if (path.Length > 0)
+            if (!string.IsNullOrEmpty(path))
             {
                 Debug.WriteLine("Reading storage...");
 
@@ -445,6 +453,8 @@ namespace OrgPalThreeDemo
 
                 //TODO: if the certs are on the SD, they should be loaded into (secure) mcu storage (and delete file on removable device)?
                 Debug.WriteLine(""); //finished loading files.
+
+                //TODO: shadow should be informed of Storage devices and content
             }
 
         }
@@ -459,6 +469,14 @@ namespace OrgPalThreeDemo
         {
             Debug.WriteLine($"Removable Device Event: @ \"{e.Path}\" was inserted.");
             ReadStorage(e.Path);
+        }
+
+        ~Program()
+        {
+            //should dispose of SD and Char display (at least!)
+            palthreeDisplay.Dispose();
+
+            //System.IO.FileStream
         }
     }
 }

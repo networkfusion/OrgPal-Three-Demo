@@ -369,15 +369,8 @@ namespace OrgPal.Three
             }
             catch
             {
-
+                //Debug.WriteLine("Error writing I2C data!");
             }
-        }
-
-
-        public void DisposeI2C()
-        {
-            if (I2C != null)
-                I2C.Dispose();
         }
 
 
@@ -395,13 +388,18 @@ namespace OrgPal.Three
         /// <param name="disposing"></param>
         protected virtual void Dispose(bool disposing)
         {
+            Clear();
+            BacklightOn = false;
+            lcdPowerOnOff.Write(PinValue.Low);
+
+            if (lcdPowerOnOff != null)
+            {
+                lcdPowerOnOff.Dispose();
+                lcdPowerOnOff = null;
+            }
+
             if (I2C != null)
                 I2C.Dispose();
-
-            lcdPowerOnOff.Write(PinValue.Low);
-            lcdPowerOnOff.Dispose();
-            lcdPowerOnOff = null;
-
         }
 
         /// <summary>
