@@ -40,6 +40,9 @@ namespace OrgPalThreeDemo
         public const int shadowSendInterval = 600000; //10 minutes...  TODO: increase shadow update interval to 24 hours when happy! since delta is received as and when neccessary 
         public const int telemetrySendInterval = 60000; //1 minute... TODO: does not take into account delays or execution time!
 
+        private static Thread sendTelemetryThread;
+        private static Thread sendShadowThread;
+
         public static void Main()
         {
             Debug.WriteLine($"{SystemInfo.TargetName} AWS MQTT Demo.");
@@ -156,9 +159,23 @@ namespace OrgPalThreeDemo
 
         static bool SetupMqtt()
         {
-            Debug.Write("Program: Connected to MQTT broker... : ");
+            //TODO: make sure we can use device flashed certs (before storage) https://github.com/nanoframework/Samples/blob/main/samples/SSL/SecureClient/Program.cs
+            Debug.Write("Program: Connecting to MQTT broker... : ");
             try
             {
+                ////Handle cases where this method is called when MQTT is already connected!
+                //if (AwsIotCore.MqttConnector.Client.IsConnected) //perhaps != null instead?
+                //{
+                //    sendShadowThread.Abort();
+                //    sendTelemetryThread.Abort();
+
+                //    AwsIotCore.MqttConnector.Client.Close();
+                //    AwsIotCore.MqttConnector.Client.CloudToDeviceMessage -= Client_CloudToDeviceMessageReceived;
+                //    AwsIotCore.MqttConnector.Client.StatusUpdated -= Client_StatusUpdated;
+                //    AwsIotCore.MqttConnector.Client.ShadowUpdated -= Client_ShadowUpdated;
+                //    AwsIotCore.MqttConnector.Client.Dispose();
+                //}
+
                 X509Certificate caCert = new X509Certificate(AwsIotCore.MqttConnector.RootCA); //commented out as alternative: //Resources.GetBytes(Resources.BinaryResources.AwsCAroot)); //should this be in secure storage, or is it fine where it is?
                 X509Certificate2 clientCert = new X509Certificate2(AwsIotCore.MqttConnector.ClientRsaSha256Crt, AwsIotCore.MqttConnector.ClientRsaKey, ""); //make sure to add a correct pfx certificate
 
@@ -197,11 +214,11 @@ namespace OrgPalThreeDemo
                 }
 
 
-                Thread telemetryThread = new Thread(new ThreadStart(TelemetryLoop));
-                telemetryThread.Start();
+                sendTelemetryThread = new Thread(new ThreadStart(TelemetryLoop));
+                sendTelemetryThread.Start();
 
 
-                Thread sendShadowThread = new Thread(new ThreadStart(SendUpdateShadowLoop));
+                sendShadowThread = new Thread(new ThreadStart(SendUpdateShadowLoop));
                 sendShadowThread.Start();
 
                 return true;
@@ -382,7 +399,7 @@ namespace OrgPalThreeDemo
                 // get files on the root of the 1st removable device
                 var filesInDevice = Directory.GetFiles(path);
 
-
+                //TODO: in certain cases it would be helpful to support File.ReadAllText -- https://zetcode.com/csharp/file/ (Helper lib??)
                 foreach (var file in filesInDevice)
                 {
                     Debug.WriteLine($"Found file: {file}");
