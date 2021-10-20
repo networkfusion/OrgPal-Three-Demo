@@ -10,7 +10,7 @@ using System;
 using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
-using nanoFramework.System.IO.FileSystem;
+using nanoFramework.System.IO.FileSystem; //used for removable device events.
 using System.IO;
 using nanoFramework.Aws.IoTCore.Devices;
 using OrgPalThreeDemo.TempDebugHelpers;
@@ -108,16 +108,16 @@ namespace OrgPalThreeDemo
         {
             for ( ; ; )
             {
-                //lcd.BacklightOn = true; //TODO: this causes display corruption!
+                //palthreeDisplay.BacklightOn = true; //TODO: this causes display corruption!
                 //TODO: create a menu handler to scroll through the display!
                 palthreeDisplay.Update($"{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm")}", //Time shortened to fit on display (excludes seconds)
                     $"IP: {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
 
 
-                //lcd.Display($"PCB Temp: { palthree.GetTemperatureOnBoard().ToString("n2")}C",
+                //palthreeDisplay.Display($"PCB Temp: { palthree.GetTemperatureOnBoard().ToString("n2")}C",
                 //    $"Voltage: { palthree.GetBatteryUnregulatedVoltage().ToString("n2")}VDC");
                 Thread.Sleep(1000); //TODO: arbitary value... what should the update rate be?!
-                //lcd.BacklightOn = false;
+                //palthreeDisplay.BacklightOn = false;
             }
         }
 
@@ -455,6 +455,7 @@ namespace OrgPalThreeDemo
                 Debug.WriteLine(""); //finished loading files.
 
                 //TODO: shadow should be informed of Storage devices and content
+                //TODO: return MQTTconfigChanged...
             }
 
         }
@@ -468,15 +469,21 @@ namespace OrgPalThreeDemo
         private static void StorageEventManager_RemovableDeviceInserted(object sender, RemovableDeviceEventArgs e)
         {
             Debug.WriteLine($"Removable Device Event: @ \"{e.Path}\" was inserted.");
-            ReadStorage(e.Path);
+            
+            // var mqttConfigChange = ReadStorage(e.Path);
+            //if (mqttConfigChange)
+            //{
+            //  SetupMqtt(restore: true); //should help handle events and Reconnect/close/open
+            //}
+
         }
 
         ~Program()
         {
             //should dispose of SD and Char display (at least!)
-            palthreeDisplay.Dispose();
+            palthreeDisplay.Dispose(); 
 
-            //System.IO.FileStream
+            //System.IO.FileStream -- Dispose??
         }
     }
 }
