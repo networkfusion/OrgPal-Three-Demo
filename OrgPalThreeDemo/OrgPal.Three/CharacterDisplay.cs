@@ -41,6 +41,10 @@ namespace OrgPal.Three
             /// Sets cursor move direction and specifies display shift.
             /// These operations are performed during data write and read.
             /// </summary>
+            /// <remarks>
+            /// 0x01 = Shift Entire Display On
+            /// 0x02 = Move Right, shift left (off would be move left, shift right)
+            /// </remarks>
             EntryModeSet = 0x04, // Delay 37us
             /// <summary>
             /// Sets the display mode
@@ -63,11 +67,12 @@ namespace OrgPal.Three
             /// </remarks>
             CursorDisplayShift = 0x10, // Delay 37us
             /// <summary>
-            /// DL: interface data is 8/4 bits
+            /// Sets display function
             /// </summary>
             /// <remarks>
-            /// 0x08 = Number of lines is 2/1
-            /// 0x10 = Font Size is 5x11/5x8
+            /// 0x04 = Font Size is 5x11 (not set is 5x8)
+            /// 0x08 = Number of lines is 2 ( not set is 1)
+            /// 0x10 = interface data is 8 (not set is 4 bits)
             /// </remarks>
             FunctionSet = 0x20, // Delay 37us
             /// <summary>
@@ -108,50 +113,49 @@ namespace OrgPal.Three
         //////////// TODO: sort below out! ////////////
 
         /// <summary>
-        /// Display entry mode
+        /// LCD entry mode
         /// </summary>
         [Flags]
         private enum LcdEntryMode : byte
         {
-            ENTRYLEFT = 0x02,
-            ENTRYSHIFTDECREMENT = 0x00,
+            ShiftEntireDisplayOn = 0x01,
+            MoveRightShiftLeft = 0x02,
         }
 
         /// <summary>
-        /// display on/off control
+        /// LCD display mode
         /// </summary>
         [Flags]
-        private enum LcdCursor : byte
+        private enum LcdDisplayMode : byte
         {
 
-            /// 0x00 = Entire display off???
-            /// 0x01 = Cursor position on
-            /// 0x02 = Cursor On
-            /// 0x04 = Entire display on
-            DISPLAYON = 0x04,
-            CURSOROFF = 0x00,
-            BLINKOFF = 0x00,
+            None = 0x00, // Entire display off???
+            CursorPositionOn = 0x01, // Default is off
+            CursorOn = 0x02, // Default is off
+            EntireDisplayOn = 0x04, // Default is off
         }
 
         /// <summary>
-        /// function set
+        /// LCD function set
         /// </summary>
         [Flags]
         private enum LcdFuctionSet : byte
         {
-        _4BITMODE = 0x00,
-        _2LINE = 0x08,
-        _5x8DOTS = 0x00,
+            None = 0x00,
+            FontSize5x11 = 0x04, // Default is 5x8
+            TwoLines = 0x08, // Default is 1 line
+            EightBitInterface = 0x10, // Default is 4 bits
         }
 
 
         //TODO: I2C values for GPIO???
         // flags for backlight control
-        const byte LCD_NOBACKLIGHT = 0x00;
-        const byte LCD_BACKLIGHT = 0b00001000;  // Turn On Backlight
-        const byte En = 0b00000100;  // Enable bit
+        const byte LCD_NOBACKLIGHT = 0x00; //0x00
+        const byte LCD_BACKLIGHT = 0b00001000;  // Turn On Backlight //0x08
+
+        const byte EnableBit = 0b00000100;  // Enable bit
         //const byte Rw = 0b00000010;  // Read/Write bit
-        const byte Rs = 0b00000001;  // Register select bit
+        const byte RegSelectBit = 0b00000001;  // Register select bit
 
         private readonly I2cDevice I2C;
         private readonly I2cConnectionSettings config;
@@ -183,7 +187,6 @@ namespace OrgPal.Three
 
         public CharacterDisplay(int I2CId = Pinout.I2cBus.I2C3, byte mainAddress = LCD_ADDRESS_MAIN)
         {
-            //lcdPowerOnOff = PalHelper.GpioPort(PalThreePins.GpioPin.POWER_LCD_ON_OFF, PinMode.Output, PinValue.High);
             lcdPowerOnOff = new GpioController().OpenPin(Pinout.GpioPin.POWER_LCD_ON_OFF, PinMode.Output);
             lcdPowerOnOff.Write(PinValue.High);
 
@@ -208,7 +211,7 @@ namespace OrgPal.Three
                 }
             }
 
-            //put the LCD into 4 bit mode
+            //put the LCD into 4 bit mode (guessing I2C here?!)
             // we start in 8bit mode, try to set 4 bit mode
             Write4bits(0x03 << 4);
             Thread.Sleep(5); // wait min 4.1ms
@@ -220,14 +223,14 @@ namespace OrgPal.Three
             Write4bits(0x02 << 4);
 
             // set # lines, font size, etc.
-            SendCommand((byte)LcdInstruction.FunctionSet | (byte)LcdFuctionSet._4BITMODE | (byte)LcdFuctionSet._2LINE | (byte)LcdFuctionSet._5x8DOTS);
+            SendCommand((byte)LcdInstruction.FunctionSet | (byte)LcdFuctionSet.TwoLines ); //(byte)LcdInstruction.FunctionSet | (byte)LcdFuctionSet._4BITMODE | (byte)LcdFuctionSet.TwoLines | (byte)LcdFuctionSet._5x8DOTS);
 
             // turn the display on with no cursor or blinking default
             //turning it on does not turn on the backlight
-            SendCommand((byte)LcdInstruction.DisplayMode | (byte)LcdCursor.DISPLAYON | (byte)LcdCursor.CURSOROFF | (byte)LcdCursor.BLINKOFF);
+            SendCommand((byte)LcdInstruction.DisplayMode | (byte)LcdDisplayMode.EntireDisplayOn); // | (byte)LcdCursor.CURSOROFF | (byte)LcdCursor.BLINKOFF);
 
             // Initialize to default text direction (for roman languages)
-            SendCommand((byte)LcdInstruction.EntryModeSet | (byte)LcdEntryMode.ENTRYLEFT | (byte)LcdEntryMode.ENTRYSHIFTDECREMENT);
+            SendCommand((byte)LcdInstruction.EntryModeSet | (byte)LcdEntryMode.MoveRightShiftLeft); // | (byte)LcdEntryMode.ENTRYLEFT | (byte)LcdEntryMode.ENTRYSHIFTDECREMENT);
 
             Clear();
 
@@ -238,7 +241,7 @@ namespace OrgPal.Three
         public void Clear()
         {
             SendCommand((byte)LcdInstruction.ClearDisplay);// clear display, set cursor position to zero
-            Thread.Sleep(250);  // command needs time! (but possibly less than this...)
+            Thread.Sleep(2);  // command needs time!
         }
 
 
@@ -284,7 +287,7 @@ namespace OrgPal.Three
             {
                 foreach (byte b in Encoding.UTF8.GetBytes(text))
                 {
-                    Send(b, Rs); //, true);
+                    Send(b, RegSelectBit); //, true);
                 }
             }
             else
@@ -297,14 +300,14 @@ namespace OrgPal.Three
                     {
                         foreach (byte b in Encoding.UTF8.GetBytes(text.Substring(0, 16)))
                         {
-                            Send(b, Rs); //, true);
+                            Send(b, RegSelectBit); //, true);
                         }
                     }
                     else
                     {
                         foreach (byte b in Encoding.UTF8.GetBytes(text.Substring(16)))
                         {
-                            Send(b, Rs); //, true);
+                            Send(b, RegSelectBit); //, true);
                         }
                     }
                 }
@@ -314,20 +317,20 @@ namespace OrgPal.Three
 
         public void RefreshText(string text) //, byte line = 0)
         {
-            this.Clear();
+            Clear();
             Update(text); //, line);
         }
 
 
         void SendCommand(byte value)
         {
-            Send(value, 0);//mode 0 is for command
+            Send(value, 0); //mode 0 is for command
         }
 
 
         void SendData(byte value)
         {
-            Send(value, Rs);
+            Send(value, RegSelectBit);
         }
 
         void Send(byte value, byte mode) //, bool isData = false)
@@ -347,9 +350,9 @@ namespace OrgPal.Three
 
         void PulseEnable(byte data)
         {
-            WriteByte((byte)(data | En | backlightval));  // En high
+            WriteByte((byte)(data | EnableBit | backlightval));  // En high
             Thread.Sleep(1);       // enable pulse must be >450ns
-            WriteByte((byte)(data & ~En | backlightval)); // En low
+            WriteByte((byte)(data & ~EnableBit | backlightval)); // En low
             Thread.Sleep(1);      // commands need > 37us to settle
         }
 
