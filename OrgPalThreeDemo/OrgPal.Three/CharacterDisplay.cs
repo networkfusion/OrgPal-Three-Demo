@@ -223,14 +223,14 @@ namespace OrgPal.Three
             Write4bits(0x02 << 4);
 
             // set # lines, font size, etc.
-            SendCommand((byte)LcdInstruction.FunctionSet | (byte)LcdFuctionSet.TwoLines ); //(byte)LcdInstruction.FunctionSet | (byte)LcdFuctionSet._4BITMODE | (byte)LcdFuctionSet.TwoLines | (byte)LcdFuctionSet._5x8DOTS);
+            SendCommand((byte)LcdInstruction.FunctionSet | (byte)LcdFuctionSet.TwoLines ); // Default font5x8, 4bit interface
 
             // turn the display on with no cursor or blinking default
             //turning it on does not turn on the backlight
-            SendCommand((byte)LcdInstruction.DisplayMode | (byte)LcdDisplayMode.EntireDisplayOn); // | (byte)LcdCursor.CURSOROFF | (byte)LcdCursor.BLINKOFF);
+            SendCommand((byte)LcdInstruction.DisplayMode | (byte)LcdDisplayMode.EntireDisplayOn); //Default no cursor, no cursor blink
 
             // Initialize to default text direction (for roman languages)
-            SendCommand((byte)LcdInstruction.EntryModeSet | (byte)LcdEntryMode.MoveRightShiftLeft); // | (byte)LcdEntryMode.ENTRYLEFT | (byte)LcdEntryMode.ENTRYSHIFTDECREMENT);
+            SendCommand((byte)LcdInstruction.EntryModeSet | (byte)LcdEntryMode.MoveRightShiftLeft); // Default Shift display off
 
             Clear();
 
@@ -271,11 +271,11 @@ namespace OrgPal.Three
         {
             while (line1.Length < 16)
             {
-                line1 += " ";
+                line1 += " "; //Remove previous chars that might have been there
             }
             while (line2.Length < 16)
             {
-                line2 += " ";
+                line2 += " "; //Remove previous chars that might have been there
             }
             Update(line1 + line2);
         }
