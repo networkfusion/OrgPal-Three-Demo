@@ -10,12 +10,13 @@ using System;
 using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
-using Windows.Storage;
-using Windows.Storage.Streams;
+using nanoFramework.System.IO.FileSystem;
+using System.IO;
 using nanoFramework.Aws.IoTCore.Devices;
 using OrgPalThreeDemo.TempDebugHelpers;
 using OrgPalThreeDemo.Networking;
 using nanoFramework.Aws.IoTCore.Devices.Shadows;
+using System.Text;
 
 #if ORGPAL_THREE
 using OrgPal.Three;
@@ -347,79 +348,78 @@ namespace OrgPalThreeDemo
             }
         }
 
-        private static void ReadStorage() //TODO: this can fail on redeploy or exiting debug!!!
+        private static void ReadStorage(string path = "D:") //TODO: this can fail on redeploy or exiting debug!!!
         {
             // Get the logical root folder for all removable storage devices
             // in nanoFramework the drive letters are fixed, being:
             // D: SD Card
             // E: USB Mass Storage Device
-            StorageFolder externalDevices = KnownFolders.RemovableDevices;
+            //StorageFolder externalDevices = KnownFolders.RemovableDevices;
 
             // list all removable storage devices
-            var removableDevices = externalDevices.GetFolders();
+            //var removableDevices = externalDevices.GetFolders();
 
-            if (removableDevices.Length > 0)
+            if (path.Length > 0)
             {
                 Debug.WriteLine("Reading storage...");
 
                 // get folders on 1st removable device
-                var foldersInDevice = removableDevices[0].GetFolders();
+                var foldersOnDevice = Directory.GetDirectories(path);
 
-                foreach (var folder in foldersInDevice)
+                foreach (var folder in foldersOnDevice)
                 {
-                    Debug.WriteLine($"Found folder: {folder.DisplayName}");
+                    Debug.WriteLine($"Found folder: {folder}");
                 }
 
                 // get files on the root of the 1st removable device
-                var filesInDevice = removableDevices[0].GetFiles();
+                var filesInDevice = Directory.GetFiles(path);
 
 
                 foreach (var file in filesInDevice)
                 {
-                    Debug.WriteLine($"Found file: {file.Name}");
+                    Debug.WriteLine($"Found file: {file}");
                     //TODO: we should really check if certs are in the mcu flash before retreiving them from the filesystem (SD).
-                    if (file.FileType == "crt")
+                    if (file.Contains(".crt"))
                     {
-                        //clientRsaSha256Crt = FileIO.ReadText(f); //Currently doesnt work with nf!
-                        //workaround...
-                        var buffer = FileIO.ReadBuffer(file);
-                        using (DataReader dataReader = DataReader.FromBuffer(buffer))
+                        using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read))
                         {
-                            AwsIotCore.MqttConnector.ClientRsaSha256Crt = dataReader.ReadString(buffer.Length);
+                            var buffer = new byte[fs.Length];
+                            fs.Read(buffer, 0, (int)fs.Length);
+                            AwsIotCore.MqttConnector.ClientRsaSha256Crt = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
+                        }
+                        //Should load into secure storage (somewhere) and delete file on removable device?
+                    }
+                    if (file.Contains(".der"))
+                    {
+                        using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read))
+                        {
+                            AwsIotCore.MqttConnector.RootCA = new byte[fs.Length];
+                            fs.Read(AwsIotCore.MqttConnector.RootCA, 0, (int)fs.Length);
+                        }
+                        //Should load into secure storage (somewhere) and delete file on removable device?
+                    }
+                    if (file.Contains("key"))
+                    {
+                        using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read))
+                        {
+                            var buffer = new byte[fs.Length];
+                            fs.Read(buffer, 0, (int)fs.Length);
+                            AwsIotCore.MqttConnector.ClientRsaKey = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
                         }
 
                         //Should load into secure storage (somewhere) and delete file on removable device?
                     }
-                    if (file.FileType == "der")
+                    if (file.Contains("mqttconfig.json"))
                     {
-                        var buffer = FileIO.ReadBuffer(file);
-                        using (DataReader dataReader = DataReader.FromBuffer(buffer))
-                        {
-                            AwsIotCore.MqttConnector.RootCA = new byte[buffer.Length];
-                            dataReader.ReadBytes(AwsIotCore.MqttConnector.RootCA);
-                        }
-                    }
-                    if (file.FileType == "key")
-                    {
-                        //clientRsaKey = FileIO.ReadText(f); //Currently doesnt work with nf!
-                        //workaround...
-                        var buffer = FileIO.ReadBuffer(file);
-                        using (DataReader dataReader = DataReader.FromBuffer(buffer))
-                        {
-                            AwsIotCore.MqttConnector.ClientRsaKey = dataReader.ReadString(buffer.Length);
-                        }
-
-                        //Should load into secure storage (somewhere) and delete file on removable device?
-                    }
-                    if (file.Name == "mqttconfig.json")
-                    {
-                        var buffer = FileIO.ReadBuffer(file);
-                        using (DataReader dataReader = DataReader.FromBuffer(buffer))
+                        using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read))
                         {
                         readMqttConfig:
                             try
                             {
-                                MqttConfigFileSchema config = (MqttConfigFileSchema)JsonConvert.DeserializeObject(dataReader, typeof(MqttConfigFileSchema));
+                                var buffer = new byte[fs.Length];
+                                fs.Read(buffer, 0, (int)fs.Length);
+
+                                MqttConfigFileSchema config = (MqttConfigFileSchema)JsonConvert.DeserializeObject(Encoding.UTF8.GetString(buffer, 0, buffer.Length), typeof(MqttConfigFileSchema));
                                 AwsIotCore.MqttConnector.Host = config.Url;
                                 if (config.Port != null)
                                 {
@@ -458,7 +458,7 @@ namespace OrgPalThreeDemo
         private static void StorageEventManager_RemovableDeviceInserted(object sender, RemovableDeviceEventArgs e)
         {
             Debug.WriteLine($"Removable Device Event: @ \"{e.Path}\" was inserted.");
-            ReadStorage();
+            ReadStorage(e.Path);
         }
     }
 }
