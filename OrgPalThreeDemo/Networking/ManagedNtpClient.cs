@@ -1,20 +1,8 @@
-﻿
-
-//namespace OrgPalThreeDemo
-//{
-//    public class managedSNTP
-//    {
-//    }
-//}
-
-
-
-
-
-/* 
+﻿/* 
  * NtpClient.cs
  * 
  * Copyright (c) 2009, Michael Schwarz (http://www.schwarz-interactive.de)
+ * Modified 2021 Robin Jones (http://nanoframework.net).
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -40,16 +28,16 @@
  * 
  */
 using System;
-//using System.Text;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 
-namespace OrgPalThreeDemo.ManagedSNTP
+namespace OrgPalThreeDemo.Networking
 {
     /// <summary>
     /// Static class to receive the time from a NTP server.
     /// </summary>
-    public class NtpClient
+    public class ManagedNtpClient
     {
         /// <summary>
         /// Gets the current DateTime from time-a.nist.gov.
@@ -57,7 +45,7 @@ namespace OrgPalThreeDemo.ManagedSNTP
         /// <returns>A DateTime containing the current time.</returns>
         public static DateTime GetNetworkTime()
         {
-            return GetNetworkTime("time-a.nist.gov");
+            return GetNetworkTime("time.cloudflare.com");
         }
 
         /// <summary>
@@ -70,8 +58,10 @@ namespace OrgPalThreeDemo.ManagedSNTP
             IPAddress[] address = Dns.GetHostEntry(ntpServer).AddressList;
 
             if (address == null || address.Length == 0)
-                throw new ArgumentException("Could not resolve ip address from '" + ntpServer + "'.", "ntpServer");
-
+            {
+                Debug.WriteLine($"Could not resolve DNS for the IP address of the NTP server: {ntpServer}");
+                throw new ArgumentException($"Could not resolve DNS for the IP address of the the NTP server: {ntpServer}");
+            }
             IPEndPoint ep = new IPEndPoint(address[0], 123);
 
             return GetNetworkTime(ep);

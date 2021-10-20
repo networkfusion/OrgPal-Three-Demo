@@ -4,10 +4,10 @@
 //using System.Device.Gpio;
 //using System.Device.I2c;
 
-//namespace PalThree
+//namespace OrgPal.Three
 //{
 //    /// <summary>Various helper methods and constants.</summary>
-//    public class PalHelper
+//    public class Helper
 //    {
 
 //        public static ArrayList FindI2cDevices(int I2CId, byte minimumAddress = 0x08, byte maximumAddress = 0x77)

@@ -1,9 +1,9 @@
 ﻿
 using System;
 
-namespace PalThree
+namespace OrgPal.Three
 {
-    public static class PalThreePins
+    public static class Pinout
     {
         public static class GpioPin
         {
@@ -19,8 +19,8 @@ namespace PalThree
             public static int Led1 = PortPin('G', 6);
             public static int Led2 = PortPin('G', 7);
 
-            public static int BUTTON_BOOT_USER_PK7 = PortPin('K', 7);
-            public static int BUTTON_DIAGNOSTIC_PB7 = PortPin('B', 7);
+            public static int BUTTON_USER_BOOT1_PK7 = PortPin('K', 7);
+            public static int BUTTON_DIAGNOSTIC_PB7 = PortPin('B', 7); // Hidden by expansion board!
             public static int BUTTON_WAKE_PA0 = PortPin('A', 0);
             public static int BUTTON_USER_WAKE_PE6 = PortPin('E', 6);
             public static int MUX_EXT_BUTTON_WAKE_PE4 = PortPin('E', 4);

@@ -1,12 +1,11 @@
-﻿using PalThree;
-using System;
+﻿using System;
 using System.Text;
 using System.Threading;
 using Windows.Devices.Adc;
 
-namespace OrgPalThreeDemo.Drivers
+namespace OrgPal.Three
 {
-    public class OnboardDevices
+    public class OnboardAdcDevice
     {
         private AdcChannel adcVBAT;
         private AdcChannel adcTemp;
@@ -23,7 +22,7 @@ namespace OrgPalThreeDemo.Drivers
             if (adcVBAT == null)
             {
                 AdcController adc1 = AdcController.GetDefault();
-                adcVBAT = adc1.OpenChannel(PalThreePins.AdcChannel.ADC1_IN8_VBAT);
+                adcVBAT = adc1.OpenChannel(Pinout.AdcChannel.ADC1_IN8_VBAT);
             }
 
             var average = 0;
@@ -57,7 +56,7 @@ namespace OrgPalThreeDemo.Drivers
         public double GetTemperatureOnBoard()
         {
             AdcController adc1 = AdcController.GetDefault();
-            adcTemp = adc1.OpenChannel(PalThreePins.AdcChannel.ADC1_IN13_TEMP);
+            adcTemp = adc1.OpenChannel(Pinout.AdcChannel.ADC1_IN13_TEMP);
 
             double tempInCent = 0;
 
@@ -78,7 +77,7 @@ namespace OrgPalThreeDemo.Drivers
         public float GetMcuTemperature()
         {
             AdcController adc1 = AdcController.GetDefault();
-            adcTemp = adc1.OpenChannel(PalThreePins.AdcChannel.ADC_CHANNEL_SENSOR);
+            adcTemp = adc1.OpenChannel(Pinout.AdcChannel.ADC_CHANNEL_SENSOR);
             return adcTemp.ReadValue() / 100.00f;
 
             //https://www.st.com/resource/en/datasheet/stm32f769ni.pdf

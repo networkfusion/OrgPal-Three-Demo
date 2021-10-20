@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace OrgPalThreeDemo.MessageSchemas
+namespace OrgPalThreeDemo.AwsIotCore.DeviceMessageSchemas
 {
-    public class ShadowMessage
+    public class ShadowStateProperties
     {
 #pragma warning disable IDE1006 // Naming Styles, disabled due to being Json specific
         public string operatingSystem { get; set; }

@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Net.NetworkInformation;
 
-namespace OrgPalThreeDemo
+namespace OrgPalThreeDemo.Networking
 {
     /// <summary>
     /// Connection Error class
@@ -78,7 +78,7 @@ namespace OrgPalThreeDemo
 
             if (setDateTime)
             {
-                Debug.WriteLine($"We do have a valid date {DateTime.UtcNow}");
+                Debug.WriteLine($"We have a valid date: {DateTime.UtcNow}");
             }
 
             ConnectionError = new ConnectionError("No error", null);
@@ -89,7 +89,7 @@ namespace OrgPalThreeDemo
         /// Check if the DateTime is valid.
         /// </summary>
         /// <returns>True if valid.</returns>
-        public static bool IsValidDateTime() => DateTime.UtcNow.Year > 2018;
+        public static bool IsValidDateTime() => DateTime.UtcNow.Year > 2020;
 
         /// <summary>
         /// Check if there is a valid IP address on a specific interface type.
@@ -110,7 +110,7 @@ namespace OrgPalThreeDemo
                 {
                     if (ni.IPv4Address[0] != '0')
                     {
-                        Debug.WriteLine($"We have and IP: {ni.IPv4Address}");
+                        Debug.WriteLine($"We have a valid IPv4 address: {ni.IPv4Address}");
                         return true;
                     }
                 }

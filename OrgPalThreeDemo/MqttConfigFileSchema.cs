@@ -1,6 +1,6 @@
 ﻿namespace OrgPalThreeDemo
 {
-    public class MqttConfig
+    public class MqttConfigFileSchema
     {
         public string Url { get; set; }
         public string Port { get; set; }
