@@ -1,6 +1,8 @@
 ﻿//using System;
 //using Windows.Devices.I2c;
 
+// TODO: might be able to use the PCF8563 as a basis? https://github.com/nanoframework/nanoFramework.IoT.Device/tree/develop/devices/Rtc/Devices/Pcf8563
+
 //namespace OrgPal.Three
 //{
 //    /// <summary>
@@ -10,17 +12,20 @@
 //    {
 //        private I2cDevice I2C;
 //        byte ADDRESS = 0x51;
-//        byte REG_SECONDS = 0x01;
-//        byte REG_ALARM_ENABLE = 0x10;
-//        byte REG_OFFSET = 0x24; // tuning
-//        byte REG_OSC_25 = 0x25; // oscillator register
-//        byte REG_BATT_26 = 0x26; // battery switch
-//        byte REG_IO_27 = 0x27; // Pin IO register
-//        byte REG_FUNC_28 = 0x28; // function register
-//        byte REG_INTA_ENABLES = 0x29; //interrupt control register
-//        byte REG_FLAGS_2B = 0x2B; // flag status register
-//        byte REG_STOP_2E = 0x2E; // stop enable
-//        byte REG_RESET_2F = 0x2F; // software reset control
+////internal enum Pcf85263Register : byte
+////{
+    //        byte REG_SECONDS = 0x01;
+    //        byte REG_ALARM_ENABLE = 0x10;
+    //        byte REG_OFFSET = 0x24; // tuning
+    //        byte REG_OSC_25 = 0x25; // oscillator register
+    //        byte REG_BATT_26 = 0x26; // battery switch
+    //        byte REG_IO_27 = 0x27; // Pin IO register
+    //        byte REG_FUNC_28 = 0x28; // function register
+    //        byte REG_INTA_ENABLES = 0x29; //interrupt control register
+    //        byte REG_FLAGS_2B = 0x2B; // flag status register
+    //        byte REG_STOP_2E = 0x2E; // stop enable
+    //        byte REG_RESET_2F = 0x2F; // software reset control
+////}
 
 //        byte OS_BIT = 7;
 //        byte CLKPM_BIT_7 = 7;

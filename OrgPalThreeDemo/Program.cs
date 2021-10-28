@@ -450,7 +450,7 @@ namespace OrgPalThreeDemo
                                 {
                                     AwsIotCore.MqttConnector.Port = int.Parse(config.Port);
                                 }
-                                if (config.ThingName != string.Empty || config.ThingName != null)
+                                if (!string.IsNullOrEmpty(config.ThingName))
                                 {
                                     AwsIotCore.MqttConnector.ThingName = config.ThingName;
                                 }
