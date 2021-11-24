@@ -65,7 +65,7 @@
       <SpecificVersion>True</SpecificVersion>
     </Reference>
     <Reference Include="nanoFramework.Aws.IoTCore.Devices, Version=1.0.0.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\packages\nanoFramework.Aws.IoTCore.Devices.1.0.0-preview.36\lib\nanoFramework.Aws.IoTCore.Devices.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.Aws.IoTCore.Devices.1.0.0-preview.38\lib\nanoFramework.Aws.IoTCore.Devices.dll</HintPath>
       <Private>True</Private>
       <SpecificVersion>True</SpecificVersion>
     </Reference>
@@ -130,7 +130,7 @@
       <SpecificVersion>True</SpecificVersion>
     </Reference>
     <Reference Include="System.Device.Spi, Version=1.0.2.0, Culture=neutral, PublicKeyToken=c07d481e9758c731">
-      <HintPath>..\packages\nanoFramework.System.Device.Spi.1.0.2-preview.15\lib\System.Device.Spi.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.System.Device.Spi.1.0.2-preview.17\lib\System.Device.Spi.dll</HintPath>
       <Private>True</Private>
       <SpecificVersion>True</SpecificVersion>
     </Reference>
