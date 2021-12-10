@@ -24,7 +24,7 @@ namespace OrgPalThreeDemo.TempDebugHelpers
                     if (key.ToString() == "timestamp")
                     {
                         Debug.Write(GetSpaces(level));
-                        Debug.WriteLine($"as ISO date: {DateTime.FromUnixTimeSeconds((int)hash[key]).ToString("s")}Z"); //TODO: should work with "o", but doesnt!
+                        Debug.WriteLine($"as ISO date: {DateTime.FromUnixTimeSeconds((int)hash[key]).ToString("o")}");
                     }
                 }
             }

@@ -244,7 +244,7 @@ namespace OrgPalThreeDemo
             Debug.WriteLine("metadata.reported:");
             DebugHelper.DumpHashTable(shadow.metadata.reported, 1);
             Debug.WriteLine($"timestamp={shadow.timestamp}");
-            Debug.WriteLine($"as ISO date: {DateTime.FromUnixTimeSeconds(shadow.timestamp).ToString("s")}Z"); //TODO: should work with "o", but doesnt!
+            Debug.WriteLine($"as ISO date: {DateTime.FromUnixTimeSeconds(shadow.timestamp).ToString("o")}");
             Debug.WriteLine($"version={shadow.version}");
             Debug.WriteLine($"clienttoken={shadow.clienttoken}");
             Debug.WriteLine("------------------");
