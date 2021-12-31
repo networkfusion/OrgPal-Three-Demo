@@ -375,13 +375,15 @@ namespace OrgPalThreeDemo
             {
                 // list all removable drives
                 var removableDrives = Directory.GetLogicalDrives();
+
+                //TODO: Better handle no removable MSD avaliable?!
+                if (removableDrives.Length == 0) throw new Exception("NO REMOVABLE STORAGE DEVICE FOUND");
                 foreach (var drive in removableDrives)
                 {
                     Debug.WriteLine($"Found logical drive {drive}");
-                    //path = drive; 
+                    path = drive;
+                    if (path.StartsWith("D")) break; // Always use the SDcard as the default device.
                 }
-                //TODO: techincally we should handle more than one drive... but for the moment, we are just going to handle the first one!
-                path = removableDrives[0];
             }
 
             if (!string.IsNullOrEmpty(path))
@@ -498,7 +500,9 @@ namespace OrgPalThreeDemo
         ~Program()
         {
             //should dispose of SD and Char display (at least!)
+#if ORGPAL_THREE
             palthreeDisplay.Dispose(); 
+#endif
 
             //System.IO.FileStream -- Dispose??
         }
