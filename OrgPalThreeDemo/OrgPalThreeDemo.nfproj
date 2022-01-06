@@ -27,7 +27,6 @@
     <Compile Include="OrgPal.Three\Pinout.cs" />
     <Compile Include="OrgPal.Three\PCF85263.cs" />
     <Compile Include="Networking\ManagedNtpClient.cs" />
-    <Compile Include="Networking\NetworkHelper.cs" />
     <Compile Include="Peripherals\HMT330.cs" />
     <Compile Include="MqttConfigFileSchema.cs" />
     <Compile Include="Peripherals\LufftVentus.cs" />

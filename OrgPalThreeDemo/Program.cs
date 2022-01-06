@@ -20,6 +20,7 @@ using System.Text;
 using Microsoft.Extensions.Logging;
 using nanoFramework.Logging;
 using nanoFramework.Logging.Debug;
+using nanoFramework.Networking;
 // TODO: add logging to find out why it does not work when debugger is not attached!
 //using nanoFramework.Logging.Stream; //should probably be only when orgpal?
 
@@ -81,18 +82,13 @@ namespace OrgPalThreeDemo
             StorageEventManager.RemovableDeviceRemoved += StorageEventManager_RemovableDeviceRemoved;
             ReadStorage();
 
-            Debug.WriteLine($"Time before network available: {DateTime.UtcNow}");
+            Debug.WriteLine($"Time before network available: {DateTime.UtcNow.ToString("o")}");
 
             SetupNetwork();
 
-            //while (DateTime.UtcNow.Year < 2021)
-            //{
-            //    Thread.Sleep(1000); //give time for native SNTP to be retrieved.
-            //    Debug.WriteLine("Waiting for time to be set...");
-            //}
             startTime = DateTime.UtcNow; //set now because the clock might have been wrong before ntp is checked.
 
-            _logger.LogInformation($"Time after network available: {startTime.ToString("yyyy-MM-dd HH:mm:ss")}");
+            _logger.LogInformation($"Time after network available: {startTime.ToString("o")}");
             _logger.LogInformation("");
 
             var connected = false;
@@ -142,14 +138,13 @@ namespace OrgPalThreeDemo
             // We are using TLS and it requires valid date & time (so we should set the option to true, but SNTP is run in the background, and setting it manually causes issues for the moment!!!)
             // Although setting it to false seems to cause a worse issue. Let us fix this by using a managed class instead.
             _logger.LogInformation("Waiting for network up and IP address...");
-            var success = NetworkHelper.WaitForValidIPAndDate(true, System.Net.NetworkInformation.NetworkInterfaceType.Ethernet, cs.Token);
+            var success = NetworkHelper.SetupAndConnectNetwork(requiresDateTime: true, token: cs.Token);
 
             if (!success)
             {
-                _logger.LogWarning($"Failed to receive an IP address and/or valid DateTime. Error: {NetworkHelper.ConnectionError.Error}.");
-                if (NetworkHelper.ConnectionError.Exception != null)
+                if (NetworkHelper.HelperException != null)
                 {
-                    _logger.LogWarning($"Exception: {NetworkHelper.ConnectionError.Exception}");
+                    _logger.LogWarning($"Failed to receive an IP address and/or valid DateTime. Error: {NetworkHelper.HelperException}.");
                 }
                 _logger.LogInformation("It is likely a DateTime problem, so we will now try to set it using a managed helper class!");
                 success = Rtc.SetSystemTime(ManagedNtpClient.GetNetworkTime());
