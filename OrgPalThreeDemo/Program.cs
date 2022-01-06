@@ -17,6 +17,8 @@ using OrgPalThreeDemo.TempDebugHelpers;
 using OrgPalThreeDemo.Networking;
 using nanoFramework.Aws.IoTCore.Devices.Shadows;
 using System.Text;
+// TODO: add logging to find out why it does not work when debugger is not attached!
+//using nanoFramework.Logging.Stream; //should probably be only when orgpal?
 
 #if ORGPAL_THREE
 using OrgPal.Three;
@@ -374,7 +376,7 @@ namespace OrgPalThreeDemo
             if (string.IsNullOrEmpty(path)) //Generally only "should" happen on initialization.
             {
                 // list all removable drives
-                var removableDrives = Directory.GetLogicalDrives();
+                var removableDrives = Directory.GetLogicalDrives(); //TODO: FEEDBACK... I Cannot help but feel (since we are no longer attached to UWP, that this should be `SD:` and `USB:`
 
                 //TODO: Better handle no removable MSD avaliable?!
                 if (removableDrives.Length == 0) throw new Exception("NO REMOVABLE STORAGE DEVICE FOUND");
