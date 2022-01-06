@@ -142,6 +142,7 @@ namespace OrgPalThreeDemo
 
             if (!success)
             {
+                _logger.LogWarning($"Failed to receive an IP address and/or valid DateTime. Error: {NetworkHelper.Status}.");
                 if (NetworkHelper.HelperException != null)
                 {
                     _logger.LogWarning($"Failed to receive an IP address and/or valid DateTime. Error: {NetworkHelper.HelperException}.");
