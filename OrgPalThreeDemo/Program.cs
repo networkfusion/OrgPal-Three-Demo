@@ -17,6 +17,9 @@ using OrgPalThreeDemo.TempDebugHelpers;
 using OrgPalThreeDemo.Networking;
 using nanoFramework.Aws.IoTCore.Devices.Shadows;
 using System.Text;
+using Microsoft.Extensions.Logging;
+using nanoFramework.Logging;
+using nanoFramework.Logging.Debug;
 // TODO: add logging to find out why it does not work when debugger is not attached!
 //using nanoFramework.Logging.Stream; //should probably be only when orgpal?
 
@@ -45,10 +48,15 @@ namespace OrgPalThreeDemo
         private static Thread sendTelemetryThread;
         private static Thread sendShadowThread;
 
+        private static ILogger _logger;
+
         public static void Main()
         {
-            Debug.WriteLine($"{SystemInfo.TargetName} AWS MQTT Demo.");
-            Debug.WriteLine("");
+            _logger = new DebugLogger("test");
+            LogDispatcher.LoggerFactory = new DebugLoggerFactory();
+            //_logger.MinLogLevel = LogLevel.Trace;
+            _logger.LogInformation($"{SystemInfo.TargetName} AWS MQTT Demo.");
+            _logger.LogInformation("");
 
 #if ORGPAL_THREE
             palthreeButtons = new Buttons();
@@ -84,14 +92,14 @@ namespace OrgPalThreeDemo
             //}
             startTime = DateTime.UtcNow; //set now because the clock might have been wrong before ntp is checked.
 
-            Debug.WriteLine($"Time after network available: {startTime.ToString("yyyy-MM-dd HH:mm:ss")}");
-            Debug.WriteLine("");
+            _logger.LogInformation($"Time after network available: {startTime.ToString("yyyy-MM-dd HH:mm:ss")}");
+            _logger.LogInformation("");
 
             var connected = false;
             int connectionAttempt = 0;
             while (!connected)
             {
-                Debug.WriteLine($"MQTT Connection Attempt: {connectionAttempt}");
+                _logger.LogInformation($"MQTT Connection Attempt: {connectionAttempt}");
                 connected = SetupMqtt();
                 if (!connected)
                 {
@@ -133,28 +141,28 @@ namespace OrgPalThreeDemo
             CancellationTokenSource cs = new CancellationTokenSource(5000); //5 seconds.
             // We are using TLS and it requires valid date & time (so we should set the option to true, but SNTP is run in the background, and setting it manually causes issues for the moment!!!)
             // Although setting it to false seems to cause a worse issue. Let us fix this by using a managed class instead.
-            Debug.WriteLine("Waiting for network up and IP address...");
+            _logger.LogInformation("Waiting for network up and IP address...");
             var success = NetworkHelper.WaitForValidIPAndDate(true, System.Net.NetworkInformation.NetworkInterfaceType.Ethernet, cs.Token);
 
             if (!success)
             {
-                Debug.WriteLine($"Failed to receive an IP address and/or valid DateTime. Error: {NetworkHelper.ConnectionError.Error}.");
+                _logger.LogWarning($"Failed to receive an IP address and/or valid DateTime. Error: {NetworkHelper.ConnectionError.Error}.");
                 if (NetworkHelper.ConnectionError.Exception != null)
                 {
-                    Debug.WriteLine($"Exception: {NetworkHelper.ConnectionError.Exception}");
+                    _logger.LogWarning($"Exception: {NetworkHelper.ConnectionError.Exception}");
                 }
-                Debug.WriteLine("It is likely a DateTime problem, so we will now try to set it using a managed helper class!");
+                _logger.LogInformation("It is likely a DateTime problem, so we will now try to set it using a managed helper class!");
                 success = Rtc.SetSystemTime(ManagedNtpClient.GetNetworkTime());
                 if (success)
                 {
-                    Debug.WriteLine("Retrived DateTime using Managed NTP Helper class...");
+                    _logger.LogInformation("Retrived DateTime using Managed NTP Helper class...");
                 }
                 else
                 {
-                    Debug.WriteLine("Failed to Retrive DateTime (or IP Address)! Retrying...");
+                    _logger.LogWarning("Failed to Retrive DateTime (or IP Address)! Retrying...");
                     SetupNetwork();
                 }
-                Debug.WriteLine($"RTC = {DateTime.UtcNow}");
+                _logger.LogInformation($"RTC = {DateTime.UtcNow}");
             }
 
         }
@@ -162,7 +170,7 @@ namespace OrgPalThreeDemo
         static bool SetupMqtt()
         {
             //TODO: make sure we can use device flashed certs (before storage) https://github.com/nanoframework/Samples/blob/main/samples/SSL/SecureClient/Program.cs
-            Debug.Write("Program: Connecting to MQTT broker... : ");
+            _logger.LogInformation("Program: Connecting to MQTT broker... : ");
             try
             {
                 ////Handle cases where this method is called when MQTT is already connected!
@@ -185,7 +193,7 @@ namespace OrgPalThreeDemo
                 AwsIotCore.MqttConnector.Client = new MqttConnectionClient(AwsIotCore.MqttConnector.Host, AwsIotCore.MqttConnector.ThingName, clientCert, MqttConnectionClient.QoSLevel.AtLeastOnce, caCert);
 
                 bool success = AwsIotCore.MqttConnector.Client.Open("nanoframework/device");
-                Debug.WriteLine($"{success}");
+                _logger.LogInformation($"{success}");
 
 
                 // Register to messages received:
@@ -194,25 +202,25 @@ namespace OrgPalThreeDemo
                 AwsIotCore.MqttConnector.Client.ShadowUpdated += Client_ShadowUpdated;
 
                 Thread.Sleep(1000); //ensure that we are ready (and connected)???
-                Debug.WriteLine("");
-                Debug.WriteLine($"Attempting to get AWS IOT shadow... Result was: ");
+                _logger.LogInformation("");
+                _logger.LogInformation($"Attempting to get AWS IOT shadow... Result was: ");
                 var shadow = AwsIotCore.MqttConnector.Client.GetShadow(new CancellationTokenSource(30000).Token);
                 if (shadow != null)
                 {
-                    Debug.WriteLine("Success!");
+                    _logger.LogInformation("Success!");
                     DecodeShadowAsHashtable(shadow);
                     //Debug.WriteLine($"Desired:  {shadow.state.desired.ToJson()}");
                     //Debug.WriteLine($"Reported:  {shadow.state.reported.ToJson()}");
 
-                    Debug.WriteLine($"Converted shadow to a json (string):");
-                    Debug.WriteLine("------------------");
-                    Debug.WriteLine($"{shadow.ToJson()}");
-                    Debug.WriteLine("------------------");
-                    Debug.WriteLine("");
+                    _logger.LogInformation($"Converted shadow to a json (string):");
+                    _logger.LogInformation("------------------");
+                    Debug.WriteLine($"{shadow.ToJson()}"); //TODO!
+                    _logger.LogInformation("------------------");
+                    _logger.LogInformation("");
                 }
                 else
                 {
-                    Debug.WriteLine("Failed!");
+                    _logger.LogWarning("Failed!");
                 }
 
 
@@ -227,7 +235,7 @@ namespace OrgPalThreeDemo
             }
             catch (Exception e)
             {
-                Debug.WriteLine(e.Message.ToString());
+                _logger.LogWarning(e.Message.ToString());
                 return false;
             }
 
@@ -235,28 +243,28 @@ namespace OrgPalThreeDemo
 
         private static void DecodeShadowAsHashtable(Shadow shadow)
         {
-            Debug.WriteLine("Decoded shadow as Hashtable was:");
-            Debug.WriteLine("------------------");
-            Debug.WriteLine("state.desired:");
+            _logger.LogInformation("Decoded shadow as Hashtable was:");
+            _logger.LogInformation("------------------");
+            _logger.LogInformation("state.desired:");
             DebugHelper.DumpHashTable(shadow.state.desired, 1);
-            Debug.WriteLine("state.reported:");
+            _logger.LogInformation("state.reported:");
             DebugHelper.DumpHashTable(shadow.state.reported, 1);
-            Debug.WriteLine("metadata.desired:");
+            _logger.LogInformation("metadata.desired:");
             DebugHelper.DumpHashTable(shadow.metadata.desired, 1);
-            Debug.WriteLine("metadata.reported:");
+            _logger.LogInformation("metadata.reported:");
             DebugHelper.DumpHashTable(shadow.metadata.reported, 1);
-            Debug.WriteLine($"timestamp={shadow.timestamp}");
-            Debug.WriteLine($"as ISO date: {DateTime.FromUnixTimeSeconds(shadow.timestamp).ToString("o")}");
-            Debug.WriteLine($"version={shadow.version}");
-            Debug.WriteLine($"clienttoken={shadow.clienttoken}");
-            Debug.WriteLine("------------------");
-            Debug.WriteLine("");
+            _logger.LogInformation($"timestamp={shadow.timestamp}");
+            _logger.LogInformation($"as ISO date: {DateTime.FromUnixTimeSeconds(shadow.timestamp).ToString("o")}");
+            _logger.LogInformation($"version={shadow.version}");
+            _logger.LogInformation($"clienttoken={shadow.clienttoken}");
+            _logger.LogInformation("------------------");
+            _logger.LogInformation("");
         }
 
         private static void Client_ShadowUpdated(object sender, ShadowUpdateEventArgs e)
         {
             //TODO: check against the last received shadow (or something)!
-            Debug.WriteLine("Program: Received a shadow update!");
+            _logger.LogInformation("Program: Received a shadow update!");
             //Debug.WriteLine("------------------");
             //DecodeShadow(e.Shadow);
             //Debug.WriteLine("------------------");
@@ -265,7 +273,7 @@ namespace OrgPalThreeDemo
         private static void Client_StatusUpdated(object sender, StatusUpdatedEventArgs e)
         {
             //TODO: handle it properly!
-            Debug.Write($"Program: Received a status update: {e.Status.State}"); //TODO: preferabily as a string?!
+            Debug.WriteLine($"Program: Received a status update: {e.Status.State}"); //TODO: preferabily as a string?!
             if (!string.IsNullOrEmpty(e.Status.Message))
             {
                 Debug.WriteLine($" with message {e.Status.Message}"); //TODO: does this need converting?
@@ -287,7 +295,7 @@ namespace OrgPalThreeDemo
                         bootTimestamp = startTime
                     };
 
-                    Debug.Write($"Updating shadow reported properties... "); //wait for result before writeline.
+                    _logger.LogInformation($"Updating shadow reported properties... "); //wait for result before writeline.
                     //TODO: this should be worked out as part of the shadow property collection?!
                     const string shadowUpdateHeader = "{\"state\":{\"reported\":";
                     const string shadowUpdateFooter = "}}";
@@ -296,13 +304,13 @@ namespace OrgPalThreeDemo
                     var shadow = new Shadow(shadowJson);
                     bool updateResult = AwsIotCore.MqttConnector.Client.UpdateReportedState(shadow);
 
-                    Debug.WriteLine($"Result was: {!updateResult}"); //Received == false (inverted for UI).
+                    _logger.LogInformation($"Result was: {!updateResult}"); //Received == false (inverted for UI).
 
                 }
                 catch (Exception ex)
                 {
 
-                    Debug.WriteLine($"error sending shadow: {ex}");
+                    _logger.LogInformation($"error sending shadow: {ex}");
                     SetupMqtt();
                 }
 
@@ -346,7 +354,7 @@ namespace OrgPalThreeDemo
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine("Message sent ex: " + ex);
+                    _logger.LogWarning($"Message sent ex: {ex}");
                     SetupMqtt();
                 }
 
@@ -358,11 +366,11 @@ namespace OrgPalThreeDemo
         {
             try
             {
-                Debug.WriteLine($"Command and Control Message received: {e.Message}");
+                _logger.LogInformation($"Command and Control Message received: {e.Message}");
             }
             catch (Exception ex)
             {
-                Debug.WriteLine("Message received ex: " + ex);
+                _logger.LogWarning("Message received ex: " + ex);
                 SetupMqtt();
             }
         }
@@ -382,7 +390,7 @@ namespace OrgPalThreeDemo
                 if (removableDrives.Length == 0) throw new Exception("NO REMOVABLE STORAGE DEVICE FOUND");
                 foreach (var drive in removableDrives)
                 {
-                    Debug.WriteLine($"Found logical drive {drive}");
+                    _logger.LogInformation($"Found logical drive {drive}");
                     path = drive;
                     if (path.StartsWith("D")) break; // Always use the SDcard as the default device.
                 }
@@ -397,7 +405,7 @@ namespace OrgPalThreeDemo
 
                 foreach (var folder in foldersOnDevice)
                 {
-                    Debug.WriteLine($"Found folder: {folder}");
+                    _logger.LogInformation($"Found folder: {folder}");
                 }
 
                 // get files on the root of the 1st removable device
@@ -406,7 +414,7 @@ namespace OrgPalThreeDemo
                 //TODO: in certain cases it would be helpful to support File.ReadAllText -- https://zetcode.com/csharp/file/ (Helper lib??)
                 foreach (var file in filesInDevice)
                 {
-                    Debug.WriteLine($"Found file: {file}");
+                    _logger.LogInformation($"Found file: {file}");
                     //TODO: we should really check if certs are in the mcu flash before retreiving them from the filesystem (SD).
                     if (file.Contains(".crt"))
                     {
@@ -473,7 +481,7 @@ namespace OrgPalThreeDemo
                 }
 
                 //TODO: if the certs are on the SD, they should be loaded into (secure) mcu storage (and delete file on removable device)?
-                Debug.WriteLine(""); //finished loading files.
+                _logger.LogInformation(""); //finished loading files.
 
                 //TODO: shadow should be informed of Storage devices and content
                 //TODO: return MQTTconfigChanged...
@@ -484,12 +492,12 @@ namespace OrgPalThreeDemo
 
         private static void StorageEventManager_RemovableDeviceRemoved(object sender, RemovableDeviceEventArgs e)
         {
-            Debug.WriteLine($"Removable Device Event: @ \"{e.Path}\" was removed.");
+            _logger.LogInformation($"Removable Device Event: @ \"{e.Path}\" was removed.");
         }
 
         private static void StorageEventManager_RemovableDeviceInserted(object sender, RemovableDeviceEventArgs e)
         {
-            Debug.WriteLine($"Removable Device Event: @ \"{e.Path}\" was inserted.");
+            _logger.LogInformation($"Removable Device Event: @ \"{e.Path}\" was inserted.");
             
             // var mqttConfigChange = ReadStorage(e.Path);
             //if (mqttConfigChange)
