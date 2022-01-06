@@ -82,7 +82,7 @@ namespace OrgPalThreeDemo
             StorageEventManager.RemovableDeviceRemoved += StorageEventManager_RemovableDeviceRemoved;
             ReadStorage();
 
-            Debug.WriteLine($"Time before network available: {DateTime.UtcNow.ToString("o")}");
+            _logger.LogInformation($"Time before network available: {DateTime.UtcNow.ToString("o")}");
 
             SetupNetwork();
 
@@ -261,9 +261,9 @@ namespace OrgPalThreeDemo
         {
             //TODO: check against the last received shadow (or something)!
             _logger.LogInformation("Program: Received a shadow update!");
-            //Debug.WriteLine("------------------");
+            //_logger.LogInformation("------------------");
             //DecodeShadow(e.Shadow);
-            //Debug.WriteLine("------------------");
+            //_logger.LogInformation("------------------");
         }
 
         private static void Client_StatusUpdated(object sender, StatusUpdatedEventArgs e)
@@ -376,6 +376,7 @@ namespace OrgPalThreeDemo
             // in nanoFramework, currently the drive letters are fixed, being:
             // D: SD Card
             // E: USB Mass Storage Device
+            // I: Internal
 
             if (string.IsNullOrEmpty(path)) //Generally only "should" happen on initialization.
             {
@@ -394,7 +395,7 @@ namespace OrgPalThreeDemo
 
             if (!string.IsNullOrEmpty(path))
             {
-                Debug.WriteLine("Reading storage...");
+                _logger.LogInformation("Reading storage...");
 
                 // get folders on 1st removable device
                 var foldersOnDevice = Directory.GetDirectories(path);
