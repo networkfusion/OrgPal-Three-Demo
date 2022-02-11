@@ -3,7 +3,7 @@
 
 namespace OrgPal.Three
 {
-    public class Buttons
+    public class Buttons : IDisposable
     {
         //private static GpioController gpioController;
 
@@ -32,26 +32,31 @@ namespace OrgPal.Three
             ////_wakeButton.ValueChanged += WakeButton_ValueChanged;
         }
 
+
+        //private static void MuxWakeButtonFlowControl_ValueChanged(object sender, PinValueChangedEventArgs e)
+        //{
+        //    Debug.WriteLine("Handle MuxWakeButton Flow...!");
+        //}
+
+        //private static void WakeButton_ValueChanged(object sender, PinValueChangedEventArgs e)
+        //{
+        //    Debug.WriteLine("Handle WakeFlow -Should be MUX?-...!");
+        //}
+
+        //TODO: this event seems to fire endlessly (probably MUX>?!
+        //private static void User_Boot1_Button_ValueChanged(object sender, PinValueChangedEventArgs e)
+        //{
+        //    if (e.ChangeType == PinEventTypes.Rising) //button pressed.
+        //    {
+        //        Debug.WriteLine("USER/BOOT1 button pressed...!");
+        //        Thread lcdShowThread = new Thread(new ThreadStart(LcdUpdate_Thread));
+        //        lcdShowThread.Start();
+        //    }
+        //}
+
+        public void Dispose()
+        {
+
+        }
     }
-
-    //private static void MuxWakeButtonFlowControl_ValueChanged(object sender, PinValueChangedEventArgs e)
-    //{
-    //    Debug.WriteLine("Handle MuxWakeButton Flow...!");
-    //}
-
-    //private static void WakeButton_ValueChanged(object sender, PinValueChangedEventArgs e)
-    //{
-    //    Debug.WriteLine("Handle WakeFlow -Should be MUX?-...!");
-    //}
-
-    //TODO: this event seems to fire endlessly (probably MUX>?!
-    //private static void User_Boot1_Button_ValueChanged(object sender, PinValueChangedEventArgs e)
-    //{
-    //    if (e.ChangeType == PinEventTypes.Rising) //button pressed.
-    //    {
-    //        Debug.WriteLine("USER/BOOT1 button pressed...!");
-    //        Thread lcdShowThread = new Thread(new ThreadStart(LcdUpdate_Thread));
-    //        lcdShowThread.Start();
-    //    }
-    //}
 }

@@ -5,7 +5,7 @@ using Windows.Devices.Adc;
 
 namespace OrgPal.Three
 {
-    public class OnboardAdcDevice
+    public class OnboardAdcDevice : IDisposable
     {
         private AdcChannel adcVBAT;
         private AdcChannel adcTemp;
@@ -109,5 +109,11 @@ namespace OrgPal.Three
 
         //RTCScheduler.Dispose();
         //        RTCScheduller = null;
+
+        public void Dispose()
+        {
+            adcVBAT.Dispose();
+            adcTemp.Dispose();
+        }
     }
 }

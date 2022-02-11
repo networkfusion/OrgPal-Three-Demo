@@ -579,9 +579,13 @@ namespace OrgPalThreeDemo
         {
             //should dispose of SD and Char display (at least!)
 #if ORGPAL_THREE
-            palthreeDisplay.Dispose(); 
+            palthreeDisplay.Dispose();
+            palAdcExpBoard.Dispose();
+            palthreeInternalAdc.Dispose();
+            palthreeButtons.Dispose();
 #endif
-
+            sendTelemetryThread.Abort();
+            sendShadowThread.Abort();
             //System.IO.FileStream -- Dispose??
         }
     }
