@@ -21,6 +21,8 @@ using Microsoft.Extensions.Logging;
 using nanoFramework.Logging;
 using nanoFramework.Logging.Debug;
 using nanoFramework.Networking;
+using nanoFramework.Hardware.Stm32;
+
 // TODO: add logging to find out why it does not work when debugger is not attached!
 //using nanoFramework.Logging.Stream; //should probably be only when orgpal?
 
@@ -39,7 +41,7 @@ namespace OrgPalThreeDemo
         private static AdcExpansionBoard palAdcExpBoard;
 #endif
 
-        private static string _serialNumber;
+        private static string _serialNumber = string.Empty;
 
         private static DateTime startTime = DateTime.UtcNow;
         private static uint messagesSent = 0;
@@ -68,19 +70,33 @@ namespace OrgPalThreeDemo
             {
                 BacklightOn = true
             };
+
             palthreeDisplay.Update("Initializing,", "Please Wait...");
 
 #endif
 
-            foreach (byte b in nanoFramework.Hardware.Stm32.Utilities.UniqueDeviceId) //STM32 devices only!
+            try
             {
-                _serialNumber += b.ToString("X2"); //Generates a unique ID for the device.
+                palthreeDisplay.Update("Initializing,", "Device...");
+                foreach (byte b in Utilities.UniqueDeviceId) //STM32 devices only!
+                {
+                    _serialNumber += b.ToString("X2"); //Generates a unique ID for the device.
+                }
+            }
+            catch (Exception)
+            {
+                _serialNumber = Guid.NewGuid().ToString();
             }
 
-            // add event handlers for Removable Device insertion and removal
-            StorageEventManager.RemovableDeviceInserted += StorageEventManager_RemovableDeviceInserted;
-            StorageEventManager.RemovableDeviceRemoved += StorageEventManager_RemovableDeviceRemoved;
-            ReadStorage();
+#if ORGPAL_THREE
+            palthreeDisplay.Update("Device S/N,", $"{_serialNumber}");
+            Thread.Sleep(1000); 
+            palthreeDisplay.Update("Initializing,", "Network...");
+#endif
+            if (!Debugger.IsAttached)
+            {
+                Thread.Sleep(3000); //Unknown why this is required, but it seems to block here when disconnected from debug ( even worse with fresh power)!
+            }
 
             _logger.LogInformation($"Time before network available: {DateTime.UtcNow.ToString("o")}");
 
@@ -96,12 +112,36 @@ namespace OrgPalThreeDemo
                     Thread.Sleep(1000);
                 }
             }
-            
+
             startTime = DateTime.UtcNow; //set now because the clock might have been wrong before ntp is checked.
 
             _logger.LogInformation($"Time after network available: {startTime.ToString("o")}");
             _logger.LogInformation("");
 
+
+#if ORGPAL_THREE
+            palthreeDisplay.Update("Initializing,", "Storage");
+#endif
+            // add event handlers for Removable Device insertion and removal
+            StorageEventManager.RemovableDeviceInserted += StorageEventManager_RemovableDeviceInserted;
+            StorageEventManager.RemovableDeviceRemoved += StorageEventManager_RemovableDeviceRemoved;
+
+            while (AwsIotCore.MqttConnector.RootCA == null || AwsIotCore.MqttConnector.ClientRsaSha256Crt == string.Empty || AwsIotCore.MqttConnector.ClientRsaKey == string.Empty)
+            {
+                try
+                {
+                    ReadStorage();
+                }
+                catch (Exception e)
+                {
+                    _logger.LogWarning(e.Message.ToString());
+                }
+            }
+
+
+            #if ORGPAL_THREE
+                palthreeDisplay.Update("Initializing,", "MQTT...");
+#endif
             var mqttConnected = false;
             int mqttConnectionAttempt = 0;
             while (!mqttConnected)
@@ -114,8 +154,10 @@ namespace OrgPalThreeDemo
                     Thread.Sleep(1000);
                 }
             }
-
 #if ORGPAL_THREE
+            palthreeDisplay.Update("Initializing,", "Finished!");
+            Thread.Sleep(1000);
+
             Thread lcdUpdateThread = new Thread(new ThreadStart(LcdUpdate_Thread));
             lcdUpdateThread.Start();
 #endif
@@ -128,16 +170,23 @@ namespace OrgPalThreeDemo
         {
             for ( ; ; )
             {
-                //palthreeDisplay.BacklightOn = true; //TODO: this causes display corruption!
-                //TODO: create a menu handler to scroll through the display!
-                palthreeDisplay.Update($"{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm")}", //Time shortened to fit on display (excludes seconds)
-                    $"IP: {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
+                try
+                {
+                    //palthreeDisplay.BacklightOn = true; //TODO: this causes display corruption!
+                    //TODO: create a menu handler to scroll through the display!
+                    palthreeDisplay.Update($"{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm")}", //Time shortened to fit on display (excludes seconds)
+                        $"IP: {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
 
 
-                //palthreeDisplay.Display($"PCB Temp: { palthree.GetTemperatureOnBoard().ToString("n2")}C",
-                //    $"Voltage: { palthree.GetBatteryUnregulatedVoltage().ToString("n2")}VDC");
-                Thread.Sleep(1000); //TODO: arbitary value... what should the update rate be?!
-                //palthreeDisplay.BacklightOn = false;
+                    //palthreeDisplay.Display($"PCB Temp: { palthree.GetTemperatureOnBoard().ToString("n2")}C",
+                    //    $"Voltage: { palthree.GetBatteryUnregulatedVoltage().ToString("n2")}VDC");
+                    Thread.Sleep(1000); //TODO: arbitary value... what should the update rate be?!
+                                        //palthreeDisplay.BacklightOn = false;
+                }
+                catch (Exception e)
+                {
+                    _logger.LogWarning(e.Message.ToString());
+                }
             }
         }
 
@@ -145,35 +194,43 @@ namespace OrgPalThreeDemo
 
         private static bool SetupNetwork()
         {
-            CancellationTokenSource cs = new CancellationTokenSource(5000); //5 seconds.
-            // We are using TLS and it requires valid date & time (so we should set the option to true, but SNTP is run in the background, and setting it manually causes issues for the moment!!!)
-            // Although setting it to false seems to cause a worse issue. Let us fix this by using a managed class instead.
-            _logger.LogInformation("Waiting for network up and IP address...");
-            var success = NetworkHelper.SetupAndConnectNetwork(requiresDateTime: true, token: cs.Token);
-
-            if (!success)
+            try
             {
-                _logger.LogWarning($"Failed to receive an IP address and/or valid DateTime. Error: {NetworkHelper.Status}.");
-                if (NetworkHelper.HelperException != null)
-                {
-                    _logger.LogWarning($"Failed to receive an IP address and/or valid DateTime. Error: {NetworkHelper.HelperException}.");
-                }
-                _logger.LogInformation("It is likely a DateTime problem, so we will now try to set it using a managed helper class!");
-                success = Rtc.SetSystemTime(ManagedNtpClient.GetNetworkTime());
-                if (success)
-                {
-                    _logger.LogInformation("Retrived DateTime using Managed NTP Helper class...");
-                }
-                else
-                {
-                    _logger.LogWarning("Failed to Retrive DateTime (or IP Address)! Retrying...");
-                    SetupNetwork();
-                }
-                _logger.LogInformation($"RTC = {DateTime.UtcNow}");
+                CancellationTokenSource cs = new CancellationTokenSource(5000); //5 seconds.
+                                                                                // We are using TLS and it requires valid date & time (so we should set the option to true, but SNTP is run in the background, and setting it manually causes issues for the moment!!!)
+                                                                                // Although setting it to false seems to cause a worse issue. Let us fix this by using a managed class instead.
+                _logger.LogInformation("Waiting for network up and IP address...");
+                var success = NetworkHelper.SetupAndConnectNetwork(requiresDateTime: true, token: cs.Token);
 
+                if (!success)
+                {
+                    _logger.LogWarning($"Failed to receive an IP address and/or valid DateTime. Error: {NetworkHelper.Status}.");
+                    if (NetworkHelper.HelperException != null)
+                    {
+                        _logger.LogWarning($"Failed to receive an IP address and/or valid DateTime. Error: {NetworkHelper.HelperException}.");
+                    }
+                    _logger.LogInformation("It is likely a DateTime problem, so we will now try to set it using a managed helper class!");
+                    success = Rtc.SetSystemTime(ManagedNtpClient.GetNetworkTime());
+                    if (success)
+                    {
+                        _logger.LogInformation("Retrived DateTime using Managed NTP Helper class...");
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Failed to Retrive DateTime (or IP Address)! Retrying...");
+                        SetupNetwork();
+                    }
+                    _logger.LogInformation($"RTC = {DateTime.UtcNow}");
+
+                    return false;
+                }
+                return true;
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning(e.Message.ToString());
                 return false;
             }
-            return true;
 
         }
 
