@@ -84,22 +84,33 @@ namespace OrgPalThreeDemo
 
             _logger.LogInformation($"Time before network available: {DateTime.UtcNow.ToString("o")}");
 
-            SetupNetwork();
-
+            var netConnected = false;
+            int netConnectionAttempt = 0;
+            while (!netConnected)
+            {
+                _logger.LogInformation($"Network Connection Attempt: {netConnectionAttempt}");
+                netConnected = SetupNetwork();
+                if (!netConnected)
+                {
+                    netConnectionAttempt += 1;
+                    Thread.Sleep(1000);
+                }
+            }
+            
             startTime = DateTime.UtcNow; //set now because the clock might have been wrong before ntp is checked.
 
             _logger.LogInformation($"Time after network available: {startTime.ToString("o")}");
             _logger.LogInformation("");
 
-            var connected = false;
-            int connectionAttempt = 0;
-            while (!connected)
+            var mqttConnected = false;
+            int mqttConnectionAttempt = 0;
+            while (!mqttConnected)
             {
-                _logger.LogInformation($"MQTT Connection Attempt: {connectionAttempt}");
-                connected = SetupMqtt();
-                if (!connected)
+                _logger.LogInformation($"MQTT Connection Attempt: {mqttConnectionAttempt}");
+                mqttConnected = SetupMqtt();
+                if (!mqttConnected)
                 {
-                    connectionAttempt += 1;
+                    mqttConnectionAttempt += 1;
                     Thread.Sleep(1000);
                 }
             }
@@ -132,7 +143,7 @@ namespace OrgPalThreeDemo
 
 #endif
 
-        private static void SetupNetwork()
+        private static bool SetupNetwork()
         {
             CancellationTokenSource cs = new CancellationTokenSource(5000); //5 seconds.
             // We are using TLS and it requires valid date & time (so we should set the option to true, but SNTP is run in the background, and setting it manually causes issues for the moment!!!)
@@ -159,7 +170,10 @@ namespace OrgPalThreeDemo
                     SetupNetwork();
                 }
                 _logger.LogInformation($"RTC = {DateTime.UtcNow}");
+
+                return false;
             }
+            return true;
 
         }
 
