@@ -1,5 +1,5 @@
 ﻿using System;
-//using System.Device.Gpio;
+using Iot.Device.Button;
 
 namespace OrgPal.Three
 {
@@ -7,27 +7,28 @@ namespace OrgPal.Three
     {
         //private static GpioController gpioController;
 
-        //private static GpioPin _userButton;
-        //private static GpioPin _muxWakeButtonFlowControl;
-        //private static GpioPin _wakeButton;
+        private static GpioButton _userButton;
+        //private static GpioButton _muxWakeButtonFlowControl;
+        //private static GpioButton _wakeButton;
 
         public Buttons()
         {
             //gpioController = new GpioController();
 
-            //_userButton = gpioController.OpenPin(PalThreePins.GpioPin.BUTTON_USER_BOOT1_PK7); //TODO: perhaps should use IoT.Devices.Button
+            _userButton = new GpioButton(buttonPin: Pinout.GpioPin.BUTTON_USER_BOOT1_PK7);
+            //_userButton = gpioController.OpenPin(Pinout.GpioPin.BUTTON_USER_BOOT1_PK7); //TODO: perhaps should use IoT.Devices.Button
             //_userButton.SetPinMode(PinMode.Input); //TODO: we definitely need to debounce this!
             //_userButton.ValueChanged += User_Boot1_Button_ValueChanged;
 
             ////the buttons are multiplexed so that the board can be woken up by user, or by the RTC
             ////so to get that interrupt to fire you need to do this:
             //// TODO: work out which buttons and why!
-            //_muxWakeButtonFlowControl = gpioController.OpenPin(PalThreePins.GpioPin.MUX_EXT_BUTTON_WAKE_PE4);
+            //_muxWakeButtonFlowControl = gpioController.OpenPin(Pinout.GpioPin.MUX_EXT_BUTTON_WAKE_PE4);
             //_muxWakeButtonFlowControl.SetPinMode(PinMode.Output);
             //_muxWakeButtonFlowControl.Write(PinValue.High);
             //_muxWakeButtonFlowControl.ValueChanged += MuxWakeButtonFlowControl_ValueChanged;
 
-            ////_wakeButton = gpioController.OpenPin(PalThreePins.GpioPin.BUTTON_WAKE_PA0);
+            ////_wakeButton = gpioController.OpenPin(Pinout.GpioPin.BUTTON_WAKE_PA0);
             ////_wakeButton.SetPinMode(PinMode.Input);
             ////_wakeButton.ValueChanged += WakeButton_ValueChanged;
         }
@@ -56,7 +57,9 @@ namespace OrgPal.Three
 
         public void Dispose()
         {
-
+            _userButton.Dispose();
+            //_muxWakeButtonFlowControl.Dispose();
+            //_wakeButton.Dispose();
         }
     }
 }

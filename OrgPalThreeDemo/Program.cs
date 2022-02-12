@@ -46,10 +46,13 @@ namespace OrgPalThreeDemo
         private static DateTime startTime = DateTime.UtcNow;
         private static uint messagesSent = 0;
         public const int shadowSendInterval = 600000; //10 minutes...  TODO: increase shadow update interval to 24 hours when happy! since delta is received as and when neccessary 
-        public const int telemetrySendInterval = 60000; //1 minute... TODO: does not take into account delays or execution time!
+        public const int telemetrySendInterval = 60000; //1 minute...
+        
+        private static Timer sendTelemetryTimer;
+        private static Timer sendShadowTimer;
 
-        private static Thread sendTelemetryThread;
-        private static Thread sendShadowThread;
+        private static Thread sendMqttMessagesThread;
+        
 
         private static ILogger _logger;
 
@@ -291,12 +294,12 @@ namespace OrgPalThreeDemo
                 }
 
 
-                sendTelemetryThread = new Thread(new ThreadStart(TelemetryLoop));
-                sendTelemetryThread.Start();
-
-
-                sendShadowThread = new Thread(new ThreadStart(SendUpdateShadowLoop));
-                sendShadowThread.Start();
+                sendMqttMessagesThread = new Thread(new ThreadStart(MqttMessagesThread));
+                while (DateTime.UtcNow.Second != 0) //TODO: this is a workaround to align to NTP second zero.
+                {
+                    Thread.SpinWait(1);
+                }
+                sendMqttMessagesThread.Start();
 
                 return true;
             }
@@ -347,85 +350,81 @@ namespace OrgPalThreeDemo
             }
         }
 
-        static void SendUpdateShadowLoop()
+        static void MqttMessagesThread()
         {
-            for (; ; )
+            sendTelemetryTimer = new Timer(TelemetryTimerCallback, null, 0, telemetrySendInterval);
+            sendShadowTimer = new Timer(TelemetryTimerCallback, null, 0, shadowSendInterval);
+        }
+
+        static void ShadowTimerCallback(object state)
+        {
+            try
             {
-                try
+                var shadowReportedState = new AwsIotCore.DeviceMessageSchemas.ShadowStateProperties
                 {
-                    var shadowReportedState = new AwsIotCore.DeviceMessageSchemas.ShadowStateProperties
-                    {
-                        operatingSystem = "nanoFramework",
-                        platform = SystemInfo.TargetName,
-                        cpu = SystemInfo.Platform,
-                        serialNumber = $"SN_{_serialNumber }", //TODO: "SN" should not be needed! but might help in the long run anyway?!
-                        bootTimestamp = startTime
-                    };
+                    operatingSystem = "nanoFramework",
+                    platform = SystemInfo.TargetName,
+                    cpu = SystemInfo.Platform,
+                    serialNumber = $"SN_{_serialNumber }", //TODO: "SN" should not be needed! but might help in the long run anyway?!
+                    bootTimestamp = startTime
+                };
 
-                    _logger.LogInformation($"Updating shadow reported properties... "); //wait for result before writeline.
-                    //TODO: this should be worked out as part of the shadow property collection?!
-                    const string shadowUpdateHeader = "{\"state\":{\"reported\":";
-                    const string shadowUpdateFooter = "}}";
-                    string shadowJson = $"{shadowUpdateHeader}{JsonConvert.SerializeObject(shadowReportedState)}{shadowUpdateFooter}";
-                    Debug.WriteLine($"  With json: {shadowJson}");
-                    var shadow = new Shadow(shadowJson);
-                    bool updateResult = AwsIotCore.MqttConnector.Client.UpdateReportedState(shadow);
+                _logger.LogInformation($"Updating shadow reported properties... "); //wait for result before writeline.
+                                                                                    //TODO: this should be worked out as part of the shadow property collection?!
+                const string shadowUpdateHeader = "{\"state\":{\"reported\":";
+                const string shadowUpdateFooter = "}}";
+                string shadowJson = $"{shadowUpdateHeader}{JsonConvert.SerializeObject(shadowReportedState)}{shadowUpdateFooter}";
+                Debug.WriteLine($"  With json: {shadowJson}");
+                var shadow = new Shadow(shadowJson);
+                bool updateResult = AwsIotCore.MqttConnector.Client.UpdateReportedState(shadow);
 
-                    _logger.LogInformation($"Result was: {!updateResult}"); //Received == false (inverted for UI).
+                _logger.LogInformation($"Result was: {!updateResult}"); //Received == false (inverted for UI).
 
-                }
-                catch (Exception ex)
-                {
+            }
+            catch (Exception ex)
+            {
 
-                    _logger.LogInformation($"error sending shadow: {ex}");
-                    SetupMqtt();
-                }
-
-
-                Thread.Sleep(shadowSendInterval);
+                _logger.LogInformation($"error sending shadow: {ex}");
+                SetupMqtt();
             }
         }
 
-        static void TelemetryLoop()
+
+        static void TelemetryTimerCallback(object state)
         {
-            for (; ; )
+            try
             {
-                try
+
+                if (messagesSent > uint.MaxValue)
                 {
+                    //reset message number
+                    messagesSent = 0;
+                }
 
-                    if (messagesSent > uint.MaxValue)
-                    {
-                        //reset message number
-                        messagesSent = 0;
-                    }
-
-                    var statusTelemetry = new AwsIotCore.DeviceMessageSchemas.TelemetryMessage
-                    {
-                        serialNumber = $"SN_{_serialNumber }", //TODO: "SN" should not be needed! but might help in the long run anyway?!
-                        sendTimestamp = DateTime.UtcNow,
-                        messageNumber = messagesSent += 1, //TODO: we need to reset if reaches max int otherwise who knows what will happen!
-                        memoryFreeBytes = nanoFramework.Runtime.Native.GC.Run(false),
+                var statusTelemetry = new AwsIotCore.DeviceMessageSchemas.TelemetryMessage
+                {
+                    serialNumber = $"SN_{_serialNumber }", //TODO: "SN" should not be needed! but might help in the long run anyway?!
+                    sendTimestamp = DateTime.UtcNow,
+                    messageNumber = messagesSent += 1, //TODO: we need to reset if reaches max int otherwise who knows what will happen!
+                    memoryFreeBytes = nanoFramework.Runtime.Native.GC.Run(false),
 #if ORGPAL_THREE
-                        batteryVoltage = palthreeInternalAdc.GetBatteryUnregulatedVoltage(),
-                        enclosureTemperatureCelsius = palthreeInternalAdc.GetTemperatureOnBoard(),
-                        mcuTemperatureCelsius = palthreeInternalAdc.GetMcuTemperature(),
-                        airTemperatureCelsius = palAdcExpBoard.GetTemperatureFromPT100(),
-                        //thermistorTemperatureCelsius = palAdcExpBoard.GetTemperatureFromThermistorNTC1000() //Commented out as causes PRT to be null for some reason!
+                    batteryVoltage = palthreeInternalAdc.GetBatteryUnregulatedVoltage(),
+                    enclosureTemperatureCelsius = palthreeInternalAdc.GetTemperatureOnBoard(),
+                    mcuTemperatureCelsius = palthreeInternalAdc.GetMcuTemperature(),
+                    airTemperatureCelsius = palAdcExpBoard.GetTemperatureFromPT100(),
+                    //thermistorTemperatureCelsius = palAdcExpBoard.GetTemperatureFromThermistorNTC1000() //Commented out as causes PRT to be null for some reason!
 #endif
-                    };
+                };
 
-                    string sampleData = JsonConvert.SerializeObject(statusTelemetry);
-                    AwsIotCore.MqttConnector.Client.SendMessage(sampleData); // ($"{AwsMqtt.ThingName}/data", Encoding.UTF8.GetBytes(sampleData), MqttQoSLevel.AtMostOnce, false);
+                string sampleData = JsonConvert.SerializeObject(statusTelemetry);
+                AwsIotCore.MqttConnector.Client.SendMessage(sampleData); // ($"{AwsMqtt.ThingName}/data", Encoding.UTF8.GetBytes(sampleData), MqttQoSLevel.AtMostOnce, false);
 
-                    Debug.WriteLine("Message sent: " + sampleData);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning($"Message sent ex: {ex}");
-                    SetupMqtt();
-                }
-
-                Thread.Sleep(telemetrySendInterval); //TODO: this should probably be a stopwatch to ensure timing consistancy!
+                Debug.WriteLine("Message sent: " + sampleData);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning($"Message sent ex: {ex}");
+                SetupMqtt();
             }
         }
 
@@ -584,8 +583,7 @@ namespace OrgPalThreeDemo
             palthreeInternalAdc.Dispose();
             palthreeButtons.Dispose();
 #endif
-            sendTelemetryThread.Abort();
-            sendShadowThread.Abort();
+            sendMqttMessagesThread.Abort();
             //System.IO.FileStream -- Dispose??
         }
     }
