@@ -21,12 +21,14 @@
     <Compile Include="AwsIotCore\MqttConnector.cs" />
     <Compile Include="OrgPal.Three\CharacterDisplay.cs" />
     <Compile Include="OrgPal.Three\AdcExpansionBoard.cs" />
+    <Compile Include="OrgPal.Three\Keypad.cs" />
     <Compile Include="OrgPal.Three\OnboardAdcDevice.cs" />
     <Compile Include="OrgPal.Three\Buttons.cs" />
     <Compile Include="OrgPal.Three\Helper.cs" />
     <Compile Include="OrgPal.Three\Pinout.cs" />
     <Compile Include="OrgPal.Three\PCF85263.cs" />
     <Compile Include="Networking\ManagedNtpClient.cs" />
+    <Compile Include="OrgPal.Three\SerialPortRS485.cs" />
     <Compile Include="Peripherals\HMT330.cs" />
     <Compile Include="MqttConfigFileSchema.cs" />
     <Compile Include="Peripherals\LufftVentus.cs" />

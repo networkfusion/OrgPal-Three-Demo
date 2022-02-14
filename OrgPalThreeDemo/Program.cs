@@ -45,11 +45,11 @@ namespace OrgPalThreeDemo
 
         private static DateTime startTime = DateTime.UtcNow;
         private static uint messagesSent = 0;
-        public const int shadowSendInterval = 600000; //10 minutes...  TODO: increase shadow update interval to 24 hours when happy! since delta is received as and when neccessary 
-        public const int telemetrySendInterval = 60000; //1 minute...
+        public const int shadowSendInterval = 1000 * 60 * 60 * 24; // 60 minutes...  TODO: increase shadow update interval to 24 hours when happy! since delta is received as and when neccessary 
+        public const int telemetrySendInterval = 1000 * 60 * 10; // 10 minute...
         
-        private static Timer sendTelemetryTimer;
-        private static Timer sendShadowTimer;
+        private static Timer sendTelemetryTimer; // Dont GC
+        private static Timer sendShadowTimer; // Dont GC
 
         private static Thread sendMqttMessagesThread;
         
@@ -133,7 +133,7 @@ namespace OrgPalThreeDemo
             {
                 try
                 {
-                    ReadStorage();
+                    ReadStorage(); // We cannot start without valid Certs!
                 }
                 catch (Exception e)
                 {
