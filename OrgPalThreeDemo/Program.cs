@@ -51,9 +51,6 @@ namespace OrgPalThreeDemo
         private static Timer sendTelemetryTimer; // Dont GC
         private static Timer sendShadowTimer; // Dont GC
 
-        private static Thread sendMqttMessagesThread;
-        
-
         private static ILogger _logger;
 
         public static void Main()
@@ -74,13 +71,13 @@ namespace OrgPalThreeDemo
                 BacklightOn = true
             };
 
-            palthreeDisplay.Update("Initializing,", "Please Wait...");
+            palthreeDisplay.Update("Initializing:", "Please Wait...");
 
 #endif
 
             try
             {
-                palthreeDisplay.Update("Initializing,", "Device...");
+                palthreeDisplay.Update("Initializing:", "Device...");
                 foreach (byte b in Utilities.UniqueDeviceId) //STM32 devices only!
                 {
                     _serialNumber += b.ToString("X2"); //Generates a unique ID for the device.
@@ -94,7 +91,6 @@ namespace OrgPalThreeDemo
 #if ORGPAL_THREE
             palthreeDisplay.Update("Device S/N,", $"{_serialNumber}");
             Thread.Sleep(1000); 
-            palthreeDisplay.Update("Initializing,", "Network...");
 #endif
             if (!Debugger.IsAttached)
             {
@@ -107,6 +103,9 @@ namespace OrgPalThreeDemo
             int netConnectionAttempt = 0;
             while (!netConnected)
             {
+#if ORGPAL_THREE
+                palthreeDisplay.Update("Initializing:", $"Network... {netConnectionAttempt}");
+#endif
                 _logger.LogInformation($"Network Connection Attempt: {netConnectionAttempt}");
                 netConnected = SetupNetwork();
                 if (!netConnected)
@@ -123,7 +122,7 @@ namespace OrgPalThreeDemo
 
 
 #if ORGPAL_THREE
-            palthreeDisplay.Update("Initializing,", "Storage");
+            palthreeDisplay.Update("Initializing:", "Storage");
 #endif
             // add event handlers for Removable Device insertion and removal
             StorageEventManager.RemovableDeviceInserted += StorageEventManager_RemovableDeviceInserted;
@@ -142,13 +141,13 @@ namespace OrgPalThreeDemo
             }
 
 
-            #if ORGPAL_THREE
-                palthreeDisplay.Update("Initializing,", "MQTT...");
-#endif
             var mqttConnected = false;
             int mqttConnectionAttempt = 0;
             while (!mqttConnected)
             {
+#if ORGPAL_THREE
+                palthreeDisplay.Update("Initializing:", $"MQTT... {mqttConnectionAttempt}");
+#endif
                 _logger.LogInformation($"MQTT Connection Attempt: {mqttConnectionAttempt}");
                 mqttConnected = SetupMqtt();
                 if (!mqttConnected)
@@ -157,9 +156,14 @@ namespace OrgPalThreeDemo
                     Thread.Sleep(1000);
                 }
             }
+
 #if ORGPAL_THREE
-            palthreeDisplay.Update("Initializing,", "Finished!");
-            Thread.Sleep(1000);
+            palthreeDisplay.Update("Initializing:", "MQTT Timers...");
+#endif
+            SetupMqttMessageTimers();
+
+#if ORGPAL_THREE
+            palthreeDisplay.Update("Initializing:", "Finished!");
 
             Thread lcdUpdateThread = new Thread(new ThreadStart(LcdUpdate_Thread));
             lcdUpdateThread.Start();
@@ -293,14 +297,6 @@ namespace OrgPalThreeDemo
                     _logger.LogWarning("Failed!");
                 }
 
-
-                sendMqttMessagesThread = new Thread(new ThreadStart(MqttMessagesThread));
-                while (DateTime.UtcNow.Second != 0) //TODO: this is a workaround to align to NTP second zero.
-                {
-                    Thread.SpinWait(1);
-                }
-                sendMqttMessagesThread.Start();
-
                 return true;
             }
             catch (Exception e)
@@ -350,8 +346,13 @@ namespace OrgPalThreeDemo
             }
         }
 
-        static void MqttMessagesThread()
+        static void SetupMqttMessageTimers()
         {
+            while (DateTime.UtcNow.Second != 0) //TODO: this is a workaround to align to NTP second zero.
+            {
+                Thread.SpinWait(5);
+            }
+
             sendTelemetryTimer = new Timer(TelemetryTimerCallback, null, 0, telemetrySendInterval);
             sendShadowTimer = new Timer(TelemetryTimerCallback, null, 0, shadowSendInterval);
         }
@@ -583,7 +584,6 @@ namespace OrgPalThreeDemo
             palthreeInternalAdc.Dispose();
             palthreeButtons.Dispose();
 #endif
-            sendMqttMessagesThread.Abort();
             //System.IO.FileStream -- Dispose??
         }
     }
