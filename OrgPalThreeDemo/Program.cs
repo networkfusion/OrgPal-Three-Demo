@@ -92,10 +92,10 @@ namespace OrgPalThreeDemo
             palthreeDisplay.Update("Device S/N,", $"{_serialNumber}");
             Thread.Sleep(1000); 
 #endif
-            if (!Debugger.IsAttached)
-            {
-                Thread.Sleep(3000); //Unknown why this is required, but it seems to block here when disconnected from debug ( even worse with fresh power)!
-            }
+            //if (!Debugger.IsAttached)
+            //{
+            //    Thread.Sleep(3000); //Unknown why this is required, but it seems to block here when disconnected from debug ( even worse with fresh power)!
+            //}
 
             _logger.LogInformation($"Time before network available: {DateTime.UtcNow.ToString("o")}");
 
@@ -201,6 +201,10 @@ namespace OrgPalThreeDemo
 
         private static bool SetupNetwork()
         {
+            //if (!Debugger.IsAttached)
+            //{
+            //    Thread.Sleep(3000);
+            //}
             try
             {
                 CancellationTokenSource cs = new CancellationTokenSource(5000); //5 seconds.
@@ -209,29 +213,34 @@ namespace OrgPalThreeDemo
                 _logger.LogInformation("Waiting for network up and IP address...");
                 var success = NetworkHelper.SetupAndConnectNetwork(requiresDateTime: true, token: cs.Token);
 
-                if (!success)
-                {
-                    _logger.LogWarning($"Failed to receive an IP address and/or valid DateTime. Error: {NetworkHelper.Status}.");
-                    if (NetworkHelper.HelperException != null)
-                    {
-                        _logger.LogWarning($"Failed to receive an IP address and/or valid DateTime. Error: {NetworkHelper.HelperException}.");
-                    }
-                    _logger.LogInformation("It is likely a DateTime problem, so we will now try to set it using a managed helper class!");
-                    success = Rtc.SetSystemTime(ManagedNtpClient.GetNetworkTime());
-                    if (success)
-                    {
-                        _logger.LogInformation("Retrived DateTime using Managed NTP Helper class...");
-                    }
-                    else
-                    {
-                        _logger.LogWarning("Failed to Retrive DateTime (or IP Address)! Retrying...");
-                        SetupNetwork();
-                    }
-                    _logger.LogInformation($"RTC = {DateTime.UtcNow}");
+                //if (!success)
+                //{
+                //    _logger.LogWarning($"Failed to receive an IP address and/or valid DateTime. Error: {NetworkHelper.Status}.");
+                //    if (NetworkHelper.HelperException != null)
+                //    {
+                //        _logger.LogWarning($"Failed to receive an IP address and/or valid DateTime. Error: {NetworkHelper.HelperException}.");
+                //    }
+                //    _logger.LogInformation("It is likely a DateTime problem, so we will now try to set it using a managed helper class!");
+                //    success = Rtc.SetSystemTime(ManagedNtpClient.GetNetworkTime());
+                //    if (success)
+                //    {
+                //        _logger.LogInformation("Retrived DateTime using Managed NTP Helper class...");
+                //    }
+                //    else
+                //    {
+                //        _logger.LogWarning("Failed to Retrive DateTime (or IP Address)! Retrying...");
+                //        SetupNetwork();
+                //    }
+                //    _logger.LogInformation($"RTC = {DateTime.UtcNow}");
 
-                    return false;
-                }
-                return true;
+                //    cs = null;
+                //    return false;
+                //}
+                
+                //return true;
+
+                cs = null;
+                return success;
             }
             catch (Exception e)
             {
@@ -585,6 +594,11 @@ namespace OrgPalThreeDemo
             palthreeButtons.Dispose();
 #endif
             //System.IO.FileStream -- Dispose??
+            sendTelemetryTimer.Dispose();
+            sendShadowTimer.Dispose();
+
+            AwsIotCore.MqttConnector.Client.Dispose();
+            nanoFramework.Networking.Sntp.Stop();
         }
     }
 }
