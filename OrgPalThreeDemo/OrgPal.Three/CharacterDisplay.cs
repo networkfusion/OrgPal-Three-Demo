@@ -214,9 +214,9 @@ namespace OrgPal.Three
             //put the LCD into 4 bit mode (guessing I2C here?!)
             // we start in 8bit mode, try to set 4 bit mode
             Write4bits(0x03 << 4);
-            Thread.Sleep(5); // wait min 4.1ms
+            Thread.SpinWait(5); // wait min 4.1ms
             Write4bits(0x03 << 4);
-            Thread.Sleep(5); // wait min 4.1ms
+            Thread.SpinWait(5); // wait min 4.1ms
             Write4bits(0x03 << 4);
             Thread.Sleep(150); //min 150 ms
             // finally, set to 4-bit interface
@@ -241,7 +241,7 @@ namespace OrgPal.Three
         public void Clear()
         {
             SendCommand((byte)LcdInstruction.ClearDisplay);// clear display, set cursor position to zero
-            Thread.Sleep(2);  // command needs time!
+            Thread.SpinWait(2);  // command needs time!
         }
 
 
@@ -339,7 +339,7 @@ namespace OrgPal.Three
             byte lownib = (byte)((value << (byte)4) & 0xf0);
             Write4bits((byte)(highnib | mode | backlightval));
             Write4bits((byte)(lownib | mode | backlightval));
-            Thread.Sleep(1);
+            Thread.SpinWait(1);
         }
 
         void Write4bits(byte value)
@@ -351,9 +351,9 @@ namespace OrgPal.Three
         void PulseEnable(byte data)
         {
             WriteByte((byte)(data | EnableBit | backlightval));  // En high
-            Thread.Sleep(1);       // enable pulse must be >450ns
+            Thread.SpinWait(1);       // enable pulse must be >450ns
             WriteByte((byte)(data & ~EnableBit | backlightval)); // En low
-            Thread.Sleep(1);      // commands need > 37us to settle
+            Thread.SpinWait(1);      // commands need > 37us to settle
         }
 
         //void LoadCustomCharacter(byte char_num, byte[] rows)

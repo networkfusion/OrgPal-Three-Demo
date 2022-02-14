@@ -71,7 +71,7 @@
       <HintPath>..\packages\nanoFramework.Hardware.Stm32.1.8.3-preview.6\lib\nanoFramework.Hardware.Stm32.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.Json">
-      <HintPath>..\packages\nanoFramework.Json.2.1.2-preview.37\lib\nanoFramework.Json.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.Json.2.1.2-preview.39\lib\nanoFramework.Json.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.Logging">
       <HintPath>..\packages\nanoFramework.Logging.1.0.1-preview.19\lib\nanoFramework.Logging.dll</HintPath>
