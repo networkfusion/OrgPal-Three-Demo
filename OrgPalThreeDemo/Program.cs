@@ -32,7 +32,7 @@ using OrgPal.Three;
 
 namespace OrgPalThreeDemo
 {
-    public class Program
+    public class Program : IDisposable
     {
 #if ORGPAL_THREE
         private static Buttons palthreeButtons;
@@ -55,6 +55,16 @@ namespace OrgPalThreeDemo
 
         public static void Main()
         {
+
+            if (!Debugger.IsAttached)
+            {
+             // Unknown why this is required, but it seems to block here when disconnected from debug
+             // ( even worse with fresh power which seems to need to be disconnected for over 12 seconds (Router DHCP?)!
+             // Current thinking is due to System.Net blocking if already connected to a TLS target (MQTT)....
+                Thread.Sleep(5000);
+            }
+
+
             _logger = new DebugLogger("test");
             LogDispatcher.LoggerFactory = new DebugLoggerFactory();
             //_logger.MinLogLevel = LogLevel.Trace;
@@ -92,10 +102,6 @@ namespace OrgPalThreeDemo
             palthreeDisplay.Update("Device S/N,", $"{_serialNumber}");
             Thread.Sleep(1000); 
 #endif
-            //if (!Debugger.IsAttached)
-            //{
-            //    Thread.Sleep(3000); //Unknown why this is required, but it seems to block here when disconnected from debug ( even worse with fresh power)!
-            //}
 
             _logger.LogInformation($"Time before network available: {DateTime.UtcNow.ToString("o")}");
 
@@ -201,46 +207,42 @@ namespace OrgPalThreeDemo
 
         private static bool SetupNetwork()
         {
-            //if (!Debugger.IsAttached)
-            //{
-            //    Thread.Sleep(3000);
-            //}
+            CancellationTokenSource cs = new CancellationTokenSource(5000); //5 seconds.
+                                                                            // We are using TLS and it requires valid date & time (so we should set the option to true, but SNTP is run in the background, and setting it manually causes issues for the moment!!!)
+                                                                            // Although setting it to false seems to cause a worse issue. Let us fix this by using a managed class instead.
+
             try
             {
-                CancellationTokenSource cs = new CancellationTokenSource(5000); //5 seconds.
-                                                                                // We are using TLS and it requires valid date & time (so we should set the option to true, but SNTP is run in the background, and setting it manually causes issues for the moment!!!)
-                                                                                // Although setting it to false seems to cause a worse issue. Let us fix this by using a managed class instead.
+                
                 _logger.LogInformation("Waiting for network up and IP address...");
                 var success = NetworkHelper.SetupAndConnectNetwork(requiresDateTime: true, token: cs.Token);
 
-                //if (!success)
-                //{
-                //    _logger.LogWarning($"Failed to receive an IP address and/or valid DateTime. Error: {NetworkHelper.Status}.");
-                //    if (NetworkHelper.HelperException != null)
-                //    {
-                //        _logger.LogWarning($"Failed to receive an IP address and/or valid DateTime. Error: {NetworkHelper.HelperException}.");
-                //    }
-                //    _logger.LogInformation("It is likely a DateTime problem, so we will now try to set it using a managed helper class!");
-                //    success = Rtc.SetSystemTime(ManagedNtpClient.GetNetworkTime());
-                //    if (success)
-                //    {
-                //        _logger.LogInformation("Retrived DateTime using Managed NTP Helper class...");
-                //    }
-                //    else
-                //    {
-                //        _logger.LogWarning("Failed to Retrive DateTime (or IP Address)! Retrying...");
-                //        SetupNetwork();
-                //    }
-                //    _logger.LogInformation($"RTC = {DateTime.UtcNow}");
 
-                //    cs = null;
-                //    return false;
-                //}
-                
-                //return true;
+                if (!success)
+                {
+                    _logger.LogWarning($"Failed to receive an IP address and/or valid DateTime. Error: {NetworkHelper.Status}.");
+                    if (NetworkHelper.HelperException != null)
+                    {
+                        _logger.LogWarning($"Failed to receive an IP address and/or valid DateTime. Error: {NetworkHelper.HelperException}.");
+                    }
+                    _logger.LogInformation("It is likely a DateTime problem, so we will now try to set it using a managed helper class!");
 
-                cs = null;
-                return success;
+                    success = Rtc.SetSystemTime(ManagedNtpClient.GetNetworkTime());
+                    if (success)
+                    {
+                        _logger.LogInformation("Retrived DateTime using Managed NTP Helper class...");
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Failed to Retrive DateTime (or IP Address)! Retrying...");
+                        SetupNetwork();
+                    }
+                    _logger.LogInformation($"RTC = {DateTime.UtcNow}");
+
+                    return false;
+                }
+
+                return true;
             }
             catch (Exception e)
             {
@@ -584,7 +586,7 @@ namespace OrgPalThreeDemo
 
         }
 
-        ~Program()
+        public void Dispose()
         {
             //should dispose of SD and Char display (at least!)
 #if ORGPAL_THREE
@@ -598,7 +600,13 @@ namespace OrgPalThreeDemo
             sendShadowTimer.Dispose();
 
             AwsIotCore.MqttConnector.Client.Dispose();
-            nanoFramework.Networking.Sntp.Stop();
+            Sntp.Stop();
+            _logger = null;
+        }
+
+        ~Program()
+        {
+            Dispose();
         }
     }
 }
