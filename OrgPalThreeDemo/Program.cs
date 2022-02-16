@@ -22,6 +22,7 @@ using nanoFramework.Logging;
 using nanoFramework.Logging.Debug;
 using nanoFramework.Networking;
 using nanoFramework.Hardware.Stm32;
+using nanoFramework.Logging.Stream;
 
 // TODO: add logging to find out why it does not work when debugger is not attached!
 //using nanoFramework.Logging.Stream; //should probably be only when orgpal?
@@ -55,6 +56,7 @@ namespace OrgPalThreeDemo
 
         public static void Main()
         {
+            _logger = new DebugLogger("debugLogger");
 
             if (!Debugger.IsAttached)
             {
@@ -62,11 +64,15 @@ namespace OrgPalThreeDemo
              // ( even worse with fresh power which seems to need to be disconnected for over 12 seconds (Router DHCP?)!
              // Current thinking is due to System.Net blocking if already connected to a TLS target (MQTT)....
                 Thread.Sleep(5000);
+                LogDispatcher.LoggerFactory = new DebugLoggerFactory();
             }
+            //else
+            //{
+                // TODO: Cannot actually use this yet as storage is not setup!
+                //var _stream = new FileStream("D:\\logging.txt", FileMode.Open, FileAccess.ReadWrite);
+                //LogDispatcher.LoggerFactory = new StreamLoggerFactory(_stream);
+            //}
 
-
-            _logger = new DebugLogger("test");
-            LogDispatcher.LoggerFactory = new DebugLoggerFactory();
             //_logger.MinLogLevel = LogLevel.Trace;
             _logger.LogInformation($"{SystemInfo.TargetName} AWS MQTT Demo.");
             _logger.LogInformation("");
@@ -358,7 +364,7 @@ namespace OrgPalThreeDemo
         {
             while (DateTime.UtcNow.Second != 0) //TODO: this is a workaround to align to NTP second zero.
             {
-                Thread.SpinWait(5);
+                Thread.SpinWait(1);
             }
 
             sendTelemetryTimer = new Timer(TelemetryTimerCallback, null, 0, telemetrySendInterval);
