@@ -45,7 +45,7 @@ namespace OrgPalThreeDemo
 
         private static DateTime startTime = DateTime.UtcNow;
         private static uint messagesSent = 0;
-        public const int shadowSendInterval = 1000 * 60 * 60 * 24; // 24 hours, since delta is received as and when neccessary 
+        public const int shadowSendInterval = 1000 * 60 * 60; // 60 minutes, since delta can be sent as and when neccessary 
         public const int telemetrySendInterval = 1000 * 60 * 10; // 10 minute...
         
         private static Timer sendTelemetryTimer; // Dont GC
@@ -261,9 +261,6 @@ namespace OrgPalThreeDemo
                 ////Handle cases where this method is called when MQTT is already connected!
                 //if (AwsIotCore.MqttConnector.Client.IsConnected) //perhaps != null instead?
                 //{
-                //    sendShadowThread.Abort();
-                //    sendTelemetryThread.Abort();
-
                 //    AwsIotCore.MqttConnector.Client.Close();
                 //    AwsIotCore.MqttConnector.Client.CloudToDeviceMessage -= Client_CloudToDeviceMessageReceived;
                 //    AwsIotCore.MqttConnector.Client.StatusUpdated -= Client_StatusUpdated;
@@ -365,7 +362,7 @@ namespace OrgPalThreeDemo
             }
 
             sendTelemetryTimer = new Timer(TelemetryTimerCallback, null, 0, telemetrySendInterval);
-            sendShadowTimer = new Timer(TelemetryTimerCallback, null, 0, shadowSendInterval);
+            sendShadowTimer = new Timer(ShadowTimerCallback, null, 0, shadowSendInterval);
         }
 
         static void ShadowTimerCallback(object state)
