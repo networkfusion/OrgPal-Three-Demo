@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO.Ports;
+using System.Text;
 using OrgPal.Three;
 
 namespace OrgPalThreeDemo.Peripherals
@@ -28,7 +29,7 @@ namespace OrgPalThreeDemo.Peripherals
             sensor.Port.StopBits = System.IO.Ports.StopBits.One;
             sensor.Port.Handshake = System.IO.Ports.Handshake.None;
 
-            sensor.Port.WatchChar = "\u0004";
+            sensor.Port.WatchChar = '\u0004';
         }
 
         public void Close()
