@@ -22,7 +22,7 @@ using nanoFramework.Logging;
 using nanoFramework.Logging.Debug;
 using nanoFramework.Networking;
 using nanoFramework.Hardware.Stm32;
-using nanoFramework.Logging.Stream;
+//using nanoFramework.Logging.Stream;
 
 // TODO: add logging to find out why it does not work when debugger is not attached!
 //using nanoFramework.Logging.Stream; //should probably be only when orgpal?
@@ -93,7 +93,6 @@ namespace OrgPalThreeDemo
 
             try
             {
-                palthreeDisplay.Update("Initializing:", "Device...");
                 foreach (byte b in Utilities.UniqueDeviceId) //STM32 devices only!
                 {
                     _serialNumber += b.ToString("X2"); //Generates a unique ID for the device.

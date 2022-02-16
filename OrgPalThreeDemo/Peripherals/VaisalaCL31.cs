@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO.Ports;
 using OrgPal.Three;
 
 namespace OrgPalThreeDemo.Peripherals
@@ -17,9 +18,9 @@ namespace OrgPalThreeDemo.Peripherals
         public string status = string.Empty;
         // This should be a struct!
 
-        VaisalaCL31()
+        public VaisalaCL31()
         {
-            sensor = new SerialPortRS485(termination: false);
+            sensor = new SerialPortRS485();
 
             sensor.Port.BaudRate = 2400;
             sensor.Port.DataBits = 7;
@@ -27,20 +28,59 @@ namespace OrgPalThreeDemo.Peripherals
             sensor.Port.StopBits = System.IO.Ports.StopBits.One;
             sensor.Port.Handshake = System.IO.Ports.Handshake.None;
 
-
-            sensor.Port.DataReceived += Port_DataReceived;
-
-            sensor.Port.Open();
+            sensor.Port.WatchChar = "\u0004";
         }
 
-        private static void Port_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
+        public void Close()
         {
-            Debug.WriteLine(e.ToString());
+            sensor.Port.DataReceived -= Port_DataReceived;
+            if (sensor.Port.IsOpen)
+            {
+                sensor.Port.Close();
+            }
+        }
+
+        public void Open()
+        {
+            sensor.Port.DataReceived += Port_DataReceived;
+            if (sensor.Port.IsOpen)
+            {
+                sensor.Port.Close();
+            }
+            sensor.Port.Open();
+            Debug.WriteLine("CL31 serial port opened!");
+        }
+
+        private void Port_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
+        {
+            SerialPort serialDevice = (SerialPort)sender;
+            if (e.EventType == SerialData.Chars)
+            {
+                Debug.WriteLine("rx chars");
+            }
+            else if (e.EventType == SerialData.WatchChar)
+            {
+                Debug.WriteLine("rx watch char");
+            }
+
+            // need to make sure that there is data to be read, because
+            // the event could have been queued several times and data read on a previous call
+            if (serialDevice.BytesToRead > 0)
+            {
+                byte[] buffer = new byte[serialDevice.BytesToRead];
+
+                var bytesRead = serialDevice.Read(buffer, 0, buffer.Length);
+
+                Debug.WriteLine("Read completed: " + bytesRead + " bytes were read from " + serialDevice.PortName + ".");
+
+                string temp = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                Debug.WriteLine("String: >>" + temp + "<< ");
+            }
         }
 
         private void DecodeMessage(string message)
         {
-            var tempStringArray = message.Split(' ');
+            var tempStringArray = message.Split('\u0004');
             cloudLayer1 = "hello";
             cloudLayer2 = "world";
         }
