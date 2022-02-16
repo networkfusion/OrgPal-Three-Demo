@@ -5,6 +5,7 @@ namespace OrgPalThreeDemo.AwsIotCore.DeviceMessageSchemas
     public class TelemetryMessage
     {
 #pragma warning disable IDE1006 // Naming Styles, disabled due to being Json specific
+        public int schemaVersion { get; set; } = 1;
         public string serialNumber { get; set; } = "";
         public DateTime sendTimestamp { get; set; } = DateTime.UtcNow;
         public uint messageNumber { get; set; } = 0;
