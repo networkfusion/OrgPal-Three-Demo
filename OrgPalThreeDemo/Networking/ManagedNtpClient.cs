@@ -37,7 +37,7 @@ namespace OrgPalThreeDemo.Networking
     /// <summary>
     /// Static class to receive the time from a NTP server.
     /// </summary>
-    public class ManagedNtpClient
+    public class ManagedNtpClient : IDisposable
     {
         /// <summary>
         /// Gets the current DateTime from time-a.nist.gov.
@@ -108,6 +108,11 @@ namespace OrgPalThreeDemo.Networking
             DateTime networkDateTime = dateTime; //(dateTime + offsetAmount);
 
             return networkDateTime;
+        }
+
+        public void Dispose()
+        {
+            System.GC.SuppressFinalize(this);
         }
     }
 }

@@ -56,28 +56,39 @@ namespace OrgPalThreeDemo
 
         public static void Main()
         {
+            // Unknown why this is required, but it seems to struggle here when disconnected from debug
+            // ( even worse with fresh power which seems to need to be disconnected for over 12 seconds (Router DHCP?)!
+            // a smaller delay might be useful (for break in if necessary)!
+            Thread.Sleep(2000);
+
             _logger = new DebugLogger("debugLogger");
 
-            if (!Debugger.IsAttached)
+            if (Debugger.IsAttached)
             {
-             // Unknown why this is required, but it seems to block here when disconnected from debug
-             // ( even worse with fresh power which seems to need to be disconnected for over 12 seconds (Router DHCP?)!
-             // Current thinking is due to System.Net blocking if already connected to a TLS target (MQTT)....
-                Thread.Sleep(5000);
                 LogDispatcher.LoggerFactory = new DebugLoggerFactory();
             }
-            //else
-            //{
-                // TODO: Cannot actually use this yet as storage is not setup!
+            else
+            {
+
+                //TODO: Cannot actually use this yet as storage is not setup!
                 //var _stream = new FileStream("D:\\logging.txt", FileMode.Open, FileAccess.ReadWrite);
                 //LogDispatcher.LoggerFactory = new StreamLoggerFactory(_stream);
-            //}
+            }
 
             //_logger.MinLogLevel = LogLevel.Trace;
             _logger.LogInformation($"{SystemInfo.TargetName} AWS MQTT Demo.");
             _logger.LogInformation("");
 
 #if ORGPAL_THREE
+            //new Thread(() =>
+            //{
+            //    var sensorCL31 = new OrgPalThreeDemo.Peripherals.VaisalaCL31();
+            //    sensorCL31.Open(); // This seems to take too long (given its low baud rate and message size)...
+            //    Thread.Sleep(Timeout.Infinite);
+            //});
+
+
+
             palthreeButtons = new Buttons();
             palthreeInternalAdc = new OnboardAdcDevice();
             palAdcExpBoard = new AdcExpansionBoard();
@@ -116,6 +127,7 @@ namespace OrgPalThreeDemo
             {
 #if ORGPAL_THREE
                 palthreeDisplay.Update("Initializing:", $"Network... {netConnectionAttempt}");
+                Thread.Sleep(1000);
 #endif
                 _logger.LogInformation($"Network Connection Attempt: {netConnectionAttempt}");
                 netConnected = SetupNetwork();
@@ -235,23 +247,45 @@ namespace OrgPalThreeDemo
                     success = Rtc.SetSystemTime(ManagedNtpClient.GetNetworkTime());
                     if (success)
                     {
+#if ORGPAL_THREE
+                        palthreeDisplay.Update("DT SET USING:", "MANAGED SMTP");
+                        Thread.Sleep(1000);
+#endif
                         _logger.LogInformation("Retrived DateTime using Managed NTP Helper class...");
                     }
                     else
                     {
-                        _logger.LogWarning("Failed to Retrive DateTime (or IP Address)! Retrying...");
-                        SetupNetwork();
+#if ORGPAL_THREE
+                        palthreeDisplay.Update("DT SET USING:", "UNMANAGED SMTP");
+                        Thread.Sleep(1000);
+#endif
+                        _logger.LogWarning("Failed to Retrive DateTime (or IP Address)!");
                     }
+
+                    _logger.LogInformation($"IP = {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
                     _logger.LogInformation($"RTC = {DateTime.UtcNow}");
 
-                    return false;
+#if ORGPAL_THREE
+                    palthreeDisplay.Update("No Network:", $"DT... {DateTime.UtcNow}");
+                    Thread.Sleep(2000);
+                    palthreeDisplay.Update("No Network:", $"IP... {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
+                    Thread.Sleep(2000);
+#endif
                 }
 
-                return true;
+                return success;
             }
             catch (Exception e)
             {
                 _logger.LogWarning(e.Message.ToString());
+
+#if ORGPAL_THREE
+                palthreeDisplay.Update("Net catch!:", $"RTC... {DateTime.UtcNow}");
+                Thread.Sleep(2000);
+                palthreeDisplay.Update("Net catch!:", $"IP... {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
+                Thread.Sleep(2000);
+#endif
+
                 return false;
             }
 
@@ -510,6 +544,7 @@ namespace OrgPalThreeDemo
                             var buffer = new byte[fs.Length];
                             fs.Read(buffer, 0, (int)fs.Length);
                             AwsIotCore.MqttConnector.ClientRsaSha256Crt = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
+                            fs.Flush();
                         }
                         //Should load into secure storage (somewhere) and delete file on removable device?
                     }
@@ -519,6 +554,7 @@ namespace OrgPalThreeDemo
                         {
                             AwsIotCore.MqttConnector.RootCA = new byte[fs.Length];
                             fs.Read(AwsIotCore.MqttConnector.RootCA, 0, (int)fs.Length);
+                            fs.Flush();
                         }
                         //Should load into secure storage (somewhere) and delete file on removable device?
                     }
@@ -529,6 +565,7 @@ namespace OrgPalThreeDemo
                             var buffer = new byte[fs.Length];
                             fs.Read(buffer, 0, (int)fs.Length);
                             AwsIotCore.MqttConnector.ClientRsaKey = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
+                            fs.Flush();
                         }
 
                         //Should load into secure storage (somewhere) and delete file on removable device?
@@ -557,6 +594,7 @@ namespace OrgPalThreeDemo
                                 {
                                     AwsIotCore.MqttConnector.ThingName = _serialNumber;
                                 }
+                                fs.Flush();
                             }
                             catch (Exception)
                             {
@@ -603,13 +641,27 @@ namespace OrgPalThreeDemo
             palthreeInternalAdc.Dispose();
             palthreeButtons.Dispose();
 #endif
-            //System.IO.FileStream -- Dispose??
+            //System.IO.FileStream -- Dispose?? (we are already (using))!
+            StorageEventManager.RemovableDeviceInserted -= StorageEventManager_RemovableDeviceInserted;
+            StorageEventManager.RemovableDeviceRemoved -= StorageEventManager_RemovableDeviceRemoved;
+
             sendTelemetryTimer.Dispose();
+            sendTelemetryTimer = null;
+
             sendShadowTimer.Dispose();
+            sendShadowTimer = null;
+
+            AwsIotCore.MqttConnector.Client.CloudToDeviceMessage -= Client_CloudToDeviceMessageReceived;
+            AwsIotCore.MqttConnector.Client.StatusUpdated -= Client_StatusUpdated;
+            AwsIotCore.MqttConnector.Client.ShadowUpdated -= Client_ShadowUpdated;
             AwsIotCore.MqttConnector.Client.Close();
             AwsIotCore.MqttConnector.Client.Dispose();
+
             Sntp.Stop();
+            LogDispatcher.LoggerFactory.Dispose();
             _logger = null;
+
+            System.GC.SuppressFinalize(this);
         }
 
         ~Program()

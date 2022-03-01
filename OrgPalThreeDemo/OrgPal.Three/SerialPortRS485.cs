@@ -6,8 +6,8 @@ namespace OrgPal.Three
 {
     public class SerialPortRS485 : IDisposable
     {
-        private GpioPin _receiverEnabledPin; //Drive RE high to let the AutoDirection circuit control the receiver (Default low = off)
-        private GpioPin _transmitterEnabledPin; //must be high for IC to be on, low turns off the IC (Default low = off)
+        private GpioPin _receiveEnablePin; //Drive RE high to let the AutoDirection circuit control the receiver (Default low = off)
+        private GpioPin _driverEnablePin; //must be high for IC to be on, low turns off the IC (Default low = off)
         private GpioPin _terminationResistorPin; //120ohm as per spec! (default low = off)
         private GpioPin _portPowerPin;
 
@@ -51,7 +51,7 @@ namespace OrgPal.Three
         /// Enables the receive line
         /// </param>
         /// <param name="transmitterEnabled">
-        /// Enables the transmit line
+        /// Enables the transmit (driver) line
         /// </param>
         public SerialPortRS485(int connector = 0, bool termination = true, bool receiverEnabled = true, bool transmitterEnabled = true)
         {
@@ -61,22 +61,22 @@ namespace OrgPal.Three
             {
                 case 1:
                     // Expansion Port 1, (right side of PCB)
-                    _transmitterEnabledPin = gpioController.OpenPin(Pinout.GpioPin.IO_PORT0_PIN_6_PA4, PinMode.Output);
-                    _receiverEnabledPin = gpioController.OpenPin(Pinout.GpioPin.IO_PORT0_PIN_7_PH13, PinMode.Output);
+                    _driverEnablePin = gpioController.OpenPin(Pinout.GpioPin.IO_PORT0_PIN_6_PA4, PinMode.Output);
+                    _receiveEnablePin = gpioController.OpenPin(Pinout.GpioPin.IO_PORT0_PIN_7_PH13, PinMode.Output);
                     _terminationResistorPin = gpioController.OpenPin(Pinout.GpioPin.IO_PORT0_PIN_8_PH14, PinMode.Output);
                     Port = new SerialPort(Pinout.UartPort.UART6_IO_PORT0);
                     break;
                 case 2:
                     //Expansion Port 2, (bottom center of PCB)
-                    _transmitterEnabledPin = gpioController.OpenPin(Pinout.GpioPin.IO_PORT1_PIN_6_PK4, PinMode.Output);
-                    _receiverEnabledPin = gpioController.OpenPin(Pinout.GpioPin.IO_PORT1_PIN_7_PB8, PinMode.Output);
+                    _driverEnablePin = gpioController.OpenPin(Pinout.GpioPin.IO_PORT1_PIN_6_PK4, PinMode.Output);
+                    _receiveEnablePin = gpioController.OpenPin(Pinout.GpioPin.IO_PORT1_PIN_7_PB8, PinMode.Output);
                     _terminationResistorPin = gpioController.OpenPin(Pinout.GpioPin.IO_PORT1_PIN_8_PB9, PinMode.Output);
                     Port = new SerialPort(Pinout.UartPort.UART7_IO_PORT1);
                     break;
                 default:
                     // This is the default port found on the top (left) green connector (pins 1 and 2). 
-                    _receiverEnabledPin = gpioController.OpenPin(Pinout.GpioPin.RS485_RECEIVERENABLE_PI_12, PinMode.Output);
-                    _transmitterEnabledPin = gpioController.OpenPin(Pinout.GpioPin.RS485_SHUTDOWN_PI_13, PinMode.Output);
+                    _receiveEnablePin = gpioController.OpenPin(Pinout.GpioPin.RS485_RECEIVERENABLE_PI_12, PinMode.Output);
+                    _driverEnablePin = gpioController.OpenPin(Pinout.GpioPin.RS485_SHUTDOWN_PI_13, PinMode.Output);
                     _terminationResistorPin = gpioController.OpenPin(Pinout.GpioPin.RS485_RESISTORONOFF_PI_14, PinMode.Output);
                     _portPowerPin = gpioController.OpenPin(Pinout.GpioPin.POWER_RS485_ON_OFF_PJ14, PinMode.Output);
                     Port = new SerialPort(Pinout.UartPort.UART3_RS485);
@@ -87,13 +87,13 @@ namespace OrgPal.Three
             if (transmitterEnabled) //TODO: is this actually the transmitter???
             {
                 //must be high for IC to be on, low turns off the IC
-                _transmitterEnabledPin.Write(PinValue.High); //rs485SHTD
+                _driverEnablePin.Write(PinValue.High); //rs485SHTD
             }
 
             if (receiverEnabled)
             {
                 //Drive Receiver Enabled high to let the AutoDirection circuit control the receiver
-                _receiverEnabledPin.Write(PinValue.High);
+                _receiveEnablePin.Write(PinValue.High);
             }
 
             if (termination)
@@ -112,16 +112,23 @@ namespace OrgPal.Three
 
         public void Dispose()
         {
-            _receiverEnabledPin.Dispose();
-            _transmitterEnabledPin.Dispose();
+            _receiveEnablePin.Dispose();
+            _receiveEnablePin = null;
+            _driverEnablePin.Dispose();
+            _driverEnablePin = null;
             _terminationResistorPin.Dispose();
+            _terminationResistorPin = null;
             _portPowerPin.Dispose();
+            _portPowerPin = null;
 
             if (Port.IsOpen)
             { 
                 Port.Close();
             }
             Port.Dispose();
+            Port = null;
+
+            System.GC.SuppressFinalize(this);
         }
     }
 }
