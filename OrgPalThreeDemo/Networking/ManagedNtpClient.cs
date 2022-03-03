@@ -25,6 +25,7 @@
  * 
  * MS   09-02-16    added NtpClient
  * 
+ * RJ   02-03-22    Made disposable
  * 
  */
 using System;
