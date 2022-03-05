@@ -52,6 +52,7 @@ namespace OrgPalThreeDemo
         private static Timer sendTelemetryTimer; // Dont GC
         private static Timer sendShadowTimer; // Dont GC
 
+        //private static ILoggerFactory _loggerFactory;
         private static ILogger _logger;
 
         public static void Main()
@@ -59,17 +60,17 @@ namespace OrgPalThreeDemo
             // Unknown why this is required, but it seems to struggle here when disconnected from debug
             // ( even worse with fresh power which seems to need to be disconnected for over 12 seconds (Router DHCP?)!
             // a smaller delay might be useful (for break in if necessary)!
-            Thread.Sleep(2000);
-
-            _logger = new DebugLogger("debugLogger");
+            //Thread.Sleep(5000);
 
             if (Debugger.IsAttached)
             {
+                //_loggerFactory = (ILoggerFactory)new DebugLoggerFactory();
+                _logger = new DebugLogger("debugLogger");
                 LogDispatcher.LoggerFactory = new DebugLoggerFactory();
             }
             else
             {
-
+                // TODO: Dont bother with logging, but we should (potentially) redirect to a file!
                 //TODO: Cannot actually use this yet as storage is not setup!
                 //var _stream = new FileStream("D:\\logging.txt", FileMode.Open, FileAccess.ReadWrite);
                 //LogDispatcher.LoggerFactory = new StreamLoggerFactory(_stream);
@@ -335,7 +336,8 @@ namespace OrgPalThreeDemo
 
                     _logger.LogInformation($"Converted shadow to a json (string):");
                     _logger.LogInformation("------------------");
-                    Debug.WriteLine($"{shadow.ToJson()}"); //TODO!
+                    Debug.WriteLine($"{shadow.ToJson()}");
+                    //_logger.LogInformation($"{shadow.ToJson()}"); //TODO: Throws exception!
                     _logger.LogInformation("------------------");
                     _logger.LogInformation("");
                 }
@@ -387,9 +389,11 @@ namespace OrgPalThreeDemo
         {
             //TODO: handle it properly!
             Debug.WriteLine($"Program: Received a status update: {e.Status.State}"); //TODO: preferabily as a string?!
+            //_logger.LogInformation($"Program: Received a status update: {e.Status.State}"); //TODO: Throws exception!
             if (!string.IsNullOrEmpty(e.Status.Message))
             {
                 Debug.WriteLine($" with message {e.Status.Message}"); //TODO: does this need converting?
+                //_logger.LogInformation($" with message {e.Status.Message}"); //TODO: Throws exception!
             }
         }
 
@@ -425,6 +429,7 @@ namespace OrgPalThreeDemo
                     const string shadowUpdateFooter = "}}";
                     string shadowJson = $"{shadowUpdateHeader}{JsonConvert.SerializeObject(shadowReportedState)}{shadowUpdateFooter}";
                     Debug.WriteLine($"  With json: {shadowJson}");
+                    //_logger.LogInformation($"  With json: {shadowJson}"); //TODO: Throws exception!
                     var shadow = new Shadow(shadowJson);
                     bool updateResult = AwsIotCore.MqttConnector.Client.UpdateReportedState(shadow);
 
@@ -473,6 +478,7 @@ namespace OrgPalThreeDemo
                     AwsIotCore.MqttConnector.Client.SendMessage(sampleData); // ($"{AwsMqtt.ThingName}/data", Encoding.UTF8.GetBytes(sampleData), MqttQoSLevel.AtMostOnce, false);
 
                     Debug.WriteLine("Message sent: " + sampleData);
+                    //_logger.LogInformation("Message sent: " + sampleData); //TODO: Throws exception!
                 }
                 catch (Exception ex)
                 {
@@ -508,7 +514,7 @@ namespace OrgPalThreeDemo
                 var removableDrives = Directory.GetLogicalDrives(); //TODO: FEEDBACK... I Cannot help but feel (since we are no longer attached to UWP, that this should be `SD:` and `USB:`
 
                 //TODO: Better handle no removable MSD avaliable?!
-                if (removableDrives.Length == 0) throw new Exception("NO REMOVABLE STORAGE DEVICE FOUND");
+                if (removableDrives.Length == 0) throw new Exception("NO REMOVABLE STORAGE DEVICE FOUND"); // Arrays are counted by Length. (not a collection!)
                 foreach (var drive in removableDrives)
                 {
                     _logger.LogInformation($"Found logical drive {drive}");
