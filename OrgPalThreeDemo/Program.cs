@@ -62,10 +62,11 @@ namespace OrgPalThreeDemo
             // a smaller delay might be useful (for break in if necessary)!
             //Thread.Sleep(5000);
 
+            _logger = new DebugLogger("debugLogger");
+
             if (Debugger.IsAttached)
             {
                 //_loggerFactory = (ILoggerFactory)new DebugLoggerFactory();
-                _logger = new DebugLogger("debugLogger");
                 LogDispatcher.LoggerFactory = new DebugLoggerFactory();
             }
             else
