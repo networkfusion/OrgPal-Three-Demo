@@ -61,12 +61,12 @@ namespace OrgPalThreeDemo
             // Unknown why this is required, but it seems to struggle here when disconnected from debug
             // ( even worse with fresh power which seems to need to be disconnected for over 12 seconds (Router DHCP?)!
             // a smaller delay might be useful (for break in if necessary)!
-            Thread.Sleep(2000);
+            //Thread.Sleep(2000);
+            _logger = new DebugLogger("debugLogger");
 
             if (Debugger.IsAttached)
             {
                 //_loggerFactory = (ILoggerFactory)new DebugLoggerFactory();
-                _logger = new DebugLogger("debugLogger");
                 LogDispatcher.LoggerFactory = new DebugLoggerFactory();
             }
             else

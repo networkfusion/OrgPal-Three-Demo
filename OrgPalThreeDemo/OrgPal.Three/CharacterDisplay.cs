@@ -3,7 +3,7 @@ using System.Text;
 using System.Threading;
 using System.Device.Gpio;
 using System.Device.I2c;
-//using System.Diagnostics;
+using System.Diagnostics;
 
 namespace OrgPal.Three
 {
@@ -192,19 +192,15 @@ namespace OrgPal.Three
             _lcdPowerPin = new GpioController().OpenPin(Pinout.GpioPin.POWER_LCD_ON_OFF, PinMode.Output);
             _lcdPowerPin.Write(PinValue.High); // on by default!
 
-            config = new I2cConnectionSettings(busId, deviceAddress, I2cBusSpeed.FastMode);
+            _displayViaI2C = I2cDevice.Create(new I2cConnectionSettings(busId, deviceAddress, I2cBusSpeed.FastMode));
 
-
-            // Thread.Sleep(250);//small break to make the LCD startup better in some cases helps boot up without sensor
-
-            _displayViaI2C = I2cDevice.Create(config);
+            // Thread.Sleep(250); //small break to make the LCD startup better in some cases helps boot up without sensor
 
             var result = _displayViaI2C.WriteByte(0); //Write command 0 and see if it is acknowledged.
             if (result.Status == I2cTransferStatus.SlaveAddressNotAcknowledged)
             {
                 _displayViaI2C.Dispose();
-                config = new I2cConnectionSettings(busId, I2C_LCD_ADDRESS_DEFAULT, I2cBusSpeed.FastMode); ;// the other default address
-                _displayViaI2C = I2cDevice.Create(config); // the other default address);
+                _displayViaI2C = I2cDevice.Create(new I2cConnectionSettings(busId, I2C_LCD_ADDRESS_DEFAULT, I2cBusSpeed.FastMode));
 
                 result = _displayViaI2C.WriteByte(0); //Write command 0 and see if it is acknowledged.
                 if (result.Status == I2cTransferStatus.SlaveAddressNotAcknowledged)
@@ -371,7 +367,7 @@ namespace OrgPal.Three
             }
             catch
             {
-                //Debug.WriteLine("Error writing I2C data!");
+                Debug.WriteLine("Error writing I2C data!");
             }
         }
 
