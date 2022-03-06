@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading;
 using System.Device.Gpio;
 using System.Device.I2c;
+//using System.Diagnostics;
 
 namespace OrgPal.Three
 {
@@ -17,8 +18,8 @@ namespace OrgPal.Three
     {
         // For PCF8574 chip, I2C address range: 0x38 - 0x3F (Dec:   56-63)
         // For PCF8574T chip, I2C address range: 0x20-0x27  (Dec:    32-38)
-        const byte LCD_ADDRESS_MAIN = 0x3F;
-        const byte LCD_ADDRESS_DEFAULT = 0x27; // 0X27 on other models depnding of soldered a0,a1,a2
+        const byte I2C_LCD_ADDRESS_MAIN = 0x3F;
+        const byte I2C_LCD_ADDRESS_DEFAULT = 0x27; // 0X27 on other models depending of soldered a0,a1,a2
 
 
         /// <summary>
@@ -157,13 +158,14 @@ namespace OrgPal.Three
         //const byte Rw = 0b00000010;  // Read/Write bit
         const byte RegSelectBit = 0b00000001;  // Register select bit
 
-        private readonly I2cDevice I2C;
+        private I2cDevice _displayViaI2C;
         private readonly I2cConnectionSettings config;
+
         private byte backlightval = LCD_NOBACKLIGHT;
-        private GpioPin lcdPowerOnOff;
+        private GpioPin _lcdPowerPin;
 
 
-        public bool BacklightOn
+        public bool PowerState
         {
             get { return backlightval == LCD_BACKLIGHT; }
 
@@ -171,43 +173,43 @@ namespace OrgPal.Three
             {
                 if (value)//turn it on
                 {
-                    lcdPowerOnOff.Write(PinValue.High);
+                    _lcdPowerPin.Write(PinValue.High);
                     backlightval = LCD_BACKLIGHT;
                 }
                 else //turn it off
                 {
-                    lcdPowerOnOff.Write(PinValue.Low);
+                    _lcdPowerPin.Write(PinValue.Low);
                     backlightval = LCD_NOBACKLIGHT;
                 }
 
-                WriteByte(0);
+                WriteByte(0); //TODO: what is this for?!
             }
         }
 
 
-        public CharacterDisplay(int I2CId = Pinout.I2cBus.I2C3, byte mainAddress = LCD_ADDRESS_MAIN)
+        public CharacterDisplay(int busId = Pinout.I2cBus.I2C3, byte deviceAddress = I2C_LCD_ADDRESS_MAIN)
         {
-            lcdPowerOnOff = new GpioController().OpenPin(Pinout.GpioPin.POWER_LCD_ON_OFF, PinMode.Output);
-            lcdPowerOnOff.Write(PinValue.High);
+            _lcdPowerPin = new GpioController().OpenPin(Pinout.GpioPin.POWER_LCD_ON_OFF, PinMode.Output);
+            _lcdPowerPin.Write(PinValue.High); // on by default!
 
-            config = new I2cConnectionSettings(I2CId, mainAddress, I2cBusSpeed.FastMode);
+            config = new I2cConnectionSettings(busId, deviceAddress, I2cBusSpeed.FastMode);
 
 
             // Thread.Sleep(250);//small break to make the LCD startup better in some cases helps boot up without sensor
 
-            I2C = I2cDevice.Create(config);
+            _displayViaI2C = I2cDevice.Create(config);
 
-            var result = I2C.WriteByte(0); //Write command 0 and see if it is acknowledged.
+            var result = _displayViaI2C.WriteByte(0); //Write command 0 and see if it is acknowledged.
             if (result.Status == I2cTransferStatus.SlaveAddressNotAcknowledged)
             {
-                I2C.Dispose();
-                config = new I2cConnectionSettings(I2CId, LCD_ADDRESS_DEFAULT, I2cBusSpeed.FastMode); ;// the other default address
-                I2C = I2cDevice.Create(config);
+                _displayViaI2C.Dispose();
+                config = new I2cConnectionSettings(busId, I2C_LCD_ADDRESS_DEFAULT, I2cBusSpeed.FastMode); ;// the other default address
+                _displayViaI2C = I2cDevice.Create(config); // the other default address);
 
-                result = I2C.WriteByte(0); //Write command 0 and see if it is acknowledged.
+                result = _displayViaI2C.WriteByte(0); //Write command 0 and see if it is acknowledged.
                 if (result.Status == I2cTransferStatus.SlaveAddressNotAcknowledged)
                 {
-                    throw new Exception("No LCD found");
+                    throw new Exception("Character Display Not Found!");
                 }
             }
 
@@ -365,7 +367,7 @@ namespace OrgPal.Three
         {
             try
             {
-                I2C.Write(new byte[] { dat });
+                _displayViaI2C.Write(new byte[] { dat });
             }
             catch
             {
@@ -389,17 +391,17 @@ namespace OrgPal.Three
         protected virtual void Dispose(bool disposing)
         {
             Clear();
-            BacklightOn = false;
-            lcdPowerOnOff.Write(PinValue.Low);
+            PowerState = false;
+            _lcdPowerPin.Write(PinValue.Low);
 
-            if (lcdPowerOnOff != null)
+            if (_lcdPowerPin != null)
             {
-                lcdPowerOnOff.Dispose();
-                lcdPowerOnOff = null;
+                _lcdPowerPin.Dispose();
+                _lcdPowerPin = null;
             }
 
-            if (I2C != null)
-                I2C.Dispose();
+            if (_displayViaI2C != null)
+                _displayViaI2C.Dispose();
         }
 
         /// <summary>

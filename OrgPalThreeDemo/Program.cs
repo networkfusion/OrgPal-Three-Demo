@@ -51,6 +51,7 @@ namespace OrgPalThreeDemo
         
         private static Timer sendTelemetryTimer; // Dont GC
         private static Timer sendShadowTimer; // Dont GC
+        //private static Timer lcdBacklightTimer;
 
         //private static ILoggerFactory _loggerFactory;
         private static ILogger _logger;
@@ -60,7 +61,7 @@ namespace OrgPalThreeDemo
             // Unknown why this is required, but it seems to struggle here when disconnected from debug
             // ( even worse with fresh power which seems to need to be disconnected for over 12 seconds (Router DHCP?)!
             // a smaller delay might be useful (for break in if necessary)!
-            //Thread.Sleep(5000);
+            Thread.Sleep(2000);
 
             if (Debugger.IsAttached)
             {
@@ -96,7 +97,7 @@ namespace OrgPalThreeDemo
 
             palthreeDisplay = new CharacterDisplay
             {
-                BacklightOn = true
+                PowerState = true
             };
 
             palthreeDisplay.Update("Initializing:", "Please Wait...");
@@ -188,6 +189,8 @@ namespace OrgPalThreeDemo
 
 #if ORGPAL_THREE
             palthreeDisplay.Update("Initializing:", "Finished!");
+            //Thread.Sleep(500);
+            //palthreeDisplay.BacklightOn = false;
 
             Thread lcdUpdateThread = new Thread(new ThreadStart(LcdUpdate_Thread));
             lcdUpdateThread.Start();
@@ -399,6 +402,8 @@ namespace OrgPalThreeDemo
 
         static void SetupMqttMessageTimers()
         {
+            //lcdBacklightTimer = new Timer(lcdBacklightTimerCallback, null, 0, 10000);
+
             while (DateTime.UtcNow.Second != 0) //TODO: this is a workaround to align to NTP second zero.
             {
                 Thread.SpinWait(1);
@@ -445,6 +450,16 @@ namespace OrgPalThreeDemo
             }).Start();
         }
 
+
+        //static void lcdBacklightTimerCallback(object state)
+        //{
+        //    new Thread(() =>
+        //   {
+        //       palthreeDisplay.BacklightOn = true;
+        //       Thread.Sleep(5000);
+        //       palthreeDisplay.BacklightOn = false;
+        //   }).Start();
+        //}
 
         static void TelemetryTimerCallback(object state)
         {
