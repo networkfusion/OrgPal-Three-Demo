@@ -4,6 +4,7 @@ using System.Threading;
 using System.Device.Gpio;
 using System.Device.I2c;
 using System.Diagnostics;
+//using Iot.Device.Pcx857x;
 
 namespace OrgPal.Three
 {
@@ -11,7 +12,7 @@ namespace OrgPal.Three
     /// LCD Character Display
     /// </summary>
     /// <remarks>
-    /// Based on an I2C controller https://github.com/dotnet/iot/tree/main/src/devices/Pcx857x
+    /// Based on an I2C expander PCF8574T https://github.com/dotnet/iot/tree/main/src/devices/Pcx857x
     /// But actual display (via I2C) is a 1602A! https://www.openhacks.com/uploadsproductos/eone-1602a1.pdf -- https://github.com/k-moskwa/kmAvrLedBar/blob/327e662199ec53ddb2edf2fbe96dba01f4ce4d25/src/kmLCD/kmLiquidCrystal.c
     /// </remarks>
     public class CharacterDisplay : IDisposable
@@ -158,8 +159,9 @@ namespace OrgPal.Three
         //const byte Rw = 0b00000010;  // Read/Write bit
         const byte RegSelectBit = 0b00000001;  // Register select bit
 
+
+        //private Pcf8574 _displayViaI2C; // PCF8574T
         private I2cDevice _displayViaI2C;
-        private readonly I2cConnectionSettings config;
 
         private byte backlightval = LCD_NOBACKLIGHT;
         private GpioPin _lcdPowerPin;
@@ -178,11 +180,11 @@ namespace OrgPal.Three
                 }
                 else //turn it off
                 {
-                    _lcdPowerPin.Write(PinValue.Low);
                     backlightval = LCD_NOBACKLIGHT;
+                    _lcdPowerPin.Write(PinValue.Low);
                 }
 
-                WriteByte(0); //TODO: what is this for?!
+                WriteByte(0); //TODO: what is this for?! should it be "backlightval"???
             }
         }
 
@@ -192,6 +194,7 @@ namespace OrgPal.Three
             _lcdPowerPin = new GpioController().OpenPin(Pinout.GpioPin.POWER_LCD_ON_OFF, PinMode.Output);
             _lcdPowerPin.Write(PinValue.High); // on by default!
 
+            //_displayViaI2C = new Pcf8574(I2cDevice.Create(new I2cConnectionSettings(busId, deviceAddress, I2cBusSpeed.FastMode)));
             _displayViaI2C = I2cDevice.Create(new I2cConnectionSettings(busId, deviceAddress, I2cBusSpeed.FastMode));
 
             // Thread.Sleep(250); //small break to make the LCD startup better in some cases helps boot up without sensor
@@ -201,6 +204,7 @@ namespace OrgPal.Three
             {
                 _displayViaI2C.Dispose();
                 _displayViaI2C = I2cDevice.Create(new I2cConnectionSettings(busId, I2C_LCD_ADDRESS_DEFAULT, I2cBusSpeed.FastMode));
+                //_displayViaI2C = new Pcf8574(I2cDevice.Create(new I2cConnectionSettings(busId, I2C_LCD_ADDRESS_DEFAULT, I2cBusSpeed.FastMode)));
 
                 result = _displayViaI2C.WriteByte(0); //Write command 0 and see if it is acknowledged.
                 if (result.Status == I2cTransferStatus.SlaveAddressNotAcknowledged)

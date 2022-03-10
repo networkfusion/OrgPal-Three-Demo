@@ -189,8 +189,8 @@ namespace OrgPalThreeDemo
 
 #if ORGPAL_THREE
             palthreeDisplay.Update("Initializing:", "Finished!");
-            //Thread.Sleep(500);
-            //palthreeDisplay.BacklightOn = false;
+            Thread.Sleep(500);
+            //palthreeDisplay.PowerState = false;
 
             Thread lcdUpdateThread = new Thread(new ThreadStart(LcdUpdate_Thread));
             lcdUpdateThread.Start();
@@ -455,9 +455,9 @@ namespace OrgPalThreeDemo
         //{
         //    new Thread(() =>
         //   {
-        //       palthreeDisplay.BacklightOn = true;
+        //       palthreeDisplay.PowerState = true;
         //       Thread.Sleep(5000);
-        //       palthreeDisplay.BacklightOn = false;
+        //       palthreeDisplay.PowerState = false;
         //   }).Start();
         //}
 
