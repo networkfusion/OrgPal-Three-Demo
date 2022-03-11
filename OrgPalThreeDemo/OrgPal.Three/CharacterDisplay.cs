@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading;
 using System.Device.Gpio;
 using System.Device.I2c;
+using System.Diagnostics;
 
 namespace OrgPal.Three
 {
@@ -17,8 +18,8 @@ namespace OrgPal.Three
     {
         // For PCF8574 chip, I2C address range: 0x38 - 0x3F (Dec:   56-63)
         // For PCF8574T chip, I2C address range: 0x20-0x27  (Dec:    32-38)
-        const byte LCD_ADDRESS_MAIN = 0x3F;
-        const byte LCD_ADDRESS_DEFAULT = 0x27; // 0X27 on other models depnding of soldered a0,a1,a2
+        const byte I2C_LCD_ADDRESS_MAIN = 0x3F;
+        const byte I2C_LCD_ADDRESS_DEFAULT = 0x27; // 0X27 on other models depnding of soldered a0,a1,a2
 
 
         /// <summary>
@@ -157,8 +158,8 @@ namespace OrgPal.Three
         //const byte Rw = 0b00000010;  // Read/Write bit
         const byte RegSelectBit = 0b00000001;  // Register select bit
 
-        private readonly I2cDevice I2C;
-        private readonly I2cConnectionSettings config;
+        private readonly I2cDevice _i2cDevice;
+        private readonly I2cConnectionSettings _i2cConfig;
         private byte backlightval = LCD_NOBACKLIGHT;
         private GpioPin lcdPowerOnOff;
 
@@ -185,29 +186,30 @@ namespace OrgPal.Three
         }
 
 
-        public CharacterDisplay(int I2CId = Pinout.I2cBus.I2C3, byte mainAddress = LCD_ADDRESS_MAIN)
+        public CharacterDisplay(int i2cBusId = Pinout.I2cBus.I2C3, byte i2cAddress = I2C_LCD_ADDRESS_MAIN)
         {
             lcdPowerOnOff = new GpioController().OpenPin(Pinout.GpioPin.POWER_LCD_ON_OFF, PinMode.Output);
             lcdPowerOnOff.Write(PinValue.High);
 
-            config = new I2cConnectionSettings(I2CId, mainAddress, I2cBusSpeed.FastMode);
+            _i2cConfig = new I2cConnectionSettings(i2cBusId, i2cAddress, I2cBusSpeed.FastMode);
 
 
             // Thread.Sleep(250);//small break to make the LCD startup better in some cases helps boot up without sensor
 
-            I2C = I2cDevice.Create(config);
+            _i2cDevice = I2cDevice.Create(_i2cConfig);
 
-            var result = I2C.WriteByte(0); //Write command 0 and see if it is acknowledged.
+            var result = _i2cDevice.WriteByte(0x00); //Write command 0 and see if it is acknowledged.
             if (result.Status == I2cTransferStatus.SlaveAddressNotAcknowledged)
             {
-                I2C.Dispose();
-                config = new I2cConnectionSettings(I2CId, LCD_ADDRESS_DEFAULT, I2cBusSpeed.FastMode); ;// the other default address
-                I2C = I2cDevice.Create(config);
+                _i2cDevice.Dispose();
+                _i2cConfig = new I2cConnectionSettings(i2cBusId, I2C_LCD_ADDRESS_DEFAULT, I2cBusSpeed.FastMode); ;// the other default address
+                _i2cDevice = I2cDevice.Create(_i2cConfig);
 
-                result = I2C.WriteByte(0); //Write command 0 and see if it is acknowledged.
+                result = _i2cDevice.WriteByte(0x00); //Write command 0 and see if it is acknowledged.
                 if (result.Status == I2cTransferStatus.SlaveAddressNotAcknowledged)
                 {
-                    throw new Exception("No LCD found");
+                    //Debug.WriteLine("No Character LCD found");
+                    throw new Exception("No Character LCD found");
                 }
             }
 
@@ -255,16 +257,16 @@ namespace OrgPal.Three
         }
 
 
-        public void CreateCustomChar(byte location, byte[] charmap)
-        {
-            //Fill the first 8 CGRAM with custom characters
-            location &= 0x7;
-            SendCommand((byte)((byte)LcdInstruction.SetCGRAMAddress | (location << 3)));
-            for (int i = 0; i < 7; i++)
-            {
-                SendData(charmap[i]);
-            }
-        }
+        //public void CreateCustomChar(byte location, byte[] charmap)
+        //{
+        //    //Fill the first 8 CGRAM with custom characters
+        //    location &= 0x7;
+        //    SendCommand((byte)((byte)LcdInstruction.SetCGRAMAddress | (location << 3)));
+        //    for (int i = 0; i < 7; i++)
+        //    {
+        //        SendData(charmap[i]);
+        //    }
+        //}
 
 
         public void Update(string line1, string line2)
@@ -365,7 +367,7 @@ namespace OrgPal.Three
         {
             try
             {
-                I2C.Write(new byte[] { dat });
+                _i2cDevice.Write(new byte[] { dat });
             }
             catch
             {
@@ -398,8 +400,8 @@ namespace OrgPal.Three
                 lcdPowerOnOff = null;
             }
 
-            if (I2C != null)
-                I2C.Dispose();
+            if (_i2cDevice != null)
+                _i2cDevice.Dispose();
         }
 
         /// <summary>
