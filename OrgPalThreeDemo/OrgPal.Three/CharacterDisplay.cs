@@ -4,6 +4,7 @@ using System.Threading;
 using System.Device.Gpio;
 using System.Device.I2c;
 using System.Diagnostics;
+using Iot.Device.Pcx857x;
 
 namespace OrgPal.Three
 {
@@ -163,6 +164,7 @@ namespace OrgPal.Three
         private byte backlightval = LCD_NOBACKLIGHT;
         private GpioPin lcdPowerOnOff;
 
+        private readonly Pcf8574 _displayController;
 
         public bool BacklightOn
         {
@@ -208,10 +210,12 @@ namespace OrgPal.Three
                 result = _i2cDevice.WriteByte(0x00); //Write command 0 and see if it is acknowledged.
                 if (result.Status == I2cTransferStatus.SlaveAddressNotAcknowledged)
                 {
-                    //Debug.WriteLine("No Character LCD found");
-                    throw new Exception("No Character LCD found");
+                    //Debug.WriteLine("No Character LCD controller found");
+                    throw new Exception("Error finding I2C display controller");
                 }
             }
+
+            _displayController = new Pcf8574(_i2cDevice);
 
             //put the LCD into 4 bit mode (guessing I2C here?!)
             // we start in 8bit mode, try to set 4 bit mode
@@ -367,11 +371,11 @@ namespace OrgPal.Three
         {
             try
             {
-                _i2cDevice.Write(new byte[] { dat });
+                _displayController.WriteByte(dat);
             }
             catch
             {
-                //Debug.WriteLine("Error writing I2C data!");
+                Debug.WriteLine("Error writing I2C data!");
             }
         }
 
@@ -399,6 +403,9 @@ namespace OrgPal.Three
                 lcdPowerOnOff.Dispose();
                 lcdPowerOnOff = null;
             }
+
+            if (_displayController != null)
+                _displayController.Dispose();
 
             if (_i2cDevice != null)
                 _i2cDevice.Dispose();
