@@ -1,7 +1,9 @@
-﻿//using System;
-//using Windows.Devices.I2c;
+﻿//using Iot.Device.Common;
+//using System;
+//using System.Device.I2c;
+//using System.Diagnostics;
 
-// TODO: might be able to use the PCF8563 as a basis? https://github.com/nanoframework/nanoFramework.IoT.Device/tree/develop/devices/Rtc/Devices/Pcf8563
+////TODO: might be able to partially use the PCF8563 as a base class? https://github.com/nanoframework/nanoFramework.IoT.Device/tree/develop/devices/Rtc/Devices/Pcf8563
 
 //namespace OrgPal.Three
 //{
@@ -10,22 +12,22 @@
 //    /// </summary>
 //    public class PCF85263 : IDisposable
 //    {
-//        private I2cDevice I2C;
+//        private I2cDevice _i2cDevice;
 //        byte ADDRESS = 0x51;
-////internal enum Pcf85263Register : byte
-////{
-    //        byte REG_SECONDS = 0x01;
-    //        byte REG_ALARM_ENABLE = 0x10;
-    //        byte REG_OFFSET = 0x24; // tuning
-    //        byte REG_OSC_25 = 0x25; // oscillator register
-    //        byte REG_BATT_26 = 0x26; // battery switch
-    //        byte REG_IO_27 = 0x27; // Pin IO register
-    //        byte REG_FUNC_28 = 0x28; // function register
-    //        byte REG_INTA_ENABLES = 0x29; //interrupt control register
-    //        byte REG_FLAGS_2B = 0x2B; // flag status register
-    //        byte REG_STOP_2E = 0x2E; // stop enable
-    //        byte REG_RESET_2F = 0x2F; // software reset control
-////}
+//        //internal enum Pcf85263Register : byte
+//        //{
+//        byte REG_SECONDS = 0x01;
+//        byte REG_ALARM_ENABLE = 0x10;
+//        byte REG_OFFSET = 0x24; // tuning
+//        byte REG_OSC_25 = 0x25; // oscillator register
+//        byte REG_BATT_26 = 0x26; // battery switch
+//        byte REG_IO_27 = 0x27; // Pin IO register
+//        byte REG_FUNC_28 = 0x28; // function register
+//        byte REG_INTA_ENABLES = 0x29; //interrupt control register
+//        byte REG_FLAGS_2B = 0x2B; // flag status register
+//        byte REG_STOP_2E = 0x2E; // stop enable
+//        byte REG_RESET_2F = 0x2F; // software reset control
+//        //}
 
 //        byte OS_BIT = 7;
 //        byte CLKPM_BIT_7 = 7;
@@ -50,22 +52,18 @@
 
 //        public PCF85263()
 //        {
-//            var settings = new I2cConnectionSettings(ADDRESS)
-//            {
-//                BusSpeed = I2cBusSpeed.FastMode,
-//                SharingMode = I2cSharingMode.Shared
-//            };
+//            var settings = new I2cConnectionSettings(busId: Pinout.I2cBus.I2C3, deviceAddress: ADDRESS, busSpeed: I2cBusSpeed.FastMode)
 
-//            I2C = I2cDevice.FromId(PalThreePins.I2cBus.I2C3, settings);
+//            _i2cDevice = I2cDevice.Create(settings);
 
-//           //DisableClockOutEnableInterruptA();
-//           //DisableBatterySwitch();
+//            //DisableClockOutEnableInterruptA();
+//            //DisableBatterySwitch();
 //        }
 
 //        public void Dispose()
 //        {
-//            if (I2C != null)
-//                I2C.Dispose();
+//            if (_i2cDevice != null)
+//                _i2cDevice.Dispose();
 //        }
 
 //        public DateTime GetDateTime()
@@ -73,15 +71,15 @@
 //            WriteByte(REG_SECONDS);
 
 //            byte[] dtNow = new byte[7];
-//            I2C.Read(dtNow);
+//            _i2cDevice.Read(dtNow);
 
-//            byte ss = PalHelper.Bcd2Bin(dtNow[0].ClearBit(7));//do not use last bit is for OS
-//            byte mm = PalHelper.Bcd2Bin(dtNow[1].ClearBit(7));//do not use last bit is for EMON
-//            byte hh = PalHelper.Bcd2Bin(dtNow[2]);
-//            byte d = PalHelper.Bcd2Bin(dtNow[3]);
-//            byte wd = dtNow[4];// skip weekdays
-//            byte m = PalHelper.Bcd2Bin(dtNow[5]);
-//            int y = PalHelper.Bcd2Bin(dtNow[6]) + 2000;
+//            byte ss = NumberHelper.Bcd2Bin(dtNow[0].ClearBit(7));//do not use last bit is for OS
+//            byte mm = NumberHelper.Bcd2Bin(dtNow[1].ClearBit(7));//do not use last bit is for EMON
+//            byte hh = NumberHelper.Bcd2Bin(dtNow[2]);
+//            byte d = NumberHelper.Bcd2Bin(dtNow[3]);
+//            //byte wd = NumberHelper.Bcd2Bin(dtNow[4]);// skip weekdays
+//            byte m = NumberHelper.Bcd2Bin(dtNow[5]);
+//            int y = NumberHelper.Bcd2Bin(dtNow[6]) + 2000;
 
 //            if (m == 0 || d == 0)
 //                return DateTime.MinValue;
@@ -93,15 +91,15 @@
 //        public void SetDateTime(DateTime dt)
 //        {
 //            byte[] sb = new byte[8] { REG_SECONDS,  // start at location 1 for seconds
-//                                   PalHelper.DecToBcd(dt.Second),
-//                                   PalHelper.DecToBcd(dt.Minute),
-//                                   PalHelper.DecToBcd(dt.Hour),
-//                                   PalHelper.DecToBcd(dt.Day),
-//                                   PalHelper.DecToBcd(0), // skip weekdays
-//                                   PalHelper.DecToBcd(dt.Month),
-//                                   PalHelper.DecToBcd(dt.Year - 2000)
+//                                   NumberHelper.DecToBcd(dt.Second),
+//                                   NumberHelper.DecToBcd(dt.Minute),
+//                                   NumberHelper.DecToBcd(dt.Hour),
+//                                   NumberHelper.DecToBcd(dt.Day),
+//                                   NumberHelper.DecToBcd(0), // skip weekdays
+//                                   NumberHelper.DecToBcd(dt.Month),
+//                                   NumberHelper.DecToBcd(dt.Year - 2000)
 //                                   };
-//            I2C.Write(sb);
+//            _i2cDevice.Write(sb);
 //        }
 
 
@@ -128,14 +126,14 @@
 //            Debug.WriteLine("Alarm set: " + alarmDateTime.ToString());
 
 //            byte[] sb = new byte[6] { ALARM1_SECONDS_08,  // start at location 1 for alarm seconds
-//                                   PalHelper.DecToBcd(alarmDateTime.Second),
-//                                   PalHelper.DecToBcd(alarmDateTime.Minute),
-//                                   PalHelper.DecToBcd(alarmDateTime.Hour),
-//                                   PalHelper.DecToBcd(alarmDateTime.Day),
-//                                   PalHelper.DecToBcd(alarmDateTime.Month)
+//                                   NumberHelper.DecToBcd(alarmDateTime.Second),
+//                                   NumberHelper.DecToBcd(alarmDateTime.Minute),
+//                                   NumberHelper.DecToBcd(alarmDateTime.Hour),
+//                                   NumberHelper.DecToBcd(alarmDateTime.Day),
+//                                   NumberHelper.DecToBcd(alarmDateTime.Month)
 //                                   };
 
-//            I2C.Write(sb);
+//            _i2cDevice.Write(sb);
 
 //            EnableAlarm();
 
@@ -152,13 +150,13 @@
 //            WriteByte(ALARM1_SECONDS_08);
 
 //            byte[] dtNow = new byte[6];
-//            I2C.Read(dtNow);
-//            byte ss = PalHelper.Bcd2Bin(dtNow[0]);
-//            byte mm = PalHelper.Bcd2Bin(dtNow[1]);
-//            byte hh = PalHelper.Bcd2Bin(dtNow[2]);
-//            byte d = PalHelper.Bcd2Bin(dtNow[3]);
-//            byte m = PalHelper.Bcd2Bin(dtNow[4]);
-//            int y = PalHelper.Bcd2Bin(dtNow[5]) + 2000;
+//            _i2cDevice.Read(dtNow);
+//            byte ss = NumberHelper.Bcd2Bin(dtNow[0]);
+//            byte mm = NumberHelper.Bcd2Bin(dtNow[1]);
+//            byte hh = NumberHelper.Bcd2Bin(dtNow[2]);
+//            byte d = NumberHelper.Bcd2Bin(dtNow[3]);
+//            byte m = NumberHelper.Bcd2Bin(dtNow[4]);
+//            int y = NumberHelper.Bcd2Bin(dtNow[5]) + 2000;
 
 //            try
 //            {
@@ -167,7 +165,8 @@
 //                else
 //                    return new DateTime(DateTime.UtcNow.Year, m, d, hh, mm, ss);
 //            }
-//            catch {
+//            catch
+//            {
 //                return DateTime.MinValue;
 //            }
 //        }
@@ -430,18 +429,18 @@
 
 //        void WriteRegister(byte reg, byte cmd)
 //        {
-//            I2C.Write(new byte[] { reg, cmd });
+//            _i2cDevice.Write(new byte[] { reg, cmd });
 //        }
 
 //        void WriteByte(byte cmd)
 //        {
-//            I2C.Write(new byte[] { cmd });
+//            _i2cDevice.Write(new byte[] { cmd });
 //        }
 
 //        byte ReadByte()
 //        {
 //            byte[] rb = new byte[1];
-//            I2C.Read(rb);
+//            _i2cDevice.Read(rb);
 //            return rb[0];
 //        }
 
