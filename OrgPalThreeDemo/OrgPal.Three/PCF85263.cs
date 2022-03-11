@@ -1,4 +1,4 @@
-﻿//using Iot.Device.Common;
+﻿////using Iot.Device.Common;
 //using System;
 //using System.Device.I2c;
 //using System.Diagnostics;
@@ -7,6 +7,17 @@
 
 //namespace OrgPal.Three
 //{
+//    public static class NumberHelper
+//    {
+//        public static byte Bcd2Bin(byte val) { return (byte)(val - 6 * (val >> 4)); }
+
+//        public static byte Bin2Bcd(byte val) { return (byte)(val + 6 * (val / 10)); }
+
+//        public static byte DecToBcd(int val) { return (byte)((val / 10 * 16) + (val % 10)); }
+
+//        public static int BcdToDec(byte val) { return (val / 16 * 10) + (val % 16); }
+//    }
+
 //    /// <summary>
 //    /// Driver for RTC PCF85263 with key functions implemented for time, alarm and some system functions.
 //    /// </summary>
@@ -29,30 +40,33 @@
 //        byte REG_RESET_2F = 0x2F; // software reset control
 //        //}
 
-//        byte OS_BIT = 7;
-//        byte CLKPM_BIT_7 = 7;
-//        byte INTA_OUT_BIT_1 = 1;
+//        byte OS_BIT = 0x07;
+//        byte CLKPM_BIT_7 = 0x07;
+//        byte INTA_OUT_BIT_1 = 0x01;
 
-//        byte ALARM1_SECONDS_BIT = 0;
-//        byte ALARM1_MINUTES_BIT = 1;
-//        byte ALARM1_HOURS_BIT = 2;
-//        byte ALARM1_DAYS_BIT = 3;
-//        byte ALARM1_MONTHS_BIT = 4;
-//        byte ALARM1_AF1_FLAG_BIT5 = 5;
+//        byte ALARM1_SECONDS_BIT = 0x00;
+//        byte ALARM1_MINUTES_BIT = 0x01;
+//        byte ALARM1_HOURS_BIT = 0x02;
+//        byte ALARM1_DAYS_BIT = 0x03;
+//        byte ALARM1_MONTHS_BIT = 0x04;
+//        byte ALARM1_AF1_FLAG_BIT5 = 0x05;
 //        byte ALARM1_SECONDS_08 = 0x08;
 //        byte ALARM1_MINUTES_09 = 0x09;
 //        byte ALARM2_MINUTES = 0x0D;
-//        byte INTA_A1IEA_BIT_4 = 4;
-//        byte INTA_ILPA_BIT_7 = 7;
-//        byte INTA_PIEA_BIT = 6;
-//        byte INTA_PI_SECOND_BIT = 5;
-//        byte INTA_PI_MINUTE_BIT = 6;
-//        byte OSC_HIGH_CAPACITANCE_BIT = 1;
-//        byte OSC_LOW_CAPACITANCE_BIT = 0;
+
+//        byte INTA_A1IEA_BIT_4 = 0x04;
+//        byte INTA_PIEA_BIT = 0x06;
+//        byte INTA_ILPA_BIT_7 = 0x07;
+
+//        byte INTA_PI_SECOND_BIT = 0x05;
+//        byte INTA_PI_MINUTE_BIT = 0x06;
+
+//        byte OSC_LOW_CAPACITANCE_BIT = 0x00;
+//        byte OSC_HIGH_CAPACITANCE_BIT = 0x01;
 
 //        public PCF85263()
 //        {
-//            var settings = new I2cConnectionSettings(busId: Pinout.I2cBus.I2C3, deviceAddress: ADDRESS, busSpeed: I2cBusSpeed.FastMode)
+//            var settings = new I2cConnectionSettings(busId: Pinout.I2cBus.I2C3, deviceAddress: ADDRESS, busSpeed: I2cBusSpeed.FastMode);
 
 //            _i2cDevice = I2cDevice.Create(settings);
 
