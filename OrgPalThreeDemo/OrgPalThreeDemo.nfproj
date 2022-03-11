@@ -57,7 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Iot.Device.Button">
-      <HintPath>..\packages\nanoFramework.Iot.Device.Button.1.0.288-preview.65\lib\Iot.Device.Button.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.Iot.Device.Button.1.0.288-preview.86\lib\Iot.Device.Button.dll</HintPath>
     </Reference>
     <Reference Include="Iot.Device.Mcp3428">
       <HintPath>..\packages\nanoFramework.Iot.Device.Mcp3428.1.0.288-preview.65\lib\Iot.Device.Mcp3428.dll</HintPath>
@@ -72,13 +72,13 @@
       <HintPath>..\packages\nanoFramework.Hardware.Stm32.1.8.3-preview.8\lib\nanoFramework.Hardware.Stm32.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.Json">
-      <HintPath>..\packages\nanoFramework.Json.2.1.2-preview.50\lib\nanoFramework.Json.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.Json.2.1.2-preview.52\lib\nanoFramework.Json.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.Logging">
-      <HintPath>..\packages\nanoFramework.Logging.1.0.1-preview.23\lib\nanoFramework.Logging.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.Logging.1.0.1-preview.24\lib\nanoFramework.Logging.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.Logging.Stream">
-      <HintPath>..\packages\nanoFramework.Logging.Stream.1.0.1-preview.23\lib\nanoFramework.Logging.Stream.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.Logging.Stream.1.0.1-preview.24\lib\nanoFramework.Logging.Stream.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.M2Mqtt">
       <HintPath>..\packages\nanoFramework.M2Mqtt.5.0.2-preview.80\lib\nanoFramework.M2Mqtt.dll</HintPath>
@@ -96,7 +96,7 @@
       <HintPath>..\packages\nanoFramework.Runtime.Native.1.5.4-preview.5\lib\nanoFramework.Runtime.Native.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.System.Collections">
-      <HintPath>..\packages\nanoFramework.System.Collections.1.4.0-preview.16\lib\nanoFramework.System.Collections.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.System.Collections.1.4.0-preview.21\lib\nanoFramework.System.Collections.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.System.Text">
       <HintPath>..\packages\nanoFramework.System.Text.1.1.3-preview.15\lib\nanoFramework.System.Text.dll</HintPath>
