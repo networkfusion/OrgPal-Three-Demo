@@ -11,7 +11,7 @@ namespace OrgPal.Three
         private GpioPin _terminationResistorPin; //120ohm as per spec! (default low = off)
         private GpioPin _portPowerPin;
 
-        public SerialPort Port;
+        public SerialPort Port { get; set; }
 
         //public bool ReceiverEnabled { get; set; }
         //public bool PortEnabled { get; set; }

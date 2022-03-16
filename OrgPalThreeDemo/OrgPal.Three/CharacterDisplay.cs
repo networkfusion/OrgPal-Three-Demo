@@ -210,7 +210,7 @@ namespace OrgPal.Three
                 if (result.Status == I2cTransferStatus.SlaveAddressNotAcknowledged)
                 {
                     Debug.WriteLine("No Character LCD controller found");
-                    throw new Exception("Error finding I2C display controller");
+                    throw new Exception("DeviceNotFound: I2C_DisplayController"); //possibily worth custom exceptions i.e. https://docs.microsoft.com/en-us/dotnet/standard/exceptions/how-to-create-user-defined-exceptions 
                 }
             }
 
@@ -266,13 +266,13 @@ namespace OrgPal.Three
         {
             while (line1.Length < 16)
             {
-                line1 += " "; //Remove previous chars that might have been there
+                line1 = $"{line1} "; //Add spaces char to replace previous chars that might have been there
             }
             while (line2.Length < 16)
             {
-                line2 += " "; //Remove previous chars that might have been there
+                line2 = $"{line2} "; //Add spaces char to replace previous chars that might have been there
             }
-            Update(line1 + line2);
+            Update($"{line1.Substring(0, line1.Length)}{line2.Substring(0, line2.Length)}");
         }
 
         public void Update(string text)

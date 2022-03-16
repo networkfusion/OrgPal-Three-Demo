@@ -5,10 +5,10 @@ namespace OrgPal.Three
 {
     public class Keypad : IDisposable
     {
-        GpioPin _keypadPin1;
-        GpioPin _keypadPin2;
-        GpioPin _keypadPin3;
-        GpioPin _keypadPin4;
+        readonly GpioPin _keypadPin1;
+        readonly GpioPin _keypadPin2;
+        readonly GpioPin _keypadPin3;
+        readonly GpioPin _keypadPin4;
 
         public Keypad()
         {

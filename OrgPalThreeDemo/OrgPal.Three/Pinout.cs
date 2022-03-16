@@ -15,7 +15,9 @@ namespace OrgPal.Three
 
 
             public static readonly int GPIO_NONE = -1;
-            /// <summary>Debug LED definition</summary>
+            /// <summary>
+            /// Debug LED definition
+            /// </summary>
             public static readonly int Led1 = PortPin('G', 6);
             public static readonly int Led2 = PortPin('G', 7);
 
@@ -25,20 +27,30 @@ namespace OrgPal.Three
             public static readonly int BUTTON_USER_WAKE_PE6 = PortPin('E', 6);
             public static readonly int MUX_EXT_BUTTON_WAKE_PE4 = PortPin('E', 4);
 
-            /// <summary>PWM Speaker PINS definition</summary>
+            /// <summary>
+            /// PWM Speaker PINS definition
+            /// </summary>
             public static readonly int PWM_SPEAKER_PH12 = PortPin('H', 12);
 
-            /// <summary>Relay On/Off PINS definition</summary>
+            /// <summary>
+            /// Relay On/Off PINS definition
+            /// </summary>
             public static readonly int RELAY_ON_OFF_PJ5 = PortPin('J', 5);
 
-            /// <summary>Pulse Counter PINS definition</summary>
+            /// <summary>
+            /// Pulse Counter PINS definition
+            /// </summary>
             public static readonly int PULSE_COUNTER_PJ12 = PortPin('J', 12);
 
-            /// <summary>RJ45 PINS definition</summary>
+            /// <summary>
+            /// RJ45 PINS definition
+            /// </summary>
             public static readonly int RJ45_POE_PIN1_CTS = PortPin('D', 3);
             public static readonly int RJ45_POE_PIN2_RTS = PortPin('D', 4);
 
-            /// <summary>KEPAD PINS definition</summary>
+            /// <summary>
+            /// KEPAD PINS definition
+            /// </summary>
             public static readonly int KEY_PIN1 = PortPin('I', 5);
             public static readonly int KEY_PIN2 = PortPin('I', 4);
             public static readonly int KEY_PIN3 = PortPin('I', 7);
@@ -60,7 +72,9 @@ namespace OrgPal.Three
             public static readonly int IO_PORT1_PIN_19_PH11 = PortPin('H', 11);
             public static readonly int IO_PORT1_PIN_23_INT_PG2 = PortPin('G', 2);
 
-            /// <summary>RS485 PINS definition</summary>
+            /// <summary>
+            /// RS485 PINS definition
+            /// </summary>
             public static readonly int RS485_RECEIVERENABLE_PI_12 = PortPin('I', 12);
             public static readonly int RS485_SHUTDOWN_PI_13 = PortPin('I', 13);
             public static readonly int RS485_RESISTORONOFF_PI_14 = PortPin('I', 14);
@@ -77,7 +91,9 @@ namespace OrgPal.Three
 
 
 
-            /// <summary>SD Card Detect Pin</summary>
+            /// <summary>
+            /// SD Card Detect Pin
+            /// </summary>
             public static readonly int SD_CARD_DETECT = PortPin('E', 5);
 
             //POWER ON/OFF FOR VARIOUS ON BOARD PERIFERALS
@@ -110,7 +126,9 @@ namespace OrgPal.Three
 
         }
 
-        /// <summary>Analog channel definition.</summary>
+        /// <summary>
+        /// Analog channel definition.
+        /// </summary>
         public static class AdcChannel
         {
             // this channel is mapped @ position 2
@@ -129,32 +147,50 @@ namespace OrgPal.Three
         /// <summary>Uart port definition.</summary>
         public static class UartPort
         {
-            /// <summary>Socket definition.</summary>
+            /// <summary>
+            /// Socket definition.
+            /// </summary>
             public const string UART2_RJ45_POE = "COM2";
-            /// <summary>Socket definition.</summary>
+            /// <summary
+            /// >Socket definition.
+            /// </summary>
             public const string UART3_RS485 = "COM3";
 
-            /// <summary>Socket definition.</summary>
+            /// <summary>
+            /// Socket definition.
+            /// </summary>
             public const string UART6_IO_PORT0 = "COM6";
-            /// <summary>Socket definition.</summary>
+            /// <summary>
+            /// Socket definition.
+            /// </summary>
             public const string UART7_IO_PORT1 = "COM7";
         }
 
-        /// <summary>SPI Bus definition.</summary>
+        /// <summary>
+        /// SPI Bus definition.
+        /// </summary>
         public static class SpiBus
         {
-            /// <summary>Socket definition.</summary>
+            /// <summary>
+            /// Socket definition.
+            /// </summary>
             public const string SPI1_FLASH_USER = "SPI1";
             public const string SPI2_IO_PORT0 = "SPI2";
         }
 
-        /// <summary>I2C Bus definition.</summary>
+        /// <summary>
+        /// I2C Bus definition.
+        /// </summary>
         public static class I2CBus
         {
-            /// <summary>Socket definition.</summary>
+            /// <summary>
+            /// Socket definition.
+            /// </summary>
             public const int I2C2 = 2;
 
-            /// <summary>Socket definition.</summary>
+            /// <summary>
+            /// Socket definition.
+            /// </summary>
             public const int I2C3 = 3;
         }
 
@@ -170,7 +206,7 @@ namespace OrgPal.Three
         internal static int PortPin(char port, byte pin)
         {
             if (port < 'A' || port > 'K')
-                throw new ArgumentException();
+                throw new ArgumentException("Invalid Port definition");
 
             return ((port - 'A') * 16) + pin;
 

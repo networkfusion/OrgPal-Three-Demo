@@ -7,10 +7,10 @@ namespace OrgPal.Three
 {
     public class Buttons : IDisposable
     {
-        private static GpioPin _muxWakeButtonFlowControl;
-        private static GpioButton _userButton;
-        private static GpioButton _wakeButton;
-        private static GpioButton _diagnosticButton;
+        private readonly GpioPin _muxWakeButtonFlowControl;
+        private readonly GpioButton _userButton;
+        private readonly GpioButton _wakeButton;
+        private readonly GpioButton _diagnosticButton;
         // TODO: is loader button a thing?
 
 

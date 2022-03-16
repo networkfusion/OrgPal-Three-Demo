@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Text;
 using System.Threading;
 using Windows.Devices.Adc;
@@ -48,6 +49,7 @@ namespace OrgPal.Three
             }
             catch
             {
+                Debug.WriteLine("OnboardAdcDevice: GetBatteryUnregulatedVoltage failed!");
             }
 
             return voltage;
@@ -68,7 +70,10 @@ namespace OrgPal.Three
                 tempInCent = ((13.582f - Math.Sqrt(184.470724f + (0.01732f * (2230.8f - adcTempCalcValue)))) / (-0.00866f)) + 30;
                 // double tempInF = ((9f / 5f) * tempInCent) + 32f;
             }
-            catch { }
+            catch
+            {
+                Debug.WriteLine("OnboardAdcDevice: GetTemperatureOnBoard failed!");
+            }
 
             return tempInCent;
 
