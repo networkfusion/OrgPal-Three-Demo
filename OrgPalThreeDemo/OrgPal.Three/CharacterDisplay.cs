@@ -160,7 +160,6 @@ namespace OrgPal.Three
         const byte RegSelectBit = 0b00000001;  // Register select bit
 
         private readonly I2cDevice _i2cDevice;
-        private readonly I2cConnectionSettings _i2cConfig;
         private byte backlightval = LCD_NOBACKLIGHT;
         private GpioPin lcdPowerOnOff;
 
@@ -188,12 +187,12 @@ namespace OrgPal.Three
         }
 
 
-        public CharacterDisplay(int i2cBusId = Pinout.I2cBus.I2C3, byte i2cAddress = I2C_LCD_ADDRESS_MAIN)
+        public CharacterDisplay(int i2cBusId = Pinout.I2CBus.I2C3, byte i2cAddress = I2C_LCD_ADDRESS_MAIN)
         {
             lcdPowerOnOff = new GpioController().OpenPin(Pinout.GpioPin.POWER_LCD_ON_OFF, PinMode.Output);
             lcdPowerOnOff.Write(PinValue.High);
 
-            _i2cConfig = new I2cConnectionSettings(i2cBusId, i2cAddress, I2cBusSpeed.FastMode);
+            var _i2cConfig = new I2cConnectionSettings(i2cBusId, i2cAddress, I2cBusSpeed.FastMode);
 
 
             // Thread.Sleep(250);//small break to make the LCD startup better in some cases helps boot up without sensor
@@ -204,18 +203,22 @@ namespace OrgPal.Three
             if (result.Status == I2cTransferStatus.SlaveAddressNotAcknowledged)
             {
                 _i2cDevice.Dispose();
-                _i2cConfig = new I2cConnectionSettings(i2cBusId, I2C_LCD_ADDRESS_DEFAULT, I2cBusSpeed.FastMode); ;// the other default address
+                _i2cConfig = new I2cConnectionSettings(i2cBusId, I2C_LCD_ADDRESS_DEFAULT, I2cBusSpeed.FastMode); // the other default address
                 _i2cDevice = I2cDevice.Create(_i2cConfig);
 
                 result = _i2cDevice.WriteByte(0x00); //Write command 0 and see if it is acknowledged.
                 if (result.Status == I2cTransferStatus.SlaveAddressNotAcknowledged)
                 {
-                    //Debug.WriteLine("No Character LCD controller found");
+                    Debug.WriteLine("No Character LCD controller found");
                     throw new Exception("Error finding I2C display controller");
                 }
             }
 
             _displayController = new Pcf8574(_i2cDevice);
+            //using LcdInterface _interface = new Pcf8574(_i2cDevice);
+            //var lcd = new Lcd1602(registerSelectPin: 0, enablePin: 2, dataPins: new int[] { 4, 5, 6, 7 }, backlightPin: 3, readWritePin: 1, controller: new GpioController((PinNumberingScheme.Logical, _displayController));
+            //using Hd44780 lcd = new Lcd1602(_i2cDevice);
+            //lcd.BacklightOn = true;
 
             //put the LCD into 4 bit mode (guessing I2C here?!)
             // we start in 8bit mode, try to set 4 bit mode
@@ -239,8 +242,6 @@ namespace OrgPal.Three
             SendCommand((byte)LcdInstruction.EntryModeSet | (byte)LcdEntryMode.MoveRightShiftLeft); // Default Shift display off
 
             Clear();
-
-            //LoadDefaultCustomChars();
         }
 
 
@@ -261,18 +262,6 @@ namespace OrgPal.Three
         }
 
 
-        //public void CreateCustomChar(byte location, byte[] charmap)
-        //{
-        //    //Fill the first 8 CGRAM with custom characters
-        //    location &= 0x7;
-        //    SendCommand((byte)((byte)LcdInstruction.SetCGRAMAddress | (location << 3)));
-        //    for (int i = 0; i < 7; i++)
-        //    {
-        //        SendData(charmap[i]);
-        //    }
-        //}
-
-
         public void Update(string line1, string line2)
         {
             while (line1.Length < 16)
@@ -286,14 +275,14 @@ namespace OrgPal.Three
             Update(line1 + line2);
         }
 
-        public void Update(string text) //, byte line = 0) //TODO: does not handle empty lines or CRLF!!
+        public void Update(string text)
         {
             int lines = text.Length > 16 ? 2 : 1;
             if (lines < 2)
             {
                 foreach (byte b in Encoding.UTF8.GetBytes(text))
                 {
-                    Send(b, RegSelectBit); //, true);
+                    Send(b, RegSelectBit);
                 }
             }
             else
@@ -306,14 +295,14 @@ namespace OrgPal.Three
                     {
                         foreach (byte b in Encoding.UTF8.GetBytes(text.Substring(0, 16)))
                         {
-                            Send(b, RegSelectBit); //, true);
+                            Send(b, RegSelectBit);
                         }
                     }
                     else
                     {
                         foreach (byte b in Encoding.UTF8.GetBytes(text.Substring(16)))
                         {
-                            Send(b, RegSelectBit); //, true);
+                            Send(b, RegSelectBit);
                         }
                     }
                 }
@@ -321,10 +310,10 @@ namespace OrgPal.Three
         }
 
 
-        public void RefreshText(string text) //, byte line = 0)
+        public void RefreshText(string text)
         {
             Clear();
-            Update(text); //, line);
+            Update(text);
         }
 
 
@@ -362,11 +351,6 @@ namespace OrgPal.Three
             Thread.SpinWait(1);      // commands need > 37us to settle
         }
 
-        //void LoadCustomCharacter(byte char_num, byte[] rows)
-        //{
-        //    CreateCustomChar(char_num, rows);
-        //}
-
         void WriteByte(byte dat)
         {
             try
@@ -375,7 +359,7 @@ namespace OrgPal.Three
             }
             catch
             {
-                Debug.WriteLine("Error writing I2C data!");
+                Debug.WriteLine("Error writing lcdController data!");
             }
         }
 
@@ -419,30 +403,5 @@ namespace OrgPal.Three
             Dispose(false);
         }
 
-        //public void PrintChar(byte custChar)
-        //{
-        //    SendData(3);
-        //}
-
-        //void LoadDefaultCustomChars()
-        //{
-        //    byte[] bell = { 0x4, 0xe, 0xe, 0xe, 0x1f, 0x0, 0x4 };
-        //    byte[] note = { 0x2, 0x3, 0x2, 0xe, 0x1e, 0xc, 0x0 };
-        //    byte[] clock = { 0x0, 0xe, 0x15, 0x17, 0x11, 0xe, 0x0 };
-        //    byte[] heart = { 0x0, 0xa, 0x1f, 0x1f, 0xe, 0x4, 0x0 };
-        //    byte[] duck = { 0x0, 0xc, 0x1d, 0xf, 0xf, 0x6, 0x0 };
-        //    byte[] check = { 0x0, 0x1, 0x3, 0x16, 0x1c, 0x8, 0x0 };
-        //    byte[] cross = { 0x0, 0x1b, 0xe, 0x4, 0xe, 0x1b, 0x0 };
-        //    byte[] retarrow = { 0x1, 0x1, 0x5, 0x9, 0x1f, 0x8, 0x4 };
-
-        //    CreateCustomChar(0, bell);
-        //    CreateCustomChar(1, note);
-        //    CreateCustomChar(2, clock);
-        //    CreateCustomChar(3, heart);
-        //    CreateCustomChar(4, duck);
-        //    CreateCustomChar(5, check);
-        //    CreateCustomChar(6, cross);
-        //    CreateCustomChar(7, retarrow);
-        //}
     }
 }

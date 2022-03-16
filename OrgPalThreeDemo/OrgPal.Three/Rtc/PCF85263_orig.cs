@@ -3,8 +3,6 @@
 //using System.Device.I2c;
 //using System.Diagnostics;
 
-////TODO: might be able to partially use the PCF8563 as a base class? https://github.com/nanoframework/nanoFramework.IoT.Device/tree/develop/devices/Rtc/Devices/Pcf8563
-
 //namespace OrgPal.Three
 //{
 //    public static class NumberHelper

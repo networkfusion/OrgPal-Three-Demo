@@ -26,8 +26,15 @@
     <Compile Include="OrgPal.Three\Buttons.cs" />
     <Compile Include="OrgPal.Three\Helper.cs" />
     <Compile Include="OrgPal.Three\Pinout.cs" />
-    <Compile Include="OrgPal.Three\PCF85263.cs" />
+    <Compile Include="OrgPal.Three\Rtc\BitHelper.cs" />
+    <Compile Include="OrgPal.Three\Rtc\PCF85263.cs" />
+    <Compile Include="OrgPal.Three\Rtc\PCF85263_orig.cs" />
     <Compile Include="Networking\ManagedNtpClient.cs" />
+    <Compile Include="OrgPal.Three\Rtc\PCF85263ControlRegisters.cs" />
+    <Compile Include="OrgPal.Three\Rtc\PCF85263RtcRegisters.cs" />
+    <Compile Include="OrgPal.Three\Rtc\PCF85263StopwatchRegisters.cs" />
+    <Compile Include="OrgPal.Three\Rtc\RtcBase.cs" />
+    <Compile Include="OrgPal.Three\Rtc\NumberHelper.cs" />
     <Compile Include="OrgPal.Three\SerialPortRS485.cs" />
     <Compile Include="Peripherals\HMT330.cs" />
     <Compile Include="MqttConfigFileSchema.cs" />
