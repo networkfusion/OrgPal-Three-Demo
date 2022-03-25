@@ -21,6 +21,20 @@
     <Compile Include="AwsIotCore\MqttConnector.cs" />
     <Compile Include="OrgPal.Three\CharacterDisplay.cs" />
     <Compile Include="OrgPal.Three\AdcExpansionBoard.cs" />
+    <Compile Include="OrgPal.Three\CharacterDisplay\Flags.cs" />
+    <Compile Include="OrgPal.Three\CharacterDisplay\Hd44780.cs" />
+    <Compile Include="OrgPal.Three\CharacterDisplay\Size.cs" />
+    <Compile Include="OrgPal.Three\CharacterDisplay\Lcd1602.cs" />
+    <Compile Include="OrgPal.Three\CharacterDisplay\ICharacterLcd.cs" />
+    <Compile Include="OrgPal.Three\CharacterDisplay\LcdInterface.cs" />
+    <Compile Include="OrgPal.Three\CharacterDisplay\LcdInterface.Gpio.cs" />
+    <Compile Include="OrgPal.Three\CharacterDisplay\LcdInterface.Pcx857x.cs" />
+    <Compile Include="OrgPal.Three\CharacterDisplay\LcdInterface.I2c.cs" />
+    <Compile Include="OrgPal.Three\CharacterDisplay\LcdInterface.I2c4Bit.cs" />
+    <Compile Include="OrgPal.Three\CharacterDisplay\LineWrapMode.cs" />
+    <Compile Include="OrgPal.Three\CharacterDisplay\SpanChar.cs" />
+    <Compile Include="OrgPal.Three\CharacterDisplay\SpanPinValuePair.cs" />
+    <Compile Include="OrgPal.Three\CharacterDisplay\LcdConsole.cs" />
     <Compile Include="OrgPal.Three\Keypad.cs" />
     <Compile Include="OrgPal.Three\OnboardAdcDevice.cs" />
     <Compile Include="OrgPal.Three\Buttons.cs" />
@@ -59,6 +73,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
     <None Include="packages.config" />
     <None Include="Resources\AwsCAroot.der" />
   </ItemGroup>

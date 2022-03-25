@@ -38,7 +38,7 @@ namespace OrgPalThreeDemo.Networking
     /// <summary>
     /// Static class to receive the time from a NTP server.
     /// </summary>
-    public class ManagedNtpClient : IDisposable
+    public static class ManagedNtpClient
     {
         /// <summary>
         /// Gets the current DateTime from time-a.nist.gov.
@@ -105,15 +105,12 @@ namespace OrgPalThreeDemo.Networking
             DateTime dateTime = new DateTime(1900, 1, 1);
             dateTime += timeSpan;
 
-            //TimeSpan offsetAmount = TimeZone.CurrentTimeZone.GetUtcOffset(dateTime);
-            DateTime networkDateTime = dateTime; //(dateTime + offsetAmount);
+            // We dont use Offsets, but left here just incase...
+            // TimeSpan offsetAmount = TimeZone.CurrentTimeZone.GetUtcOffset(dateTime);
+            DateTime networkDateTime = dateTime; // (dateTime + offsetAmount);
 
             return networkDateTime;
         }
 
-        public void Dispose()
-        {
-            System.GC.SuppressFinalize(this);
-        }
     }
 }

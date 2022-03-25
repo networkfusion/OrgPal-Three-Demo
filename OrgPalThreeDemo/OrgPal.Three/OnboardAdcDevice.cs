@@ -64,8 +64,8 @@ namespace OrgPal.Three
 
             try
             {
-                var maximumValue = 4095;
-                var analogReference = 3300;
+                var maximumValue = 4095.0;
+                var analogReference = 3300.0;
                 double adcTempCalcValue = (analogReference * adcTemp.ReadValue()) / maximumValue;
                 tempInCent = ((13.582f - Math.Sqrt(184.470724f + (0.01732f * (2230.8f - adcTempCalcValue)))) / (-0.00866f)) + 30;
                 // double tempInF = ((9f / 5f) * tempInCent) + 32f;

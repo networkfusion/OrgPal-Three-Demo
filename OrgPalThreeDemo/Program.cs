@@ -41,7 +41,7 @@ namespace OrgPalThreeDemo
         private static CharacterDisplay palthreeDisplay;
         private static AdcExpansionBoard palAdcExpBoard;
 #endif
-
+        private bool _disposed;
         private static string _serialNumber = string.Empty;
 
         private static DateTime startTime = DateTime.UtcNow;
@@ -106,10 +106,13 @@ namespace OrgPalThreeDemo
 
             try
             {
+                var sb = new StringBuilder();
                 foreach (byte b in Utilities.UniqueDeviceId) //STM32 devices only!
                 {
-                    _serialNumber += b.ToString("X2"); //Generates a unique ID for the device.
+                    sb.Append(b.ToString("X2")); //Generates a unique ID for the device.
+                    //_serialNumber += b.ToString("X2"); // TODO: Using string builder, but word is that it is slower! (if required, suppress S1643)!
                 }
+                _serialNumber = sb.ToString();
             }
             catch (Exception)
             {
@@ -207,13 +210,21 @@ namespace OrgPalThreeDemo
                     //palthreeDisplay.BacklightOn = true; //TODO: this causes display corruption!
                     //TODO: create a menu handler to scroll through the display!
                     palthreeDisplay.Update($"{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm")}", //Time shortened to fit on display (excludes seconds)
-                        $"IP: {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
+                        $"{System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
 
+                    Thread.Sleep(2000);
 
-                    //palthreeDisplay.Display($"PCB Temp: { palthree.GetTemperatureOnBoard().ToString("n2")}C",
-                    //    $"Voltage: { palthree.GetBatteryUnregulatedVoltage().ToString("n2")}VDC");
-                    Thread.Sleep(1000); //TODO: arbitary value... what should the update rate be?!
-                                        //palthreeDisplay.BacklightOn = false;
+                    //var externalIpString = new WebClient().DownloadString("http://icanhazip.com").Replace("\\r\\n", "").Replace("\\n", "").Trim();
+                    ////var externalIp = IPAddress.Parse(externalIpString);
+                    //palthreeDisplay.Update($"{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm")}", //Time shortened to fit on display (excludes seconds)
+                    //    $"WAN: {externalIpString}");
+
+                    Thread.Sleep(1000);
+
+                    palthreeDisplay.Update($"PCB Temp: { palthreeInternalAdc.GetTemperatureOnBoard().ToString("n2")}C",
+                        $"Voltage: { palthreeInternalAdc.GetBatteryUnregulatedVoltage().ToString("n2")}VDC");
+                    Thread.Sleep(2000); //TODO: arbitary value... what should the update rate be?!
+                    //palthreeDisplay.BacklightOn = false;
                 }
                 catch (Exception e)
                 {
@@ -446,6 +457,17 @@ namespace OrgPalThreeDemo
             }).Start();
         }
 
+        static uint IncrementTelemtryMessageSentCount()
+        {
+            if (messagesSent < uint.MaxValue)
+            {
+                return messagesSent += 1;
+            } 
+            else 
+            {
+                return messagesSent = 0; 
+            }
+        }
 
         static void TelemetryTimerCallback(object state)
         {
@@ -454,17 +476,11 @@ namespace OrgPalThreeDemo
                 try
                 {
 
-                    if (messagesSent > uint.MaxValue)
-                    {
-                        //reset message number
-                        messagesSent = 0;
-                    }
-
                     var statusTelemetry = new AwsIotCore.DeviceMessageSchemas.TelemetryMessage
                     {
                         serialNumber = $"SN_{_serialNumber }", //TODO: "SN" should not be needed! but might help in the long run anyway?!
                         sendTimestamp = DateTime.UtcNow,
-                        messageNumber = messagesSent += 1, //TODO: we need to reset if reaches max int otherwise who knows what will happen!
+                        messageNumber = IncrementTelemtryMessageSentCount(),
                         memoryFreeBytes = nanoFramework.Runtime.Native.GC.Run(false),
 #if ORGPAL_THREE
                         batteryVoltage = palthreeInternalAdc.GetBatteryUnregulatedVoltage(),
@@ -515,7 +531,11 @@ namespace OrgPalThreeDemo
                 var removableDrives = Directory.GetLogicalDrives(); //TODO: FEEDBACK... I Cannot help but feel (since we are no longer attached to UWP, that this should be `SD:` and `USB:`
 
                 //TODO: Better handle no removable MSD avaliable?!
-                if (removableDrives.Length == 0) throw new Exception("NO REMOVABLE STORAGE DEVICE FOUND"); // Arrays are counted by Length. (not a collection!)
+                if (removableDrives.Length == 0) // Arrays are counted by Length. (not a collection!)
+                {
+                    _logger.LogError("NO REMOVABLE STORAGE DEVICE FOUND");
+                    // FIXME: what should we do?!
+                }
                 foreach (var drive in removableDrives)
                 {
                     _logger.LogInformation($"Found logical drive {drive}");
@@ -581,32 +601,36 @@ namespace OrgPalThreeDemo
                     {
                         using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read))
                         {
-                        readMqttConfig:
-                            try
+                            var success = false;
+                            while (!success)
                             {
-                                var buffer = new byte[fs.Length];
-                                fs.Read(buffer, 0, (int)fs.Length);
+                                try
+                                {
+                                    var buffer = new byte[fs.Length];
+                                    fs.Read(buffer, 0, (int)fs.Length);
 
-                                MqttConfigFileSchema config = (MqttConfigFileSchema)JsonConvert.DeserializeObject(Encoding.UTF8.GetString(buffer, 0, buffer.Length), typeof(MqttConfigFileSchema));
-                                AwsIotCore.MqttConnector.Host = config.Url;
-                                if (config.Port != null)
-                                {
-                                    AwsIotCore.MqttConnector.Port = int.Parse(config.Port);
+                                    MqttConfigFileSchema config = (MqttConfigFileSchema)JsonConvert.DeserializeObject(Encoding.UTF8.GetString(buffer, 0, buffer.Length), typeof(MqttConfigFileSchema));
+                                    AwsIotCore.MqttConnector.Host = config.Url;
+                                    if (config.Port != null)
+                                    {
+                                        AwsIotCore.MqttConnector.Port = int.Parse(config.Port);
+                                    }
+                                    if (!string.IsNullOrEmpty(config.ThingName))
+                                    {
+                                        AwsIotCore.MqttConnector.ThingName = config.ThingName;
+                                    }
+                                    else
+                                    {
+                                        AwsIotCore.MqttConnector.ThingName = _serialNumber;
+                                    }
+                                    fs.Flush();
+                                    success = true;
                                 }
-                                if (!string.IsNullOrEmpty(config.ThingName))
+                                catch (Exception)
                                 {
-                                    AwsIotCore.MqttConnector.ThingName = config.ThingName;
+                                    //TODO: sometimes a json deserialize exception happens. For the moment, just try again.
+                                    _logger.LogWarning("Failed to decode MqttConfig.json, Retrying...");
                                 }
-                                else
-                                {
-                                    AwsIotCore.MqttConnector.ThingName = _serialNumber;
-                                }
-                                fs.Flush();
-                            }
-                            catch (Exception)
-                            {
-
-                                goto readMqttConfig; //TODO: sometimes a json deserialize exception happens. For the moment, just try again.
                             }
                         }
                     }
@@ -639,41 +663,59 @@ namespace OrgPalThreeDemo
 
         }
 
+        /// <summary>
+        /// Releases unmanaged resources
+        /// and optionally release managed resources
+        /// </summary>
+        /// <param name="disposing"><see langword="true" /> to release both managed and unmanaged resources; <see langword="false" /> to release only unmanaged resources.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+
+            if (disposing)
+            {
+                //should dispose of SD and Char display (at least!)
+#if ORGPAL_THREE
+                palthreeDisplay.Dispose();
+                palAdcExpBoard.Dispose();
+                palthreeInternalAdc.Dispose();
+                palthreeButtons.Dispose();
+#endif
+                //System.IO.FileStream -- Dispose?? (we are already (using))!
+                StorageEventManager.RemovableDeviceInserted -= StorageEventManager_RemovableDeviceInserted;
+                StorageEventManager.RemovableDeviceRemoved -= StorageEventManager_RemovableDeviceRemoved;
+
+                sendTelemetryTimer.Dispose();
+
+                sendShadowTimer.Dispose();
+
+                AwsIotCore.MqttConnector.Client.CloudToDeviceMessage -= Client_CloudToDeviceMessageReceived;
+                AwsIotCore.MqttConnector.Client.StatusUpdated -= Client_StatusUpdated;
+                AwsIotCore.MqttConnector.Client.ShadowUpdated -= Client_ShadowUpdated;
+                AwsIotCore.MqttConnector.Client.Close();
+                AwsIotCore.MqttConnector.Client.Dispose();
+
+                Sntp.Stop();
+                LogDispatcher.LoggerFactory.Dispose();
+            }
+
+            _disposed = true;
+        }
+
         public void Dispose()
         {
-            //should dispose of SD and Char display (at least!)
-#if ORGPAL_THREE
-            palthreeDisplay.Dispose();
-            palAdcExpBoard.Dispose();
-            palthreeInternalAdc.Dispose();
-            palthreeButtons.Dispose();
-#endif
-            //System.IO.FileStream -- Dispose?? (we are already (using))!
-            StorageEventManager.RemovableDeviceInserted -= StorageEventManager_RemovableDeviceInserted;
-            StorageEventManager.RemovableDeviceRemoved -= StorageEventManager_RemovableDeviceRemoved;
 
-            sendTelemetryTimer.Dispose();
-            sendTelemetryTimer = null;
-
-            sendShadowTimer.Dispose();
-            sendShadowTimer = null;
-
-            AwsIotCore.MqttConnector.Client.CloudToDeviceMessage -= Client_CloudToDeviceMessageReceived;
-            AwsIotCore.MqttConnector.Client.StatusUpdated -= Client_StatusUpdated;
-            AwsIotCore.MqttConnector.Client.ShadowUpdated -= Client_ShadowUpdated;
-            AwsIotCore.MqttConnector.Client.Close();
-            AwsIotCore.MqttConnector.Client.Dispose();
-
-            Sntp.Stop();
-            LogDispatcher.LoggerFactory.Dispose();
-            _logger = null;
-
+            if (!_disposed)
+            {
+                Dispose(true);
+                _disposed = true;
+            }
             System.GC.SuppressFinalize(this);
         }
 
         ~Program()
         {
-            Dispose();
+            Dispose(false);
         }
     }
 }
