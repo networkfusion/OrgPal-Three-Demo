@@ -38,7 +38,7 @@ namespace OrgPalThreeDemo
 #if ORGPAL_THREE
         private static Buttons palthreeButtons;
         private static OnboardAdcDevice palthreeInternalAdc;
-        private static OrgPalThreeLcd palthreeDisplay;
+        private static Lcd palthreeDisplay;
         private static AdcExpansionBoard palAdcExpBoard;
 #endif
         private bool _disposed;
@@ -95,10 +95,11 @@ namespace OrgPalThreeDemo
             palthreeInternalAdc = new OnboardAdcDevice();
             palAdcExpBoard = new AdcExpansionBoard();
 
-            palthreeDisplay = new OrgPalThreeLcd();
+            palthreeDisplay = new Lcd();
 
-            palthreeDisplay.Update("Initializing:", "Please Wait...");
-
+            palthreeDisplay.Output.Clear();
+            palthreeDisplay.Output.WriteLine("Initializing:");
+            palthreeDisplay.Output.WriteLine("Please Wait...");
 #endif
 
             try
@@ -117,7 +118,9 @@ namespace OrgPalThreeDemo
             }
 
 #if ORGPAL_THREE
-            palthreeDisplay.Update("Device S/N,", $"{_serialNumber}");
+            palthreeDisplay.Output.Clear();
+            palthreeDisplay.Output.WriteLine("Device S/N,");
+            palthreeDisplay.Output.WriteLine($"{_serialNumber}");
             Thread.Sleep(1000); 
 #endif
 
@@ -128,7 +131,9 @@ namespace OrgPalThreeDemo
             while (!netConnected)
             {
 #if ORGPAL_THREE
-                palthreeDisplay.Update("Initializing:", $"Network... {netConnectionAttempt}");
+                palthreeDisplay.Output.Clear();
+                palthreeDisplay.Output.WriteLine("Initializing:");
+                palthreeDisplay.Output.WriteLine($"Network... {netConnectionAttempt}");
                 Thread.Sleep(1000);
 #endif
                 _logger.LogInformation($"Network Connection Attempt: {netConnectionAttempt}");
@@ -147,7 +152,9 @@ namespace OrgPalThreeDemo
 
 
 #if ORGPAL_THREE
-            palthreeDisplay.Update("Initializing:", "Storage");
+            palthreeDisplay.Output.Clear();
+            palthreeDisplay.Output.WriteLine("Initializing:");
+            palthreeDisplay.Output.WriteLine("Storage");
 #endif
             // add event handlers for Removable Device insertion and removal
             StorageEventManager.RemovableDeviceInserted += StorageEventManager_RemovableDeviceInserted;
@@ -171,7 +178,9 @@ namespace OrgPalThreeDemo
             while (!mqttConnected)
             {
 #if ORGPAL_THREE
-                palthreeDisplay.Update("Initializing:", $"MQTT... {mqttConnectionAttempt}");
+                palthreeDisplay.Output.Clear();
+                palthreeDisplay.Output.WriteLine("Initializing:");
+                palthreeDisplay.Output.WriteLine($"MQTT... {mqttConnectionAttempt}");
 #endif
                 _logger.LogInformation($"MQTT Connection Attempt: {mqttConnectionAttempt}");
                 mqttConnected = SetupMqtt();
@@ -183,12 +192,16 @@ namespace OrgPalThreeDemo
             }
 
 #if ORGPAL_THREE
-            palthreeDisplay.Update("Initializing:", "MQTT Timers...");
+            palthreeDisplay.Output.Clear();
+            palthreeDisplay.Output.WriteLine("Initializing:");
+            palthreeDisplay.Output.WriteLine("MQTT Timers...");
 #endif
             SetupMqttMessageTimers();
 
 #if ORGPAL_THREE
-            palthreeDisplay.Update("Initializing:", "Finished!");
+            palthreeDisplay.Output.Clear();
+            palthreeDisplay.Output.WriteLine("Initializing:");
+            palthreeDisplay.Output.WriteLine("Finished!");
 
             Thread lcdUpdateThread = new Thread(new ThreadStart(LcdUpdate_Thread));
             lcdUpdateThread.Start();
@@ -214,9 +227,9 @@ namespace OrgPalThreeDemo
             try
             {
                 //TODO: create a menu handler to scroll through the display!
-                palthreeDisplay.Update($"{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm")}", //Time shortened to fit on display (excludes seconds)
-                    $"{System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
-
+                palthreeDisplay.Output.Clear();
+                palthreeDisplay.Output.WriteLine($"{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm")}"); //Time shortened to fit on display (excludes seconds)
+                palthreeDisplay.Output.WriteLine( $"{System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
                 Thread.Sleep(2000);
 
                 //var externalIpString = new WebClient().DownloadString("http://icanhazip.com").Replace("\\r\\n", "").Replace("\\n", "").Trim();
@@ -226,8 +239,9 @@ namespace OrgPalThreeDemo
 
                 Thread.Sleep(1000);
 
-                palthreeDisplay.Update($"PCB Temp: { palthreeInternalAdc.GetTemperatureOnBoard().ToString("n2")}C",
-                    $"Voltage: { palthreeInternalAdc.GetBatteryUnregulatedVoltage().ToString("n2")}VDC");
+                palthreeDisplay.Output.Clear();
+                palthreeDisplay.Output.WriteLine($"PCB Temp: { palthreeInternalAdc.GetTemperatureOnBoard().ToString("n2")}C");
+                palthreeDisplay.Output.WriteLine($"Voltage: { palthreeInternalAdc.GetBatteryUnregulatedVoltage().ToString("n2")}VDC");
                 Thread.Sleep(2000); //TODO: arbitary value... what should the update rate be?!
             }
             catch (Exception e)
@@ -264,7 +278,9 @@ namespace OrgPalThreeDemo
                     if (success)
                     {
 #if ORGPAL_THREE
-                        palthreeDisplay.Update("DT SET USING:", "MANAGED SMTP");
+                        palthreeDisplay.Output.Clear();
+                        palthreeDisplay.Output.WriteLine("DT SET USING:");
+                        palthreeDisplay.Output.WriteLine("MANAGED SMTP");
                         Thread.Sleep(1000);
 #endif
                         _logger.LogInformation("Retrived DateTime using Managed NTP Helper class...");
@@ -272,7 +288,9 @@ namespace OrgPalThreeDemo
                     else
                     {
 #if ORGPAL_THREE
-                        palthreeDisplay.Update("DT SET USING:", "UNMANAGED SMTP");
+                        palthreeDisplay.Output.Clear();
+                        palthreeDisplay.Output.WriteLine("DT SET USING:");
+                        palthreeDisplay.Output.WriteLine("UNMANAGED SMTP");
                         Thread.Sleep(1000);
 #endif
                         _logger.LogWarning("Failed to Retrive DateTime (or IP Address)!");
@@ -282,9 +300,13 @@ namespace OrgPalThreeDemo
                     _logger.LogInformation($"RTC = {DateTime.UtcNow}");
 
 #if ORGPAL_THREE
-                    palthreeDisplay.Update("No Network:", $"DT... {DateTime.UtcNow}");
+                    palthreeDisplay.Output.Clear();
+                    palthreeDisplay.Output.WriteLine("No Network:");
+                    palthreeDisplay.Output.WriteLine($"DT... {DateTime.UtcNow}");
                     Thread.Sleep(2000);
-                    palthreeDisplay.Update("No Network:", $"IP... {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
+                    palthreeDisplay.Output.Clear();
+                    palthreeDisplay.Output.WriteLine("No Network:");
+                    palthreeDisplay.Output.WriteLine($"IP... {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
                     Thread.Sleep(2000);
 #endif
                 }
@@ -296,9 +318,13 @@ namespace OrgPalThreeDemo
                 _logger.LogWarning(e.Message.ToString());
 
 #if ORGPAL_THREE
-                palthreeDisplay.Update("Net catch!:", $"RTC... {DateTime.UtcNow}");
+                palthreeDisplay.Output.Clear();
+                palthreeDisplay.Output.WriteLine("Net catch!:");
+                palthreeDisplay.Output.WriteLine($"RTC... {DateTime.UtcNow}");
                 Thread.Sleep(2000);
-                palthreeDisplay.Update("Net catch!:", $"IP... {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
+                palthreeDisplay.Output.Clear();
+                palthreeDisplay.Output.WriteLine("Net catch!:");
+                palthreeDisplay.Output.WriteLine($"IP... {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
                 Thread.Sleep(2000);
 #endif
 
