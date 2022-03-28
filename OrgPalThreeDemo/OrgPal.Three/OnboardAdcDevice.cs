@@ -8,6 +8,7 @@ namespace OrgPal.Three
 {
     public class OnboardAdcDevice : IDisposable
     {
+        private bool _disposed;
         private AdcChannel adcVBAT;
         private AdcChannel adcTemp;
         //private AdcChannel adc420mA;
@@ -115,10 +116,29 @@ namespace OrgPal.Three
         //RTCScheduler.Dispose();
         //        RTCScheduller = null;
 
-        public void Dispose()
+
+        /// <summary>
+        /// Releases unmanaged resources
+        /// and optionally release managed resources
+        /// </summary>
+        /// <param name="disposing"><see langword="true" /> to release both managed and unmanaged resources; <see langword="false" /> to release only unmanaged resources.</param>
+        protected virtual void Dispose(bool disposing)
         {
+            if (_disposed) return;
+
             adcVBAT.Dispose();
             adcTemp.Dispose();
+        }
+
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                Dispose(true);
+                _disposed = true;
+            }
+
+            GC.SuppressFinalize(this);
         }
     }
 }
