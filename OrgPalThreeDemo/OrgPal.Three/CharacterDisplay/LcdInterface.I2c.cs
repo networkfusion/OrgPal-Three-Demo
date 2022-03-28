@@ -12,10 +12,10 @@ namespace Iot.Device.CharacterLcd
         /// Built-in I2c access to the Hd44780 compatible controller. The Philips/NXP LCD driver ICs
         /// (such as the PCF2119x) are examples of this support.
         /// </summary>
-        private class I2c : LcdInterface
+        private sealed class I2c : LcdInterface
         {
             [Flags]
-            private enum ControlByteFlags : byte
+            private enum ControlByte : byte
             {
                 /// <summary>
                 /// When set, another control byte will follow the next data/command byte.
@@ -74,19 +74,19 @@ namespace Iot.Device.CharacterLcd
                 _device.Write(buffer);
             }
 
-            public override void SendCommands(SpanByte commands)
+            public override void SendCommands(SpanByte values)
             {
                 // There is a limit to how much data the controller can accept at once. Haven't found documentation
                 // for this yet, can probably iterate a bit more on this to find a true "max". Not adding additional
                 // logic like SendData as we don't expect a need to send more than a handful of commands at a time.
-                if (commands.Length > 20)
+                if (values.Length > 20)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(commands), "Too many commands in one request.");
+                    throw new ArgumentOutOfRangeException(nameof(values), "Too many commands in one request.");
                 }
 
-                SpanByte buffer = new byte[commands.Length + 1];
+                SpanByte buffer = new byte[values.Length + 1];
                 buffer[0] = 0x00;
-                commands.CopyTo(buffer.Slice(1));
+                values.CopyTo(buffer.Slice(1));
                 _device.Write(buffer);
             }
 
@@ -94,7 +94,7 @@ namespace Iot.Device.CharacterLcd
             {
                 SpanByte buffer = new byte[]
                 {
-                    (byte)ControlByteFlags.RegisterSelect,
+                    (byte)ControlByte.RegisterSelect,
                     value
                 };
                 _device.Write(buffer);
@@ -106,7 +106,7 @@ namespace Iot.Device.CharacterLcd
                 // for this yet, can probably iterate a bit more on this to find a true "max". 40 was too much.
                 const int MaxCopy = 20;
                 SpanByte buffer = new byte[MaxCopy + 1];
-                buffer[0] = (byte)ControlByteFlags.RegisterSelect;
+                buffer[0] = (byte)ControlByte.RegisterSelect;
                 SpanByte bufferData = buffer.Slice(1);
 
                 while (values.Length > 0)
@@ -124,7 +124,7 @@ namespace Iot.Device.CharacterLcd
                 // for this yet, can probably iterate a bit more on this to find a true "max". 40 was too much.
                 const int MaxCopy = 20;
                 SpanByte buffer = new byte[MaxCopy + 1];
-                buffer[0] = (byte)ControlByteFlags.RegisterSelect;
+                buffer[0] = (byte)ControlByte.RegisterSelect;
                 SpanByte bufferData = buffer.Slice(1);
 
                 while (values.Length > 0)

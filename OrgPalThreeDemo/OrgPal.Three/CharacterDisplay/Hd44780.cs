@@ -19,7 +19,7 @@ namespace Iot.Device.CharacterLcd
     ///
     /// This implementation was drawn from numerous datasheets and libraries such as Adafruit_Python_CharLCD.
     /// </remarks>
-    public class Hd44780 : ICharacterLcd, IDisposable
+    public class Hd44780 : ICharacterLcd
     {
         /// <summary>
         /// Command which can be used to clear the display
