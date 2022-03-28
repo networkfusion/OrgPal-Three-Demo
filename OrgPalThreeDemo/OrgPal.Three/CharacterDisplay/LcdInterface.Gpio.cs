@@ -4,7 +4,6 @@
 #nullable enable
 
 using System;
-using System.Device;
 using System.Device.Gpio;
 using System.Threading;
 
@@ -15,7 +14,7 @@ namespace Iot.Device.CharacterLcd
         /// <summary>
         /// Standard direct pin access to the HD44780 controller.
         /// </summary>
-        private class Gpio : LcdInterface
+        private sealed class Gpio : LcdInterface
         {
             /// <summary>
             /// Register select pin. Low is for writing to the instruction
@@ -47,7 +46,7 @@ namespace Iot.Device.CharacterLcd
             private bool _useLastByte;
 
             private GpioController? _controller;
-            private bool _shouldDispose;
+            private readonly bool _shouldDispose;
             private readonly PinValuePair[] _pinBuffer = new PinValuePair[8];
 
             public Gpio(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, float backlightBrightness = 1.0f, int readWritePin = -1, GpioController? controller = null, bool shouldDispose = true)

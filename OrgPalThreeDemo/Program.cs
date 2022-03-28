@@ -38,7 +38,7 @@ namespace OrgPalThreeDemo
 #if ORGPAL_THREE
         private static Buttons palthreeButtons;
         private static OnboardAdcDevice palthreeInternalAdc;
-        private static CharacterDisplay palthreeDisplay;
+        private static OrgPalThreeLcd palthreeDisplay;
         private static AdcExpansionBoard palAdcExpBoard;
 #endif
         private bool _disposed;
@@ -95,10 +95,7 @@ namespace OrgPalThreeDemo
             palthreeInternalAdc = new OnboardAdcDevice();
             palAdcExpBoard = new AdcExpansionBoard();
 
-            palthreeDisplay = new CharacterDisplay
-            {
-                BacklightOn = true
-            };
+            palthreeDisplay = new OrgPalThreeLcd();
 
             palthreeDisplay.Update("Initializing:", "Please Wait...");
 
@@ -203,33 +200,39 @@ namespace OrgPalThreeDemo
 #if ORGPAL_THREE
         private static void LcdUpdate_Thread() //TODO: backlight timeout should be in driver!
         {
-            for ( ; ; )
+            for( ; ; )
             {
-                try
-                {
-                    //palthreeDisplay.BacklightOn = true; //TODO: this causes display corruption!
-                    //TODO: create a menu handler to scroll through the display!
-                    palthreeDisplay.Update($"{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm")}", //Time shortened to fit on display (excludes seconds)
-                        $"{System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
+                //palthreeDisplay.Display.BacklightOn = true;
+                CycleDisplay();
+                //palthreeDisplay.Display.BacklightOn = false;
+                //Thread.Sleep(2000); //TODO: arbitary value... what should the update rate be?!
+            }
+        }
 
-                    Thread.Sleep(2000);
+        private static void CycleDisplay()
+        {
+            try
+            {
+                //TODO: create a menu handler to scroll through the display!
+                palthreeDisplay.Update($"{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm")}", //Time shortened to fit on display (excludes seconds)
+                    $"{System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
 
-                    //var externalIpString = new WebClient().DownloadString("http://icanhazip.com").Replace("\\r\\n", "").Replace("\\n", "").Trim();
-                    ////var externalIp = IPAddress.Parse(externalIpString);
-                    //palthreeDisplay.Update($"{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm")}", //Time shortened to fit on display (excludes seconds)
-                    //    $"WAN: {externalIpString}");
+                Thread.Sleep(2000);
 
-                    Thread.Sleep(1000);
+                //var externalIpString = new WebClient().DownloadString("http://icanhazip.com").Replace("\\r\\n", "").Replace("\\n", "").Trim();
+                ////var externalIp = IPAddress.Parse(externalIpString);
+                //palthreeDisplay.Update($"{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm")}", //Time shortened to fit on display (excludes seconds)
+                //    $"WAN: {externalIpString}");
 
-                    palthreeDisplay.Update($"PCB Temp: { palthreeInternalAdc.GetTemperatureOnBoard().ToString("n2")}C",
-                        $"Voltage: { palthreeInternalAdc.GetBatteryUnregulatedVoltage().ToString("n2")}VDC");
-                    Thread.Sleep(2000); //TODO: arbitary value... what should the update rate be?!
-                    //palthreeDisplay.BacklightOn = false;
-                }
-                catch (Exception e)
-                {
-                    _logger.LogWarning(e.Message.ToString());
-                }
+                Thread.Sleep(1000);
+
+                palthreeDisplay.Update($"PCB Temp: { palthreeInternalAdc.GetTemperatureOnBoard().ToString("n2")}C",
+                    $"Voltage: { palthreeInternalAdc.GetBatteryUnregulatedVoltage().ToString("n2")}VDC");
+                Thread.Sleep(2000); //TODO: arbitary value... what should the update rate be?!
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning(e.Message.ToString());
             }
         }
 

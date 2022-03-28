@@ -20,15 +20,15 @@ namespace Iot.Device.CharacterLcd
     {
         private readonly object _lock;
         private readonly bool _shouldDispose;
-        private ICharacterLcd _lcd;
+        private readonly ICharacterLcd _lcd;
 
         /// <summary>
         /// The text currently on the display (required for arbitrary scrolling)
         /// </summary>
-        private StringBuilder[] _currentData;
-        private LineWrapMode _lineFeedMode;
+        private readonly StringBuilder[] _currentData;
+        //private LineWrapMode _lineFeedMode;
         private TimeSpan _scrollUpDelay;
-        private string _romType;
+        private readonly string _romType;
         private Encoding? _characterEncoding;
 
         /// <summary>
@@ -134,14 +134,7 @@ namespace Iot.Device.CharacterLcd
         /// Sets the Line Feed Mode.
         /// This defines what happens when writting past the end of the line/screen.
         /// </summary>
-        public LineWrapMode LineFeedMode
-        {
-            get => _lineFeedMode;
-            set
-            {
-                _lineFeedMode = value;
-            }
-        }
+        public LineWrapMode LineFeedMode { get; set; }
 
         /// <summary>
         /// Size of the display

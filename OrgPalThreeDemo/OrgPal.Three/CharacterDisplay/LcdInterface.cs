@@ -186,6 +186,7 @@ namespace Iot.Device.CharacterLcd
                 Dispose(true);
                 _disposed = true;
             }
+            GC.SuppressFinalize(this);
         }
     }
 }
