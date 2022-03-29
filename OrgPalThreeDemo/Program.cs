@@ -1,6 +1,11 @@
 ﻿// Copyright (c) NetworkFusion. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+// !!!!!
+// This program targets firmware  ORGPAL_PALTHREE-1.7.4-preview.127
+// Future firmware (or nuget updates) might break it!!!
+// !!!!!
+
 // These defines allow this program to be built for multiple targets. Make sure to use the one you need
 #define ORGPAL_THREE //Comment this out for any other STM32 target!
 
