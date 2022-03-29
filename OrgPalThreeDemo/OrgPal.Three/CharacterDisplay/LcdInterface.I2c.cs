@@ -12,7 +12,9 @@ namespace Iot.Device.CharacterLcd
         /// Built-in I2c access to the Hd44780 compatible controller. The Philips/NXP LCD driver ICs
         /// (such as the PCF2119x) are examples of this support.
         /// </summary>
+#pragma warning disable S101 // Types should be named in PascalCase
         private sealed class I2c : LcdInterface
+#pragma warning restore S101 // Types should be named in PascalCase
         {
             [Flags]
             private enum ControlByte : byte
@@ -57,7 +59,9 @@ namespace Iot.Device.CharacterLcd
             {
                 // Setting the backlight on or off is not supported with 8 bit commands, according to the docs.
                 get => true;
+#pragma warning disable S3237 // "value" parameters should be used
                 set
+#pragma warning restore S3237 // "value" parameters should be used
                 {
                     // Ignore setting the backlight. Exceptions are not expected by user code here, as it is normal to
                     // enable this during initialization, so that it is enabled whether switching it is supported or not.
