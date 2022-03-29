@@ -1,10 +1,15 @@
 ﻿// Copyright (c) NetworkFusion. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-// !!!!!
-// This program targets firmware  ORGPAL_PALTHREE-1.7.4-preview.127
-// Future firmware (or nuget updates) might break it!!!
-// !!!!!
+/*
+    This program targets (and is tested against) firmware  ORGPAL_PALTHREE-1.7.4-preview.127
+    Future firmware (or nuget updates) might break it!!!
+
+    Known Issues:
+        * To deploy (or erase flash) sucessfully, you must press the boards "Reset" button just before...
+        * When the debugger is attached, `System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()` returns "255.255.255.255".
+*/
+
 
 // These defines allow this program to be built for multiple targets. Make sure to use the one you need
 #define ORGPAL_THREE //Comment this out for any other STM32 target!
