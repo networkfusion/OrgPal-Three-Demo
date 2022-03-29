@@ -7,6 +7,7 @@ namespace OrgPal.Three
 {
     public class Buttons : IDisposable
     {
+        private bool _disposed;
         private readonly GpioPin _muxWakeButtonFlowControl;
         private readonly GpioButton _userButton;
         private readonly GpioButton _wakeButton;
@@ -61,12 +62,30 @@ namespace OrgPal.Three
             Debug.WriteLine("Diagnostic Button pressed...!");
         }
 
-        public void Dispose()
+        /// <summary>
+        /// Releases unmanaged resources
+        /// and optionally release managed resources
+        /// </summary>
+        /// <param name="disposing"><see langword="true" /> to release both managed and unmanaged resources; <see langword="false" /> to release only unmanaged resources.</param>
+        protected virtual void Dispose(bool disposing)
         {
+            if (_disposed) return;
+
             _userButton.Dispose();
             _wakeButton.Dispose();
             _diagnosticButton.Dispose();
             _muxWakeButtonFlowControl.Dispose();
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                Dispose(true);
+                _disposed = true;
+            }
+            GC.SuppressFinalize(this);
         }
     }
 }

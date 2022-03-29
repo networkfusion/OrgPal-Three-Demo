@@ -8,6 +8,7 @@ namespace OrgPal.Three
 {
     public class OnboardAdcDevice : IDisposable
     {
+        private bool _disposed;
         private AdcChannel adcVBAT;
         private AdcChannel adcTemp;
         //private AdcChannel adc420mA;
@@ -64,8 +65,8 @@ namespace OrgPal.Three
 
             try
             {
-                var maximumValue = 4095;
-                var analogReference = 3300;
+                var maximumValue = 4095.0;
+                var analogReference = 3300.0;
                 double adcTempCalcValue = (analogReference * adcTemp.ReadValue()) / maximumValue;
                 tempInCent = ((13.582f - Math.Sqrt(184.470724f + (0.01732f * (2230.8f - adcTempCalcValue)))) / (-0.00866f)) + 30;
                 // double tempInF = ((9f / 5f) * tempInCent) + 32f;
@@ -115,10 +116,29 @@ namespace OrgPal.Three
         //RTCScheduler.Dispose();
         //        RTCScheduller = null;
 
-        public void Dispose()
+
+        /// <summary>
+        /// Releases unmanaged resources
+        /// and optionally release managed resources
+        /// </summary>
+        /// <param name="disposing"><see langword="true" /> to release both managed and unmanaged resources; <see langword="false" /> to release only unmanaged resources.</param>
+        protected virtual void Dispose(bool disposing)
         {
+            if (_disposed) return;
+
             adcVBAT.Dispose();
             adcTemp.Dispose();
+        }
+
+        public void Dispose()
+        {
+            if (!_disposed)
+            {
+                Dispose(true);
+                _disposed = true;
+            }
+
+            GC.SuppressFinalize(this);
         }
     }
 }

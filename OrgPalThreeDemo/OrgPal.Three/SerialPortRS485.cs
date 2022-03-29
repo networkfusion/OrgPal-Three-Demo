@@ -6,10 +6,11 @@ namespace OrgPal.Three
 {
     public class SerialPortRS485 : IDisposable
     {
-        private GpioPin _receiveEnablePin; //Drive RE high to let the AutoDirection circuit control the receiver (Default low = off)
-        private GpioPin _driverEnablePin; //must be high for IC to be on, low turns off the IC (Default low = off)
-        private GpioPin _terminationResistorPin; //120ohm as per spec! (default low = off)
-        private GpioPin _portPowerPin;
+        private bool _disposed;
+        private readonly GpioPin _receiveEnablePin; //Drive RE high to let the AutoDirection circuit control the receiver (Default low = off)
+        private readonly GpioPin _driverEnablePin; //must be high for IC to be on, low turns off the IC (Default low = off)
+        private readonly GpioPin _terminationResistorPin; //120ohm as per spec! (default low = off)
+        private readonly GpioPin _portPowerPin;
 
         public SerialPort Port { get; set; }
 
@@ -110,25 +111,43 @@ namespace OrgPal.Three
 
         }
 
-        public void Dispose()
+        /// <summary>
+        /// Releases unmanaged resources
+        /// and optionally release managed resources
+        /// </summary>
+        /// <param name="disposing"><see langword="true" /> to release both managed and unmanaged resources; <see langword="false" /> to release only unmanaged resources.</param>
+        protected virtual void Dispose(bool disposing)
         {
+            if (_disposed) return;
+
             _receiveEnablePin.Dispose();
-            _receiveEnablePin = null;
+            //_receiveEnablePin = null;
             _driverEnablePin.Dispose();
-            _driverEnablePin = null;
+            //_driverEnablePin = null;
             _terminationResistorPin.Dispose();
-            _terminationResistorPin = null;
+            //_terminationResistorPin = null;
             _portPowerPin.Dispose();
-            _portPowerPin = null;
+            //_portPowerPin = null;
 
             if (Port.IsOpen)
-            { 
+            {
                 Port.Close();
             }
             Port.Dispose();
             Port = null;
 
-            System.GC.SuppressFinalize(this);
+
+        }
+
+        public void Dispose()
+        {
+
+            if (!_disposed)
+            {
+                Dispose(true);
+                _disposed = true;
+            }
+            GC.SuppressFinalize(this);
         }
     }
 }

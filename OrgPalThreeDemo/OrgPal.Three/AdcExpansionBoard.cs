@@ -16,7 +16,7 @@ namespace OrgPal.Three
     public class AdcExpansionBoard : IDisposable
     {
         private bool disposed = false;
-        Mcp3428 sensor;
+        private readonly Mcp3428 sensor;
 
         //private readonly float[] lsbValues = new float[] { 0.001f, 0.00025f, 0.0000625f, 0.000015625f };
         //private readonly int[] conversionTimeMilliSecs = new int[] { 5, 20, 70, 270 };
@@ -182,16 +182,29 @@ namespace OrgPal.Three
             return adcValue;
         }
 
+        /// <summary>
+        /// Releases unmanaged resources
+        /// and optionally release managed resources
+        /// </summary>
+        /// <param name="disposing"><see langword="true" /> to release both managed and unmanaged resources; <see langword="false" /> to release only unmanaged resources.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed) return;
+
+            sensor.Dispose();
+        }
+
 
         public void Dispose()
         {
 
             if (!disposed)
-                return;
+            {
+                Dispose(true);
+                disposed = true;
+            }
 
-            sensor.Dispose();
-            sensor = null;
-            disposed = true;
+            GC.SuppressFinalize(this);
         }
     }
 }
