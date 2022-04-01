@@ -28,7 +28,7 @@ namespace OrgPal.Three
         const byte I2C_LCD_ADDRESS_DEFAULT = 0x27; // 0X27 on other models depnding of soldered a0,a1,a2
 
         private readonly I2cDevice _i2cDevice;
-        private GpioPin lcdPowerOnOff { get; set; }
+        private GpioPin lcdPowerOnOff { get; set; } // TODO: if the LCD is powered off, it will likely need re-initializing!
 
         //private readonly Pcf8574 _displayController;
 
