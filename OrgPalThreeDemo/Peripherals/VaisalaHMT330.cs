@@ -1,13 +1,12 @@
 ﻿//using System;
 //using System.Text;
-////using Windows.Devices.Uart;
 
 //namespace OrgPalThreeDemo.Peripherals
 //{
 //    /// <summary>
 //    /// https://www.vaisala.com/sites/default/files/documents/HMT330%20User%27s%20Guide%20in%20English%20M210566EN.pdf
 //    /// </summary>
-//    public class HMT330
+//    public class VaisalaHMT330
 //    {
 
 //        //HMT330(string port)
