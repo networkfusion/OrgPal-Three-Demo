@@ -131,6 +131,9 @@
     <Reference Include="System.Buffers.Binary.BinaryPrimitives">
       <HintPath>..\packages\nanoFramework.System.Buffers.Binary.BinaryPrimitives.1.0.288\lib\System.Buffers.Binary.BinaryPrimitives.dll</HintPath>
     </Reference>
+    <Reference Include="System.Device.Adc">
+      <HintPath>..\packages\nanoFramework.System.Device.Adc.1.0.2\lib\System.Device.Adc.dll</HintPath>
+    </Reference>
     <Reference Include="System.Device.Gpio">
       <HintPath>..\packages\nanoFramework.System.Device.Gpio.1.0.4\lib\System.Device.Gpio.dll</HintPath>
     </Reference>
@@ -138,7 +141,7 @@
       <HintPath>..\packages\nanoFramework.System.Device.I2c.1.0.3\lib\System.Device.I2c.dll</HintPath>
     </Reference>
     <Reference Include="System.Device.Spi">
-      <HintPath>..\packages\nanoFramework.System.Device.Spi.1.0.5\lib\System.Device.Spi.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.System.Device.Spi.1.1.1\lib\System.Device.Spi.dll</HintPath>
     </Reference>
     <Reference Include="System.IO.FileSystem">
       <HintPath>..\packages\nanoFramework.System.IO.FileSystem.1.0.3\lib\System.IO.FileSystem.dll</HintPath>
@@ -157,9 +160,6 @@
     </Reference>
     <Reference Include="System.Threading">
       <HintPath>..\packages\nanoFramework.System.Threading.1.0.4\lib\System.Threading.dll</HintPath>
-    </Reference>
-    <Reference Include="Windows.Devices.Adc">
-      <HintPath>..\packages\nanoFramework.Windows.Devices.Adc.1.5.3\lib\Windows.Devices.Adc.dll</HintPath>
     </Reference>
     <Reference Include="Windows.Storage.Streams">
       <HintPath>..\packages\nanoFramework.Windows.Storage.Streams.1.12.4\lib\Windows.Storage.Streams.dll</HintPath>

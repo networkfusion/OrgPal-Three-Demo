@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Text;
 using System.Threading;
-using Windows.Devices.Adc;
+using System.Device.Adc;
 
 namespace OrgPal.Three
 {
@@ -11,6 +10,7 @@ namespace OrgPal.Three
         private bool _disposed;
         private AdcChannel adcVBAT;
         private AdcChannel adcTemp;
+        private AdcController adcController = new AdcController();
         //private AdcChannel adc420mA;
 
         /// <summary>
@@ -23,8 +23,7 @@ namespace OrgPal.Three
 
             if (adcVBAT == null)
             {
-                AdcController adc1 = AdcController.GetDefault();
-                adcVBAT = adc1.OpenChannel(Pinout.AdcChannel.ADC1_IN8_VBAT);
+                adcVBAT = adcController.OpenChannel(Pinout.AdcChannel.ADC1_IN8_VBAT);
             }
 
             var average = 0;
@@ -58,8 +57,7 @@ namespace OrgPal.Three
 
         public double GetTemperatureOnBoard()
         {
-            AdcController adc1 = AdcController.GetDefault();
-            adcTemp = adc1.OpenChannel(Pinout.AdcChannel.ADC1_IN13_TEMP);
+            adcTemp = adcController.OpenChannel(Pinout.AdcChannel.ADC1_IN13_TEMP);
 
             double tempInCent = 0;
 
@@ -82,8 +80,7 @@ namespace OrgPal.Three
 
         public float GetMcuTemperature()
         {
-            AdcController adc1 = AdcController.GetDefault();
-            adcTemp = adc1.OpenChannel(Pinout.AdcChannel.ADC_CHANNEL_SENSOR);
+            adcTemp = adcController.OpenChannel(Pinout.AdcChannel.ADC_CHANNEL_SENSOR);
             return adcTemp.ReadValue() / 100.00f;
 
             //https://www.st.com/resource/en/datasheet/stm32f769ni.pdf
