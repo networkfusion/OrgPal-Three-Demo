@@ -3,7 +3,7 @@
 
 /*
     This program targets (and is tested against) firmware  ORGPAL_PALTHREE-1.8.0.72
-    `nanoff --masserase --update --target ORGPAL_PALTHREE`
+    `nanoff --masserase --update --target ORGPAL_PALTHREE --fwversion 1.8.0.72`
     Future firmware (or nuget updates) might break it!!!
 
     Known Issues:
