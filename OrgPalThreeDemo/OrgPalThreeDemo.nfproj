@@ -111,7 +111,7 @@
       <HintPath>..\packages\nanoFramework.M2Mqtt.5.0.2\lib\nanoFramework.M2Mqtt.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.Networking.Sntp">
-      <HintPath>..\packages\nanoFramework.Networking.Sntp.1.5.8\lib\nanoFramework.Networking.Sntp.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.Networking.Sntp.1.6.1\lib\nanoFramework.Networking.Sntp.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.ResourceManager">
       <HintPath>..\packages\nanoFramework.ResourceManager.1.1.4\lib\nanoFramework.ResourceManager.dll</HintPath>
@@ -141,7 +141,7 @@
       <HintPath>..\packages\nanoFramework.System.Device.I2c.1.0.3\lib\System.Device.I2c.dll</HintPath>
     </Reference>
     <Reference Include="System.Device.Spi">
-      <HintPath>..\packages\nanoFramework.System.Device.Spi.1.1.1\lib\System.Device.Spi.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.System.Device.Spi.1.2.1\lib\System.Device.Spi.dll</HintPath>
     </Reference>
     <Reference Include="System.IO.FileSystem">
       <HintPath>..\packages\nanoFramework.System.IO.FileSystem.1.0.3\lib\System.IO.FileSystem.dll</HintPath>
