@@ -7,8 +7,7 @@
     Future firmware (or nuget updates) might break it!!!
 
     Known Issues:
-        * To deploy (or erase flash) sucessfully, you must press the boards "Reset" button just before...
-        * When the debugger is attached, `System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()` returns "255.255.255.255".
+        * `System.IO.Streams` reports a conflict. There are no changes, so just ignore it!
 */
 
 
@@ -117,13 +116,14 @@ namespace OrgPalThreeDemo
 
             try
             {
-                var sb = new StringBuilder();
+                // Word has it that string builder is slower on nF! (if required, suppress S1643)!
+                //var sb = new StringBuilder();
                 foreach (byte b in Utilities.UniqueDeviceId) //STM32 devices only!
                 {
-                    sb.Append(b.ToString("X2")); //Generates a unique ID for the device.
-                    //_serialNumber += b.ToString("X2"); // TODO: Using string builder, but word is that it is slower! (if required, suppress S1643)!
+                    //sb.Append(b.ToString("X2")); //Generates a unique ID for the device.
+                    _serialNumber += b.ToString("X2"); 
                 }
-                _serialNumber = sb.ToString();
+                //_serialNumber = sb.ToString();
             }
             catch (Exception)
             {
@@ -134,9 +134,9 @@ namespace OrgPalThreeDemo
             palthreeDisplay.Output.Clear();
             palthreeDisplay.Output.WriteLine("Device S/N,");
             palthreeDisplay.Output.WriteLine($"{_serialNumber}");
+            _logger.LogInformation($"Device Serial number: {_serialNumber}");
+            _logger.LogInformation("");
             Thread.Sleep(1000);
-            //_logger.LogInformation($"Device Serial number: {_serialNumber}");
-            //_logger.LogInformation("");
 
 #endif
 
@@ -248,11 +248,11 @@ namespace OrgPalThreeDemo
                 palthreeDisplay.Output.WriteLine($"{System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
                 Thread.Sleep(2000);
 
-                //var externalIpString = new WebClient().DownloadString("http://icanhazip.com").Replace("\\r\\n", "").Replace("\\n", "").Trim();
-                ////var externalIp = IPAddress.Parse(externalIpString);
-                //palthreeDisplay.Update($"{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm")}", //Time shortened to fit on display (excludes seconds)
-                //    $"WAN: {externalIpString}");
-                //Thread.Sleep(1000);
+                palthreeDisplay.Output.Clear();
+               
+                //palthreeDisplay.Output.WriteLine($"{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm")}"); //Time shortened to fit on display (excludes seconds)
+                //palthreeDisplay.Output.WriteLine($"WAN: {IpHelper.GetPublicIpAddress()}");
+                //Thread.Sleep(2000);
 
                 palthreeDisplay.Output.Clear();
                 palthreeDisplay.Output.WriteLine($"PCB Temp: {palthreeInternalAdc.GetPcbTemperature().ToString("n2")}C");

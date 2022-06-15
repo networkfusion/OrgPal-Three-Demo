@@ -26,7 +26,7 @@ namespace OrgPal.Three
             _muxWakeButtonFlowControl.Write(PinValue.High);
             //_muxWakeButtonFlowControl.ValueChanged += MuxWakeButtonFlowControl_ValueChanged;
 
-            _userButton = new GpioButton(buttonPin: Pinout.GpioPin.BUTTON_USER_BOOT1_PK7);
+            _userButton = new GpioButton(buttonPin: Pinout.GpioPin.BUTTON_USER_BOOT1_PK7); // TODO: something wrong, likely due to: debounceTime: new TimeSpan(0)
             _userButton.Press += _userButton_Press;
 
             _wakeButton = new GpioButton(buttonPin: Pinout.GpioPin.BUTTON_WAKE_PA0);

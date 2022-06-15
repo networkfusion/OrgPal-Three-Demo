@@ -70,6 +70,7 @@ namespace OrgPalThreeDemo.Networking
         /// <returns>Network MAC Address as a string</returns>
         public static string GetMacAsString(char seperator = ':')
         {
+            // TODO: Word has it that string builder is slower on nF! (if required, suppress S1643)!
             var sb = new StringBuilder();
             foreach (byte b in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces()[0].PhysicalAddress)
             {
