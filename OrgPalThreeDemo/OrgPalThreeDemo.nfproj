@@ -19,6 +19,7 @@
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
     <Compile Include="AwsIotCore\MqttConnector.cs" />
+    <Compile Include="Networking\MacAddressHelper.cs" />
     <Compile Include="OrgPal.Three\Lcd.cs" />
     <Compile Include="OrgPal.Three\AdcExpansionBoard.cs" />
     <Compile Include="OrgPal.Three\CharacterDisplay\Flags.cs" />

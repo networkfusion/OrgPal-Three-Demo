@@ -73,6 +73,8 @@ namespace OrgPalThreeDemo
             // a smaller delay might be useful (for break in if necessary)!
             //Thread.Sleep(5000);
 
+            MacAddressHelper.CheckSetDefaultMac();
+
             _logger = new DebugLogger("debugLogger");
 
             if (Debugger.IsAttached)
@@ -137,63 +139,6 @@ namespace OrgPalThreeDemo
             //_logger.LogInformation("");
 
 #endif
-            var _DeviceMacAddress = string.Empty;
-            try
-            {
-                var sb2 = new StringBuilder();
-                foreach (byte b in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces()[0].PhysicalAddress)
-                {
-                    sb2.Append(b.ToString("X2"));
-                }
-                Debug.WriteLine($"mac= {sb2.ToString()}");
-                _DeviceMacAddress = sb2.ToString();
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"mac= ex {ex.ToString()}");
-            }
-
-            //TODO: it would probably be better to compare a byte array (for speed).
-            //var _macBytes = new byte[6];
-            //Array.Copy(System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces()[0].PhysicalAddress, _macBytes, 6);
-            //if (_macBytes[0].Equals(0x00) && _macBytes[1].Equals(0x80) && _macBytes[2].Equals(0xE1) && 
-            //    _macBytes[3].Equals(0x01) && _macBytes[4].Equals(0x35) && _macBytes[5].Equals(0xD1))
-            //{
-            //    Debug.WriteLine($"Speed check!");
-            //    Debug.WriteLine($"WARNING: USING STM32 DEVELOPER MAC");
-            //    Debug.WriteLine($"It is static and might be duplicated on the network!");
-            //    Debug.WriteLine($"Due to this, we will assign a randomized one!");
-            //    _DeviceMacAddress = "0080E10135D1";
-            //}
-
-
-            if (_DeviceMacAddress == "0080E10135D1") //this will only run once, as it seems to be set in flash config.
-            {
-                Debug.WriteLine($"WARNING: USING STM32 DEVELOPER MAC");
-                Debug.WriteLine($"It is static and might be duplicated on the network!");
-                Debug.WriteLine($"Due to this, we will assign a randomized one!");
-                // this is the developer ID, so we should assign a different one!
-                byte[] _newMacArray = new byte[6];
-                Array.Copy(Utilities.UniqueDeviceId, 7, _newMacArray, 1, 5); //use the last 5 bytes of the unique ID
-                _newMacArray[0] = 0x0A; //set the first byte to a static random identifier.
-                //Array.Copy(Utilities.UniqueDeviceId, 6, _newMacArray, 0, 6); //use the last 6 bytes of the unique ID
-                //_newMacArray[0] = (byte)(_newMacArray[0] | 0x0A); // TODO: is this correct!!!
-                System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces()[0].PhysicalAddress = _newMacArray;
-            }
-
-            //try
-            //{
-            //    var sb3 = new StringBuilder();
-            //    foreach (byte b in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces()[0].PhysicalAddress) //STM32 devices only!
-            //    {
-            //        sb3.Append(b.ToString("X2"));
-            //    }
-            //    Debug.WriteLine($"newmac= {sb3.ToString()}");
-            //}
-            //catch (Exception ex)
-            //{
-            //    Debug.WriteLine($"newmac= ex {ex.ToString()}");
-            //}
 
             _logger.LogInformation($"Time before network available: {DateTime.UtcNow.ToString("o")}");
 
