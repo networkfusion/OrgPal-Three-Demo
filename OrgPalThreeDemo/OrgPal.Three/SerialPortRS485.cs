@@ -62,16 +62,16 @@ namespace OrgPal.Three
             {
                 case 1:
                     // Expansion Port 1, (right side of PCB)
-                    _driverEnablePin = gpioController.OpenPin(Pinout.GpioPin.IO_PORT0_PIN_6_PA4, PinMode.Output);
-                    _receiveEnablePin = gpioController.OpenPin(Pinout.GpioPin.IO_PORT0_PIN_7_PH13, PinMode.Output);
-                    _terminationResistorPin = gpioController.OpenPin(Pinout.GpioPin.IO_PORT0_PIN_8_PH14, PinMode.Output);
+                    _driverEnablePin = gpioController.OpenPin(Pinout.GpioPin.IO_PORT0.IO_PORT0_PIN_6_PA4, PinMode.Output);
+                    _receiveEnablePin = gpioController.OpenPin(Pinout.GpioPin.IO_PORT0.IO_PORT0_PIN_7_PH13, PinMode.Output);
+                    _terminationResistorPin = gpioController.OpenPin(Pinout.GpioPin.IO_PORT0.IO_PORT0_PIN_8_PH14, PinMode.Output);
                     Port = new SerialPort(Pinout.UartPort.UART6_IO_PORT0);
                     break;
                 case 2:
                     //Expansion Port 2, (bottom center of PCB)
-                    _driverEnablePin = gpioController.OpenPin(Pinout.GpioPin.IO_PORT1_PIN_6_PK4, PinMode.Output);
-                    _receiveEnablePin = gpioController.OpenPin(Pinout.GpioPin.IO_PORT1_PIN_7_PB8, PinMode.Output);
-                    _terminationResistorPin = gpioController.OpenPin(Pinout.GpioPin.IO_PORT1_PIN_8_PB9, PinMode.Output);
+                    _driverEnablePin = gpioController.OpenPin(Pinout.GpioPin.IO_PORT1.IO_PORT1_PIN_6_PK4, PinMode.Output);
+                    _receiveEnablePin = gpioController.OpenPin(Pinout.GpioPin.IO_PORT1.IO_PORT1_PIN_7_PB8, PinMode.Output);
+                    _terminationResistorPin = gpioController.OpenPin(Pinout.GpioPin.IO_PORT1.IO_PORT1_PIN_8_PB9, PinMode.Output);
                     Port = new SerialPort(Pinout.UartPort.UART7_IO_PORT1);
                     break;
                 default:

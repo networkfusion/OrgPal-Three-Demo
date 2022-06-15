@@ -255,7 +255,7 @@ namespace OrgPalThreeDemo
                 //Thread.Sleep(1000);
 
                 palthreeDisplay.Output.Clear();
-                palthreeDisplay.Output.WriteLine($"PCB Temp: {palthreeInternalAdc.GetTemperatureOnBoard().ToString("n2")}C");
+                palthreeDisplay.Output.WriteLine($"PCB Temp: {palthreeInternalAdc.GetPcbTemperature().ToString("n2")}C");
                 palthreeDisplay.Output.WriteLine($"Voltage: {palthreeInternalAdc.GetBatteryUnregulatedVoltage().ToString("n2")}VDC");
                 Thread.Sleep(2000); //TODO: arbitary value... what should the update rate be?!
             }
@@ -372,6 +372,10 @@ namespace OrgPalThreeDemo
 
                 bool success = AwsIotCore.MqttConnector.Client.Open("nanoframework/device");
                 _logger.LogInformation($"{success}");
+                if (!success)
+                {
+                    return false;
+                }
 
 
                 // Register to messages received:
@@ -382,6 +386,7 @@ namespace OrgPalThreeDemo
                 Thread.Sleep(1000); //ensure that we are ready (and connected)???
                 _logger.LogInformation("");
                 _logger.LogInformation($"Attempting to get AWS IOT shadow... Result was: ");
+                
                 var shadow = AwsIotCore.MqttConnector.Client.GetShadow(new CancellationTokenSource(30000).Token);
                 if (shadow != null)
                 {
@@ -400,6 +405,7 @@ namespace OrgPalThreeDemo
                 else
                 {
                     _logger.LogWarning("Failed!");
+                    return false;
                 }
 
                 return true;
@@ -528,7 +534,7 @@ namespace OrgPalThreeDemo
                         memoryFreeBytes = nanoFramework.Runtime.Native.GC.Run(false),
 #if ORGPAL_THREE
                         batteryVoltage = palthreeInternalAdc.GetBatteryUnregulatedVoltage(),
-                        enclosureTemperatureCelsius = palthreeInternalAdc.GetTemperatureOnBoard(),
+                        enclosureTemperatureCelsius = palthreeInternalAdc.GetPcbTemperature(),
                         mcuTemperatureCelsius = palthreeInternalAdc.GetMcuTemperature(),
                         airTemperatureCelsius = palAdcExpBoard.GetTemperatureFromPT100(),
                         //thermistorTemperatureCelsius = palAdcExpBoard.GetTemperatureFromThermistorNTC1000() //Commented out as causes PRT to be null for some reason!

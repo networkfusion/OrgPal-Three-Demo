@@ -18,11 +18,12 @@ namespace OrgPal.Three
             /// <summary>
             /// Debug LED definition
             /// </summary>
-            public static readonly int Led1 = PortPin('G', 6);
-            public static readonly int Led2 = PortPin('G', 7);
+            public static readonly int Led1 = PortPin('G', 6); // located on the right of the RJ45 port
+            public static readonly int Led2 = PortPin('G', 7); // located bottom middle
 
+            // Buttons located on bottom of board (apart from diagnostics which is on the right middle)
             public static readonly int BUTTON_USER_BOOT1_PK7 = PortPin('K', 7);
-            public static readonly int BUTTON_DIAGNOSTIC_PB7 = PortPin('B', 7); // Hidden by expansion board!
+            public static readonly int BUTTON_DIAGNOSTIC_PB7 = PortPin('B', 7); // Hidden by expansion board on IO_PORT 0!
             public static readonly int BUTTON_WAKE_PA0 = PortPin('A', 0);
             public static readonly int BUTTON_USER_WAKE_PE6 = PortPin('E', 6);
             public static readonly int MUX_EXT_BUTTON_WAKE_PE4 = PortPin('E', 4);
@@ -51,26 +52,42 @@ namespace OrgPal.Three
             /// <summary>
             /// KEPAD PINS definition
             /// </summary>
-            public static readonly int KEY_PIN1 = PortPin('I', 5);
-            public static readonly int KEY_PIN2 = PortPin('I', 4);
-            public static readonly int KEY_PIN3 = PortPin('I', 7);
-            public static readonly int KEY_PIN4 = PortPin('I', 6);
+            public static class KEYPAD_PORT
+            {
+                public static readonly int KEY_PIN1 = PortPin('I', 5);
+                public static readonly int KEY_PIN2 = PortPin('I', 4);
+                public static readonly int KEY_PIN3 = PortPin('I', 7);
+                public static readonly int KEY_PIN4 = PortPin('I', 6);
+            }
 
-            public static readonly int IO_PORT0_PIN_6_PA4 = PortPin('A', 4);
-            public static readonly int IO_PORT0_PIN_7_PH13 = PortPin('H', 13);
-            public static readonly int IO_PORT0_PIN_8_PH14 = PortPin('H', 14);
-            public static readonly int IO_PORT0_PIN_12_PH15 = PortPin('H', 15);
-            public static readonly int IO_PORT0_PIN_13_PG9 = PortPin('G', 9);
-            public static readonly int IO_PORT0_PIN_19_PG10 = PortPin('G', 10);
-            public static readonly int IO_PORT0_PIN_23_INT_PI3 = PortPin('I', 3);
+            /// <summary>
+            /// PORT_0 is the righthand connector
+            /// </summary>
+            public static class IO_PORT0
+            {  
+                public static readonly int IO_PORT0_PIN_6_PA4 = PortPin('A', 4);
+                public static readonly int IO_PORT0_PIN_7_PH13 = PortPin('H', 13);
+                public static readonly int IO_PORT0_PIN_8_PH14 = PortPin('H', 14);
+                public static readonly int IO_PORT0_PIN_12_PH15 = PortPin('H', 15);
+                public static readonly int IO_PORT0_PIN_13_PG9 = PortPin('G', 9);
+                public static readonly int IO_PORT0_PIN_19_PG10 = PortPin('G', 10);
+                public static readonly int IO_PORT0_PIN_23_INT_PI3 = PortPin('I', 3);
+            }
 
-            public static readonly int IO_PORT1_PIN_6_PK4 = PortPin('K', 4);
-            public static readonly int IO_PORT1_PIN_7_PB8 = PortPin('B', 8);
-            public static readonly int IO_PORT1_PIN_8_PB9 = PortPin('B', 9);
-            public static readonly int IO_PORT1_PIN_12_PH9 = PortPin('H', 9);
-            public static readonly int IO_PORT1_PIN_13_PH10 = PortPin('H', 10);
-            public static readonly int IO_PORT1_PIN_19_PH11 = PortPin('H', 11);
-            public static readonly int IO_PORT1_PIN_23_INT_PG2 = PortPin('G', 2);
+            /// <summary>
+            /// PORT_1 is the middle bottom connector
+            /// </summary>
+            public static class IO_PORT1
+            {
+                // PORT_1 is the middle bottom connector
+                public static readonly int IO_PORT1_PIN_6_PK4 = PortPin('K', 4);
+                public static readonly int IO_PORT1_PIN_7_PB8 = PortPin('B', 8);
+                public static readonly int IO_PORT1_PIN_8_PB9 = PortPin('B', 9);
+                public static readonly int IO_PORT1_PIN_12_PH9 = PortPin('H', 9);
+                public static readonly int IO_PORT1_PIN_13_PH10 = PortPin('H', 10);
+                public static readonly int IO_PORT1_PIN_19_PH11 = PortPin('H', 11);
+                public static readonly int IO_PORT1_PIN_23_INT_PG2 = PortPin('G', 2);
+            }
 
             /// <summary>
             /// RS485 PINS definition
@@ -96,7 +113,7 @@ namespace OrgPal.Three
             /// </summary>
             public static readonly int SD_CARD_DETECT = PortPin('E', 5);
 
-            //POWER ON/OFF FOR VARIOUS ON BOARD PERIFERALS
+            //POWER ON/OFF FOR VARIOUS ON BOARD PERIPHERALS
             public static readonly int POWER_LCD_ON_OFF = PortPin('K', 3);
             public static readonly int POWER_4V_ON_OFF_PJ13 = PortPin('J', 13);
             public static readonly int POWER_RS485_ON_OFF_PJ14 = PortPin('J', 14);
