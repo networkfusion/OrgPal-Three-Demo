@@ -2,8 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 /*
-    This program targets (and is tested against) firmware  ORGPAL_PALTHREE-1.8.0.80
-    `nanoff --masserase --update --target ORGPAL_PALTHREE --fwversion 1.8.0.80`
+    This program targets (and is tested against) firmware  ORGPAL_PALTHREE-1.8.0.323
+    `nanoff --masserase --update --target ORGPAL_PALTHREE --fwversion 1.8.0.323`
     Future firmware (or nuget updates) might break it!!!
 
     Known Issues:
@@ -59,7 +59,7 @@ namespace OrgPalThreeDemo
         private static uint messagesSent = 0;
         public const int shadowSendInterval = 1000 * 60 * 60; // 60 minutes, since delta can be sent as and when neccessary 
         public const int telemetrySendInterval = 1000 * 60 * 10; // 10 minute...
-        
+
         private static Timer sendTelemetryTimer; // Dont GC
         private static Timer sendShadowTimer; // Dont GC
 
@@ -132,7 +132,14 @@ namespace OrgPalThreeDemo
             palthreeDisplay.Output.Clear();
             palthreeDisplay.Output.WriteLine("Device S/N,");
             palthreeDisplay.Output.WriteLine($"{_serialNumber}");
-            Thread.Sleep(1000); 
+            Thread.Sleep(1000);
+            //_logger.LogInformation($"Device Serial number: {_serialNumber}");
+            //_logger.LogInformation("");
+            // if (System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces()[0].PhysicalAddress == xxxxxxxxxx)
+            //System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces()[0].PhysicalAddress = Utilities.UniqueDeviceId;
+            //System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces()[0].PhysicalAddress[0] = 0x0A;
+            //_logger.LogInformation($"MAC was static STM32 developer {developerMac}, so was changed to: {newMac}");
+            //}
 #endif
 
             _logger.LogInformation($"Time before network available: {DateTime.UtcNow.ToString("o")}");
@@ -160,6 +167,23 @@ namespace OrgPalThreeDemo
 
             _logger.LogInformation($"Time after network available: {startTime.ToString("o")}");
             _logger.LogInformation("");
+
+
+//#if ORGPAL_THREE
+//            palthreeDisplay.Output.Clear();
+//            palthreeDisplay.Output.WriteLine("Device MAC");
+//            var macAddress = System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces()[0].PhysicalAddress;
+//            var strMacAddress = string.Empty;
+//            foreach (var item in macAddress)
+//            {
+//                strMacAddress += item.ToString("X2");
+//            }
+//            palthreeDisplay.Output.WriteLine($"{strMacAddress}");
+//            Thread.Sleep(1000);
+
+//            //_logger.LogInformation($"Device network MAC: {strMacAddress}");
+//            //_logger.LogInformation("");
+//#endif
 
 
 #if ORGPAL_THREE
@@ -240,19 +264,18 @@ namespace OrgPalThreeDemo
                 //TODO: create a menu handler to scroll through the display!
                 palthreeDisplay.Output.Clear();
                 palthreeDisplay.Output.WriteLine($"{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm")}"); //Time shortened to fit on display (excludes seconds)
-                palthreeDisplay.Output.WriteLine( $"{System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
+                palthreeDisplay.Output.WriteLine($"{System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
                 Thread.Sleep(2000);
 
                 //var externalIpString = new WebClient().DownloadString("http://icanhazip.com").Replace("\\r\\n", "").Replace("\\n", "").Trim();
                 ////var externalIp = IPAddress.Parse(externalIpString);
                 //palthreeDisplay.Update($"{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm")}", //Time shortened to fit on display (excludes seconds)
                 //    $"WAN: {externalIpString}");
-
-                Thread.Sleep(1000);
+                //Thread.Sleep(1000);
 
                 palthreeDisplay.Output.Clear();
-                palthreeDisplay.Output.WriteLine($"PCB Temp: { palthreeInternalAdc.GetTemperatureOnBoard().ToString("n2")}C");
-                palthreeDisplay.Output.WriteLine($"Voltage: { palthreeInternalAdc.GetBatteryUnregulatedVoltage().ToString("n2")}VDC");
+                palthreeDisplay.Output.WriteLine($"PCB Temp: {palthreeInternalAdc.GetTemperatureOnBoard().ToString("n2")}C");
+                palthreeDisplay.Output.WriteLine($"Voltage: {palthreeInternalAdc.GetBatteryUnregulatedVoltage().ToString("n2")}VDC");
                 Thread.Sleep(2000); //TODO: arbitary value... what should the update rate be?!
             }
             catch (Exception e)
@@ -271,7 +294,7 @@ namespace OrgPalThreeDemo
 
             try
             {
-                
+
                 _logger.LogInformation("Waiting for network up and IP address...");
                 var success = NetworkHelper.SetupAndConnectNetwork(requiresDateTime: true, token: cs.Token);
 
@@ -471,7 +494,7 @@ namespace OrgPalThreeDemo
                         operatingSystem = "nanoFramework",
                         platform = SystemInfo.TargetName,
                         cpu = SystemInfo.Platform,
-                        serialNumber = $"SN_{_serialNumber }", //TODO: "SN" should not be needed! but might help in the long run anyway?!
+                        serialNumber = $"SN_{_serialNumber}", //TODO: "SN" should not be needed! but might help in the long run anyway?!
                         bootTimestamp = startTime
                     };
 
@@ -502,10 +525,10 @@ namespace OrgPalThreeDemo
             if (messagesSent < uint.MaxValue)
             {
                 return messagesSent += 1;
-            } 
-            else 
+            }
+            else
             {
-                return messagesSent = 0; 
+                return messagesSent = 0;
             }
         }
 
@@ -518,7 +541,7 @@ namespace OrgPalThreeDemo
 
                     var statusTelemetry = new AwsIotCore.DeviceMessageSchemas.TelemetryMessage
                     {
-                        serialNumber = $"SN_{_serialNumber }", //TODO: "SN" should not be needed! but might help in the long run anyway?!
+                        serialNumber = $"SN_{_serialNumber}", //TODO: "SN" should not be needed! but might help in the long run anyway?!
                         sendTimestamp = DateTime.UtcNow,
                         messageNumber = IncrementTelemtryMessageSentCount(),
                         memoryFreeBytes = nanoFramework.Runtime.Native.GC.Run(false),
@@ -694,7 +717,7 @@ namespace OrgPalThreeDemo
         private static void StorageEventManager_RemovableDeviceInserted(object sender, RemovableDeviceEventArgs e)
         {
             _logger.LogInformation($"Removable Device Event: @ \"{e.Path}\" was inserted.");
-            
+
             // var mqttConfigChange = ReadStorage(e.Path);
             //if (mqttConfigChange)
             //{
