@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Net;
+using System.Net.Http;
 using System.Diagnostics;
 
 namespace OrgPalThreeDemo.Networking
 {
     public static class IpHelper
     {
-        public static IPAddress GetPublicIpAddress(string server = "http://icanhazip.com")//or should this be GetPublicWanIpAddress ?
+        public static IPAddress GetWanAddressIpv4(string server = "http://icanhazip.com")//or should this be GetPublicWanIpAddress ?
         {
-            //var externalIpString = new WebClient().DownloadString(server).Replace("\\r\\n", "").Replace("\\n", "").Trim();
-            //var externalIp = IPAddress.Parse(externalIpString);
-
-            return new IPAddress(0);
+            var externalIpString = new HttpClient().GetString(server); //.Replace("\\r\\n", "").Replace("\\n", "").Trim();
+            return IPAddress.Parse(externalIpString);
         }
 
         public static int Ping(string address)

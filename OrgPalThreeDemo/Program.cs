@@ -242,22 +242,23 @@ namespace OrgPalThreeDemo
         {
             try
             {
+                const int cycleDelay = 2000;  //TODO: arbitary value... what should the update rate be?!
                 //TODO: create a menu handler to scroll through the display!
                 palthreeDisplay.Output.Clear();
                 palthreeDisplay.Output.WriteLine($"{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm")}"); //Time shortened to fit on display (excludes seconds)
                 palthreeDisplay.Output.WriteLine($"{System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
-                Thread.Sleep(2000);
+                Thread.Sleep(cycleDelay);
 
                 palthreeDisplay.Output.Clear();
-               
-                //palthreeDisplay.Output.WriteLine($"{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm")}"); //Time shortened to fit on display (excludes seconds)
-                //palthreeDisplay.Output.WriteLine($"WAN: {IpHelper.GetPublicIpAddress()}");
-                //Thread.Sleep(2000);
+
+                palthreeDisplay.Output.WriteLine($"{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm")}"); //Time shortened to fit on display (excludes seconds)
+                palthreeDisplay.Output.WriteLine($"*{IpHelper.GetWanAddressIpv4()}");
+                Thread.Sleep(cycleDelay);
 
                 palthreeDisplay.Output.Clear();
                 palthreeDisplay.Output.WriteLine($"PCB Temp: {palthreeInternalAdc.GetPcbTemperature().ToString("n2")}C");
                 palthreeDisplay.Output.WriteLine($"Voltage: {palthreeInternalAdc.GetBatteryUnregulatedVoltage().ToString("n2")}VDC");
-                Thread.Sleep(2000); //TODO: arbitary value... what should the update rate be?!
+                Thread.Sleep(cycleDelay);
             }
             catch (Exception e)
             {
@@ -482,7 +483,9 @@ namespace OrgPalThreeDemo
                         platform = SystemInfo.TargetName,
                         cpu = SystemInfo.Platform,
                         serialNumber = $"SN_{_serialNumber}", //TODO: "SN" should not be needed! but might help in the long run anyway?!
-                        bootTimestamp = startTime
+                        bootTimestamp = startTime,
+                        endpointAddressIpv4 = $"{IpHelper.GetWanAddressIpv4()}"
+
                     };
 
                     _logger.LogInformation($"Updating shadow reported properties... "); //wait for result before writeline.

@@ -161,6 +161,9 @@
     <Reference Include="System.Net">
       <HintPath>..\packages\nanoFramework.System.Net.1.9.0.8\lib\System.Net.dll</HintPath>
     </Reference>
+    <Reference Include="System.Net.Http">
+      <HintPath>..\packages\nanoFramework.System.Net.Http.Client.1.4.0.23\lib\System.Net.Http.dll</HintPath>
+    </Reference>
     <Reference Include="System.Threading">
       <HintPath>..\packages\nanoFramework.System.Threading.1.0.4\lib\System.Threading.dll</HintPath>
     </Reference>
