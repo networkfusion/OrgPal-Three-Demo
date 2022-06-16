@@ -14,6 +14,13 @@
 // These defines allow this program to be built for multiple targets. Make sure to use the one you need
 #define ORGPAL_THREE //Comment this out for any other STM32 target!
 
+// These defines allow for "features" that are not ready for primetime!
+// #define ALPHA_FEATURE_FLAG
+// #define BETA_FEATURE_FLAG
+
+// #define ALPHA_FEATURE_FLAG_CL31 // Commented out as needs more work (and inherent issues with STM32 boards)
+// #define BETA_FEATURE_THERMISTOR //Commented out as sometimes causes PRT to be null for some reason!
+
 using nanoFramework.Json;
 using nanoFramework.Runtime.Native;
 using System;
@@ -32,8 +39,6 @@ using nanoFramework.Logging;
 using nanoFramework.Logging.Debug;
 using nanoFramework.Networking;
 using nanoFramework.Hardware.Stm32;
-//using nanoFramework.Logging.Stream;
-
 // TODO: add logging to find out why it does not work when debugger is not attached!
 //using nanoFramework.Logging.Stream; //should probably be only when orgpal?
 
@@ -67,11 +72,6 @@ namespace OrgPalThreeDemo
 
         public static void Main()
         {
-            // Unknown why this is required, but it seems to struggle here when disconnected from debug
-            // ( even worse with fresh power which seems to need to be disconnected for over 12 seconds (Router DHCP?)!
-            // a smaller delay might be useful (for break in if necessary)!
-            //Thread.Sleep(5000);
-
             MacAddressHelper.CheckSetDefaultMac();
 
             _logger = new DebugLogger("debugLogger");
@@ -94,12 +94,15 @@ namespace OrgPalThreeDemo
             _logger.LogInformation("");
 
 #if ORGPAL_THREE
-            //new Thread(() =>
-            //{
-            //    var sensorCL31 = new OrgPalThreeDemo.Peripherals.VaisalaCL31();
-            //    sensorCL31.Open(); // This seems to take too long (given its low baud rate and message size)...
-            //    Thread.Sleep(Timeout.Infinite);
-            //});
+
+#if ALPHA_FEATURE_FLAG_CL31
+            new Thread(() =>
+            {
+                var sensorCL31 = new OrgPalThreeDemo.Peripherals.VaisalaCL31();
+                sensorCL31.Open(); // This seems to take too long (given its low baud rate and message size)...
+                Thread.Sleep(Timeout.Infinite);
+            });
+#endif
 
 
 
@@ -540,7 +543,9 @@ namespace OrgPalThreeDemo
                         enclosureTemperatureCelsius = palthreeInternalAdc.GetPcbTemperature(),
                         mcuTemperatureCelsius = palthreeInternalAdc.GetMcuTemperature(),
                         airTemperatureCelsius = palAdcExpBoard.GetTemperatureFromPT100(),
-                        //thermistorTemperatureCelsius = palAdcExpBoard.GetTemperatureFromThermistorNTC1000() //Commented out as causes PRT to be null for some reason!
+#if BETA_FEATURE_THERMISTOR
+                        thermistorTemperatureCelsius = palAdcExpBoard.GetTemperatureFromThermistorNTC1000()
+#endif
 #endif
                     };
 
