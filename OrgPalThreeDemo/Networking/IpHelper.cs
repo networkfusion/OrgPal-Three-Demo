@@ -16,6 +16,7 @@ namespace OrgPalThreeDemo.Networking
         public static int Ping(string address)
         {
             // lets look at https://github.com/dotnet/runtime/tree/main/src/libraries/System.Net.Ping/src/System/Net/NetworkInformation
+            // or http://www.java2s.com/Code/CSharp/Network/SimplePing.htm
             return int.MaxValue;
         }
     }
