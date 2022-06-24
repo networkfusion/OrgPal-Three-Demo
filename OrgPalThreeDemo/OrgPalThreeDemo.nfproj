@@ -83,10 +83,10 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Iot.Device.Button">
-      <HintPath>..\packages\nanoFramework.Iot.Device.Button.1.1.58.10097\lib\Iot.Device.Button.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.Iot.Device.Button.1.1.113.2032\lib\Iot.Device.Button.dll</HintPath>
     </Reference>
     <Reference Include="Iot.Device.Mcp3428">
-      <HintPath>..\packages\nanoFramework.Iot.Device.Mcp3428.1.1.97.17326\lib\Iot.Device.Mcp3428.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.Iot.Device.Mcp3428.1.1.116.8772\lib\Iot.Device.Mcp3428.dll</HintPath>
     </Reference>
     <Reference Include="Iot.Device.Pcx857x">
       <HintPath>..\packages\nanoFramework.Iot.Device.Pcx857x.1.1.1\lib\Iot.Device.Pca95x4.dll</HintPath>
@@ -132,7 +132,7 @@
       <HintPath>..\packages\nanoFramework.System.Text.1.1.3.13\lib\nanoFramework.System.Text.dll</HintPath>
     </Reference>
     <Reference Include="System.Buffers.Binary.BinaryPrimitives">
-      <HintPath>..\packages\nanoFramework.System.Buffers.Binary.BinaryPrimitives.1.1.95.24058\lib\System.Buffers.Binary.BinaryPrimitives.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.System.Buffers.Binary.BinaryPrimitives.1.1.113.2032\lib\System.Buffers.Binary.BinaryPrimitives.dll</HintPath>
     </Reference>
     <Reference Include="System.Device.Adc">
       <HintPath>..\packages\nanoFramework.System.Device.Adc.1.0.2\lib\System.Device.Adc.dll</HintPath>
