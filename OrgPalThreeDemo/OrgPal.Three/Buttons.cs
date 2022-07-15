@@ -12,6 +12,7 @@ namespace OrgPal.Three
         private readonly GpioButton _userButton;
         private readonly GpioButton _wakeButton;
         private readonly GpioButton _diagnosticButton;
+        //private readonly GpioButton _enclosureButton;
         // TODO: is loader button a thing?
 
 
@@ -27,13 +28,16 @@ namespace OrgPal.Three
             //_muxWakeButtonFlowControl.ValueChanged += MuxWakeButtonFlowControl_ValueChanged;
 
             _userButton = new GpioButton(buttonPin: Pinout.GpioPin.BUTTON_USER_BOOT1_PK7); // TODO: something wrong, likely due to: debounceTime: new TimeSpan(0)
-            _userButton.Press += _userButton_Press;
+            _userButton.Press += UserButton_Press;
 
             _wakeButton = new GpioButton(buttonPin: Pinout.GpioPin.BUTTON_WAKE_PA0);
             _wakeButton.Press += WakeButton_Press;
 
             _diagnosticButton = new GpioButton(buttonPin: Pinout.GpioPin.BUTTON_DIAGNOSTIC_PB7);
             _diagnosticButton.Press += DiagnosticButton_Press;
+
+            //_enclosureButton = new GpioButton(buttonPin: Pinout.GpioPin.MUX_EXT_BUTTON_WAKE_PE4);
+            //_enclosureButton.Press += EnclosureButton_Press;
         }
 
 
@@ -48,7 +52,7 @@ namespace OrgPal.Three
         }
 
         
-        private static void _userButton_Press(object sender, EventArgs e)
+        private static void UserButton_Press(object sender, EventArgs e)
         {
             //TODO: this event seems to fire endlessly (probably MUX)?!
             Debug.WriteLine("USER/BOOT1 button pressed...!");
@@ -60,6 +64,11 @@ namespace OrgPal.Three
         private static void DiagnosticButton_Press(object sender, EventArgs e)
         {
             Debug.WriteLine("Diagnostic Button pressed...!");
+        }
+
+        private static void EnclosureButton_Press(object sender, EventArgs e)
+        {
+            Debug.WriteLine("Enclosure Button pressed...!");
         }
 
         /// <summary>
@@ -74,6 +83,7 @@ namespace OrgPal.Three
             _userButton.Dispose();
             _wakeButton.Dispose();
             _diagnosticButton.Dispose();
+            //_enclosureButton.Dispose();
             _muxWakeButtonFlowControl.Dispose();
         }
 
