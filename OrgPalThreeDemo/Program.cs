@@ -2,8 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 /*
-    This program targets (and is tested against) firmware  ORGPAL_PALTHREE-1.8.0.431
-    `nanoff --masserase --update --target ORGPAL_PALTHREE --fwversion 1.8.0.431`
+    This program targets (and is tested against) firmware  ORGPAL_PALTHREE-1.8.0.841
+    `nanoff --masserase --update --target ORGPAL_PALTHREE --fwversion 1.8.0.841`
     Future firmware (or nuget updates) might break it!!!
 */
 
@@ -53,6 +53,7 @@ namespace OrgPalThreeDemo
         private static Lcd palthreeDisplay;
         private static AdcExpansionBoard palAdcExpBoard;
 #endif
+        private static object monitor = new object();
         private bool _disposed;
         private static string _serialNumber = string.Empty;
 
@@ -172,20 +173,36 @@ namespace OrgPalThreeDemo
             palthreeDisplay.Output.WriteLine("Initializing:");
             palthreeDisplay.Output.WriteLine("Storage");
 #endif
+
+            var rootPath = "D:\\"; //string.Empty;
+
+            //while (rootPath == string.Empty)
+            //{
+            //    rootPath = CheckStorageDevices(); // does not seem to like this on non debug!!
+            //}
+
             // add event handlers for Removable Device insertion and removal
             StorageEventManager.RemovableDeviceInserted += StorageEventManager_RemovableDeviceInserted;
             StorageEventManager.RemovableDeviceRemoved += StorageEventManager_RemovableDeviceRemoved;
 
-            while (AwsIotCore.MqttConnector.RootCA == null || AwsIotCore.MqttConnector.ClientRsaSha256Crt == string.Empty || AwsIotCore.MqttConnector.ClientRsaKey == string.Empty)
+            var storageReadCount = 0;
+            while (!AwsIotCore.MqttConnector.CheckConfigValid())
             {
+                storageReadCount += 1;
                 try
                 {
-                    ReadStorage(); // We cannot start without valid Certs!
+                    var res = ReadStorage(rootPath); // We cannot start without valid Certs!
                 }
                 catch (Exception e)
                 {
+#if ORGPAL_THREE
+                    palthreeDisplay.Output.Clear();
+                    palthreeDisplay.Output.WriteLine("Initializing:");
+                    palthreeDisplay.Output.WriteLine($"Storage... {storageReadCount}");
+#endif
                     _logger.LogWarning(e.Message.ToString());
                 }
+                Thread.Sleep(1000);
             }
 
 
@@ -270,7 +287,7 @@ namespace OrgPalThreeDemo
 
         private static bool SetupNetwork()
         {
-            CancellationTokenSource cs = new CancellationTokenSource(5000); //5 seconds.
+            CancellationTokenSource cs = new CancellationTokenSource(10000); //10 seconds.
                                                                             // We are using TLS and it requires valid date & time (so we should set the option to true, but SNTP is run in the background, and setting it manually causes issues for the moment!!!)
                                                                             // Although setting it to false seems to cause a worse issue. Let us fix this by using a managed class instead.
 
@@ -366,9 +383,9 @@ namespace OrgPalThreeDemo
                 //}
 
                 X509Certificate caCert = new X509Certificate(AwsIotCore.MqttConnector.RootCA); //commented out as alternative: //Resources.GetBytes(Resources.BinaryResources.AwsCAroot)); //should this be in secure storage, or is it fine where it is?
+                Thread.Sleep(1000);
                 X509Certificate2 clientCert = new X509Certificate2(AwsIotCore.MqttConnector.ClientRsaSha256Crt, AwsIotCore.MqttConnector.ClientRsaKey, ""); //make sure to add a correct pfx certificate
-
-
+                Thread.Sleep(1000);
                 AwsIotCore.MqttConnector.Client = new MqttConnectionClient(AwsIotCore.MqttConnector.Host, AwsIotCore.MqttConnector.ThingName, clientCert, MqttConnectionClient.QoSLevel.AtLeastOnce, caCert);
 
                 bool success = AwsIotCore.MqttConnector.Client.Open("nanoframework/device");
@@ -573,31 +590,43 @@ namespace OrgPalThreeDemo
             }
         }
 
-        private static void ReadStorage(string path = "") //TODO: this can fail on redeploy or exiting debug!!!
+        private static string CheckStorageDevices()
         {
             // in nanoFramework, currently the drive letters are fixed, being:
             // D: SD Card
             // E: USB Mass Storage Device
             // I: Internal
 
-            if (string.IsNullOrEmpty(path)) //Generally only "should" happen on initialization.
-            {
-                // list all removable drives
-                var removableDrives = Directory.GetLogicalDrives(); //TODO: FEEDBACK... I Cannot help but feel (since we are no longer attached to UWP, that this should be `SD:` and `USB:`
+            // list all removable drives
+            var removableDrives = Directory.GetLogicalDrives(); //TODO: FEEDBACK... I Cannot help but feel (since we are no longer attached to UWP, that this should be `SD:` and `USB:`
 
-                //TODO: Better handle no removable MSD avaliable?!
-                if (removableDrives.Length == 0) // Arrays are counted by Length. (not a collection!)
-                {
-                    _logger.LogError("NO REMOVABLE STORAGE DEVICE FOUND");
-                    // FIXME: what should we do?!
-                }
-                foreach (var drive in removableDrives)
-                {
-                    _logger.LogInformation($"Found logical drive {drive}");
-                    path = drive;
-                    if (path.StartsWith("D")) break; // Always use the SDcard as the default device.
-                }
+            //TODO: Better handle no removable MSD avaliable?!
+            if (removableDrives.Length == 0) // Arrays are counted by Length. (not a collection!)
+            {
+                _logger.LogError("NO REMOVABLE STORAGE DEVICE FOUND");
+                // FIXME: what should we do?!
             }
+
+            var rootPath = string.Empty;
+            foreach (var drive in removableDrives)
+            {
+                _logger.LogInformation($"Found logical drive {drive}");
+                rootPath = drive;
+                if (drive.StartsWith("D")) break; // Always use the SDcard as the default device.
+            }
+
+            if (string.IsNullOrEmpty(rootPath))
+            {
+                return string.Empty;
+            }
+            else
+            {
+                return rootPath;
+            }    
+        }
+
+        private static bool ReadStorage(string path = "") //TODO: this can fail on redeploy or exiting debug!!!
+        {
 
             if (!string.IsNullOrEmpty(path))
             {
@@ -621,33 +650,83 @@ namespace OrgPalThreeDemo
                     //TODO: we should really check if certs are in the mcu flash before retreiving them from the filesystem (SD).
                     if (file.Contains(".crt"))
                     {
+
                         using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read))
                         {
-                            var buffer = new byte[fs.Length];
-                            fs.Read(buffer, 0, (int)fs.Length);
-                            AwsIotCore.MqttConnector.ClientRsaSha256Crt = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
-                            fs.Flush();
+                            var success = false;
+                            while (!success)
+                            {
+                                try
+                                {
+                                    var buffer = new byte[fs.Length];
+                                    fs.Read(buffer, 0, (int)fs.Length);
+
+                                    AwsIotCore.MqttConnector.ClientRsaSha256Crt = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
+
+                                    fs.Flush();
+                                    fs.Close();
+                                    success = true;
+                                }
+                                catch (Exception)
+                                {
+                                    //TODO: sometimes a json deserialize exception happens. For the moment, just try again.
+                                    _logger.LogWarning("Failed to decode crt, Retrying...");
+                                }
+
+                            }
                         }
+                        
                         //Should load into secure storage (somewhere) and delete file on removable device?
                     }
                     if (file.Contains(".der"))
                     {
                         using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read))
                         {
-                            AwsIotCore.MqttConnector.RootCA = new byte[fs.Length];
-                            fs.Read(AwsIotCore.MqttConnector.RootCA, 0, (int)fs.Length);
-                            fs.Flush();
+                            var success = false;
+                            while (!success)
+                            {
+                                try
+                                {
+                                    AwsIotCore.MqttConnector.RootCA = new byte[fs.Length];
+                                    fs.Read(AwsIotCore.MqttConnector.RootCA, 0, (int)fs.Length);
+                                    fs.Flush();
+                                    fs.Close();
+                                    success = true;
+                                }
+                                catch (Exception)
+                                {
+                                    //TODO: sometimes a json deserialize exception happens. For the moment, just try again.
+                                    _logger.LogWarning("Failed to decode der, Retrying...");
+                                }
+
+                            }
                         }
+
                         //Should load into secure storage (somewhere) and delete file on removable device?
                     }
                     if (file.Contains("key"))
                     {
                         using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read))
                         {
-                            var buffer = new byte[fs.Length];
-                            fs.Read(buffer, 0, (int)fs.Length);
-                            AwsIotCore.MqttConnector.ClientRsaKey = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
-                            fs.Flush();
+                            var success = false;
+                            while (!success)
+                            {
+                                try
+                                {
+                                    var buffer = new byte[fs.Length];
+                                    fs.Read(buffer, 0, (int)fs.Length);
+                                    AwsIotCore.MqttConnector.ClientRsaKey = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
+
+                                    fs.Flush();
+                                    fs.Close();
+                                    success = true;
+                                }
+                                catch (Exception)
+                                {
+                                    //TODO: sometimes a json deserialize exception happens. For the moment, just try again.
+                                    _logger.LogWarning("Failed to decode key, Retrying...");
+                                }
+                            }
                         }
 
                         //Should load into secure storage (somewhere) and delete file on removable device?
@@ -664,22 +743,27 @@ namespace OrgPalThreeDemo
                                     var buffer = new byte[fs.Length];
                                     fs.Read(buffer, 0, (int)fs.Length);
 
-                                    MqttConfigFileSchema config = (MqttConfigFileSchema)JsonConvert.DeserializeObject(Encoding.UTF8.GetString(buffer, 0, buffer.Length), typeof(MqttConfigFileSchema));
-                                    AwsIotCore.MqttConnector.Host = config.Url;
-                                    if (config.Port != null)
+                                    lock (monitor)
                                     {
-                                        AwsIotCore.MqttConnector.Port = int.Parse(config.Port);
+                                        MqttConfigFileSchema config = (MqttConfigFileSchema)JsonConvert.DeserializeObject(Encoding.UTF8.GetString(buffer, 0, buffer.Length), typeof(MqttConfigFileSchema));
+
+                                        AwsIotCore.MqttConnector.Host = config.Url;
+                                        if (config.Port != null)
+                                        {
+                                            AwsIotCore.MqttConnector.Port = int.Parse(config.Port);
+                                        }
+                                        if (!string.IsNullOrEmpty(config.ThingName))
+                                        {
+                                            AwsIotCore.MqttConnector.ThingName = config.ThingName;
+                                        }
+                                        else
+                                        {
+                                            AwsIotCore.MqttConnector.ThingName = _serialNumber;
+                                        }
+                                        fs.Flush();
+                                        fs.Close();
+                                        success = true;
                                     }
-                                    if (!string.IsNullOrEmpty(config.ThingName))
-                                    {
-                                        AwsIotCore.MqttConnector.ThingName = config.ThingName;
-                                    }
-                                    else
-                                    {
-                                        AwsIotCore.MqttConnector.ThingName = _serialNumber;
-                                    }
-                                    fs.Flush();
-                                    success = true;
                                 }
                                 catch (Exception)
                                 {
@@ -696,8 +780,9 @@ namespace OrgPalThreeDemo
 
                 //TODO: shadow should be informed of Storage devices and content
                 //TODO: return MQTTconfigChanged...
+                return true;
             }
-
+            return false;
         }
 
 

@@ -13,5 +13,28 @@ namespace OrgPalThreeDemo.AwsIotCore
         public static string ClientRsaKey { get; set; } = string.Empty; //Device private key copied from AWS
         public static byte[] RootCA { get; set; } //AWS root CA
         public static MqttConnectionClient Client { get; set; }
+
+        public static bool CheckConfigValid()
+        {
+            if (string.IsNullOrEmpty(AwsIotCore.MqttConnector.ClientRsaSha256Crt))
+            {
+                return false;
+            }
+            if (AwsIotCore.MqttConnector.RootCA.Length < 100) // we will presume that it has to be greater...
+            {
+                return false;
+            }
+            if (string.IsNullOrEmpty(AwsIotCore.MqttConnector.ClientRsaKey))
+            {
+                return false;
+            }
+            if (string.IsNullOrEmpty(AwsIotCore.MqttConnector.Host))
+            {
+                return false;
+            }
+
+            return true;
+
+        }
     }
 }
