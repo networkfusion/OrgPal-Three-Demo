@@ -167,7 +167,7 @@ namespace OrgPalThreeDemo
             _logger.LogInformation($"Time after network available: {startTime.ToString("o")}");
             _logger.LogInformation("");
 
-
+            // TODO: handle the case where network is not connected! (should we retry or reboot)?!
 #if ORGPAL_THREE
             palthreeDisplay.Output.Clear();
             palthreeDisplay.Output.WriteLine("Initializing:");
@@ -300,38 +300,32 @@ namespace OrgPalThreeDemo
 
                 if (success) // We received a valid IP
                 {
-                    //_logger.LogWarning($"Failed to receive an IP address and/or valid DateTime. Error: {NetworkHelper.Status}.");
-                    //if (NetworkHelper.HelperException != null)
-                    //{
-                    //    _logger.LogWarning($"Failed to receive an IP address and/or valid DateTime. Error: {NetworkHelper.HelperException}.");
-                    //}
-                    //_logger.LogInformation("It is likely a DateTime problem, so we will now try to set it using a managed helper class!");
 
                     success = Rtc.SetSystemTime(ManagedNtpClient.GetNetworkTime());
-                    //                    if (success)
-                    //                    {
-                    //#if ORGPAL_THREE
-                    //                        palthreeDisplay.Output.Clear();
-                    //                        palthreeDisplay.Output.WriteLine("DT SET USING:");
-                    //                        palthreeDisplay.Output.WriteLine("MANAGED SMTP");
-                    //                        Thread.Sleep(1000);
-                    //#endif
-                    //                        Debug.WriteLine("Retrived DateTime using Managed NTP Helper class...");
-                    //                        //_logger.LogInformation("Retrived DateTime using Managed NTP Helper class...");
-                    //                    }
-                    //                    else
-                    //                    {
-                    //#if ORGPAL_THREE
-                    //                        palthreeDisplay.Output.Clear();
-                    //                        palthreeDisplay.Output.WriteLine("DT SET USING:");
-                    //                        palthreeDisplay.Output.WriteLine("UNMANAGED SMTP");
-                    //                        Thread.Sleep(1000);
-                    //#endif
-                    //                        //_logger.LogWarning("Failed to Retrive DateTime (or IP Address)!");
-                    //                    }
+                    if (success)
+                    {
+#if ORGPAL_THREE
+                        palthreeDisplay.Output.Clear();
+                        palthreeDisplay.Output.WriteLine("NTP DATETIME");
+                        palthreeDisplay.Output.WriteLine("UPDATED");
+#endif
+                        _logger.LogInformation("Retrived DateTime using Managed NTP Helper class...");
+                    }
+                    else
+                    {
+#if ORGPAL_THREE
+                        palthreeDisplay.Output.Clear();
+                        palthreeDisplay.Output.WriteLine("NTP DATETIME");
+                        palthreeDisplay.Output.WriteLine("FAILED");
+                        Thread.Sleep(1000);
+#endif
+                        _logger.LogWarning("Failed to Retrive Managed DateTime!");
+                    }
 
-                    //                    //_logger.LogInformation($"IP = {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
-                    //                    //_logger.LogInformation($"RTC = {DateTime.UtcNow}");
+                }
+                else
+                {
+                    _logger.LogWarning("Failed to get valid IP (and time)");
 
                     //#if ORGPAL_THREE
                     //                    palthreeDisplay.Output.Clear();
@@ -344,10 +338,9 @@ namespace OrgPalThreeDemo
                     //                    Thread.Sleep(2000);
                     //#endif
                 }
-                else
-                {
-                    _logger.LogWarning("Failed to get valid IP (and time)");
-                }
+
+                _logger.LogInformation($"IP = {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
+                _logger.LogInformation($"RTC = {DateTime.UtcNow}");
 
                 return success;
             }
