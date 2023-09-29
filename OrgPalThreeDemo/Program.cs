@@ -202,6 +202,7 @@ namespace OrgPalThreeDemo
 #endif
                     _logger.LogWarning(e.Message.ToString());
                 }
+                Thread.Sleep(1000);
             }
 
 
