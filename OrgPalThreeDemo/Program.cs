@@ -150,13 +150,14 @@ namespace OrgPalThreeDemo
             //palthreeDisplay.Output.WriteLine($"Network... {netConnectionAttempt}");
             //Thread.Sleep(1000);
 #endif
-            //Debug.WriteLine($"Network Connection Attempt: {netConnectionAttempt}");
-            //_logger.LogInformation($"Network Connection Attempt: {netConnectionAttempt}");
-            //while (!netConnected)
-            //{
-                netConnected = SetupNetwork();
-                //Thread.Sleep(2000);
-            //}
+            netConnected = SetupNetwork();
+
+            if (!netConnected)
+            {
+                // We cannot get an IP or valid time so the only thing we can do is reboot to try again!
+                nanoFramework.Runtime.Native.Power.RebootDevice();
+            }
+
 
             startTime = DateTime.UtcNow; //set now because the clock might have been wrong before ntp is checked.
 
@@ -343,17 +344,7 @@ namespace OrgPalThreeDemo
             catch (Exception e)
             {
                 _logger.LogWarning(e.Message.ToString());
-
-#if ORGPAL_THREE
-                palthreeDisplay.Output.Clear();
-                palthreeDisplay.Output.WriteLine("NET ISSUE!:");
-                palthreeDisplay.Output.WriteLine($"RTC... {DateTime.UtcNow}");
-                Thread.Sleep(2000);
-                palthreeDisplay.Output.Clear();
-                palthreeDisplay.Output.WriteLine("Net catch!:");
-                palthreeDisplay.Output.WriteLine($"IP... {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
-                Thread.Sleep(2000);
-#endif
+                
 
                 return false;
             }
