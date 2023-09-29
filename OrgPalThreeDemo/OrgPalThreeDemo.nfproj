@@ -92,7 +92,7 @@
       <HintPath>..\packages\nanoFramework.CoreLibrary.1.14.2\lib\mscorlib.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.Aws.IoTCore.Devices">
-      <HintPath>..\packages\nanoFramework.Aws.IoTCore.Devices.1.1.74\lib\nanoFramework.Aws.IoTCore.Devices.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.Aws.IoTCore.Devices.1.1.81\lib\nanoFramework.Aws.IoTCore.Devices.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.Hardware.Stm32">
       <HintPath>..\packages\nanoFramework.Hardware.Stm32.1.10.2\lib\nanoFramework.Hardware.Stm32.dll</HintPath>
@@ -107,7 +107,10 @@
       <HintPath>..\packages\nanoFramework.Logging.Stream.1.1.63\lib\nanoFramework.Logging.Stream.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.M2Mqtt">
-      <HintPath>..\packages\nanoFramework.M2Mqtt.5.1.79\lib\nanoFramework.M2Mqtt.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.M2Mqtt.5.1.94\lib\nanoFramework.M2Mqtt.dll</HintPath>
+    </Reference>
+    <Reference Include="nanoFramework.M2Mqtt.Core">
+      <HintPath>..\packages\nanoFramework.M2Mqtt.5.1.94\lib\nanoFramework.M2Mqtt.Core.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.Networking.Sntp">
       <HintPath>..\packages\nanoFramework.Networking.Sntp.1.6.18\lib\nanoFramework.Networking.Sntp.dll</HintPath>

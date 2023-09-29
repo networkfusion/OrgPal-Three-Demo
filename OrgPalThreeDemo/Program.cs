@@ -2,8 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 /*
-    This program targets (and is tested against) firmware  ORGPAL_PALTHREE-1.8.1.431
-    `nanoff --masserase --update --target ORGPAL_PALTHREE --fwversion 1.8.1.431`
+    This program targets (and is tested against) firmware  ORGPAL_PALTHREE-1.8.1.603
+    `nanoff --masserase --update --target ORGPAL_PALTHREE --fwversion 1.8.1.603`
     Future firmware (or nuget updates) might break it!!!
 */
 
@@ -137,30 +137,30 @@ namespace OrgPalThreeDemo
             palthreeDisplay.Output.WriteLine($"{_serialNumber}");
             _logger.LogInformation($"Device Serial number: {_serialNumber}");
             _logger.LogInformation("");
-            Thread.Sleep(1000);
 
 #endif
 
             _logger.LogInformation($"Time before network available: {DateTime.UtcNow.ToString("o")}");
 
             var netConnected = false;
-            int netConnectionAttempt = 0;
-            while (!netConnected)
-            {
+            //int netConnectionAttempt = 0;
+            //while (!netConnected)
+            //{
 #if ORGPAL_THREE
                 palthreeDisplay.Output.Clear();
                 palthreeDisplay.Output.WriteLine("Initializing:");
-                palthreeDisplay.Output.WriteLine($"Network... {netConnectionAttempt}");
-                Thread.Sleep(1000);
+                palthreeDisplay.Output.WriteLine($"Network...");
+            //Thread.Sleep(1000);
+            //palthreeDisplay.Output.WriteLine($"Network... {netConnectionAttempt}");
+            //Thread.Sleep(1000);
 #endif
-                _logger.LogInformation($"Network Connection Attempt: {netConnectionAttempt}");
+            //Debug.WriteLine($"Network Connection Attempt: {netConnectionAttempt}");
+            //_logger.LogInformation($"Network Connection Attempt: {netConnectionAttempt}");
+            //while (!netConnected)
+            //{
                 netConnected = SetupNetwork();
-                if (!netConnected)
-                {
-                    netConnectionAttempt += 1;
-                    Thread.Sleep(1000);
-                }
-            }
+                //Thread.Sleep(2000);
+            //}
 
             startTime = DateTime.UtcNow; //set now because the clock might have been wrong before ntp is checked.
 
@@ -202,7 +202,6 @@ namespace OrgPalThreeDemo
 #endif
                     _logger.LogWarning(e.Message.ToString());
                 }
-                Thread.Sleep(1000);
             }
 
 
@@ -220,7 +219,7 @@ namespace OrgPalThreeDemo
                 if (!mqttConnected)
                 {
                     mqttConnectionAttempt += 1;
-                    Thread.Sleep(1000);
+                    Thread.Sleep(10000);
                 }
             }
 
@@ -287,7 +286,7 @@ namespace OrgPalThreeDemo
 
         private static bool SetupNetwork()
         {
-            CancellationTokenSource cs = new CancellationTokenSource(10000); //10 seconds.
+            CancellationTokenSource cs = new CancellationTokenSource(30000); //30 seconds.
                                                                             // We are using TLS and it requires valid date & time (so we should set the option to true, but SNTP is run in the background, and setting it manually causes issues for the moment!!!)
                                                                             // Although setting it to false seems to cause a worse issue. Let us fix this by using a managed class instead.
 
@@ -295,53 +294,58 @@ namespace OrgPalThreeDemo
             {
 
                 _logger.LogInformation("Waiting for network up and IP address...");
-                var success = NetworkHelper.SetupAndConnectNetwork(requiresDateTime: true, token: cs.Token);
+                var success = NetworkHelper.SetupAndConnectNetwork(requiresDateTime: false, token: cs.Token); // SNTP is dodgy, always use our managed class!
 
 
-                if (!success)
+                if (success) // We received a valid IP
                 {
-                    _logger.LogWarning($"Failed to receive an IP address and/or valid DateTime. Error: {NetworkHelper.Status}.");
-                    if (NetworkHelper.HelperException != null)
-                    {
-                        _logger.LogWarning($"Failed to receive an IP address and/or valid DateTime. Error: {NetworkHelper.HelperException}.");
-                    }
-                    _logger.LogInformation("It is likely a DateTime problem, so we will now try to set it using a managed helper class!");
+                    //_logger.LogWarning($"Failed to receive an IP address and/or valid DateTime. Error: {NetworkHelper.Status}.");
+                    //if (NetworkHelper.HelperException != null)
+                    //{
+                    //    _logger.LogWarning($"Failed to receive an IP address and/or valid DateTime. Error: {NetworkHelper.HelperException}.");
+                    //}
+                    //_logger.LogInformation("It is likely a DateTime problem, so we will now try to set it using a managed helper class!");
 
                     success = Rtc.SetSystemTime(ManagedNtpClient.GetNetworkTime());
-                    if (success)
-                    {
-#if ORGPAL_THREE
-                        palthreeDisplay.Output.Clear();
-                        palthreeDisplay.Output.WriteLine("DT SET USING:");
-                        palthreeDisplay.Output.WriteLine("MANAGED SMTP");
-                        Thread.Sleep(1000);
-#endif
-                        _logger.LogInformation("Retrived DateTime using Managed NTP Helper class...");
-                    }
-                    else
-                    {
-#if ORGPAL_THREE
-                        palthreeDisplay.Output.Clear();
-                        palthreeDisplay.Output.WriteLine("DT SET USING:");
-                        palthreeDisplay.Output.WriteLine("UNMANAGED SMTP");
-                        Thread.Sleep(1000);
-#endif
-                        _logger.LogWarning("Failed to Retrive DateTime (or IP Address)!");
-                    }
+                    //                    if (success)
+                    //                    {
+                    //#if ORGPAL_THREE
+                    //                        palthreeDisplay.Output.Clear();
+                    //                        palthreeDisplay.Output.WriteLine("DT SET USING:");
+                    //                        palthreeDisplay.Output.WriteLine("MANAGED SMTP");
+                    //                        Thread.Sleep(1000);
+                    //#endif
+                    //                        Debug.WriteLine("Retrived DateTime using Managed NTP Helper class...");
+                    //                        //_logger.LogInformation("Retrived DateTime using Managed NTP Helper class...");
+                    //                    }
+                    //                    else
+                    //                    {
+                    //#if ORGPAL_THREE
+                    //                        palthreeDisplay.Output.Clear();
+                    //                        palthreeDisplay.Output.WriteLine("DT SET USING:");
+                    //                        palthreeDisplay.Output.WriteLine("UNMANAGED SMTP");
+                    //                        Thread.Sleep(1000);
+                    //#endif
+                    //                        //_logger.LogWarning("Failed to Retrive DateTime (or IP Address)!");
+                    //                    }
 
-                    _logger.LogInformation($"IP = {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
-                    _logger.LogInformation($"RTC = {DateTime.UtcNow}");
+                    //                    //_logger.LogInformation($"IP = {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
+                    //                    //_logger.LogInformation($"RTC = {DateTime.UtcNow}");
 
-#if ORGPAL_THREE
-                    palthreeDisplay.Output.Clear();
-                    palthreeDisplay.Output.WriteLine("No Network:");
-                    palthreeDisplay.Output.WriteLine($"DT... {DateTime.UtcNow}");
-                    Thread.Sleep(2000);
-                    palthreeDisplay.Output.Clear();
-                    palthreeDisplay.Output.WriteLine("No Network:");
-                    palthreeDisplay.Output.WriteLine($"IP... {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
-                    Thread.Sleep(2000);
-#endif
+                    //#if ORGPAL_THREE
+                    //                    palthreeDisplay.Output.Clear();
+                    //                    palthreeDisplay.Output.WriteLine("No Network:");
+                    //                    palthreeDisplay.Output.WriteLine($"DT... {DateTime.UtcNow}");
+                    //                    Thread.Sleep(2000);
+                    //                    palthreeDisplay.Output.Clear();
+                    //                    palthreeDisplay.Output.WriteLine("No Network:");
+                    //                    palthreeDisplay.Output.WriteLine($"IP... {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
+                    //                    Thread.Sleep(2000);
+                    //#endif
+                }
+                else
+                {
+                    _logger.LogWarning("Failed to get valid IP (and time)");
                 }
 
                 return success;
@@ -352,7 +356,7 @@ namespace OrgPalThreeDemo
 
 #if ORGPAL_THREE
                 palthreeDisplay.Output.Clear();
-                palthreeDisplay.Output.WriteLine("Net catch!:");
+                palthreeDisplay.Output.WriteLine("NET ISSUE!:");
                 palthreeDisplay.Output.WriteLine($"RTC... {DateTime.UtcNow}");
                 Thread.Sleep(2000);
                 palthreeDisplay.Output.Clear();
@@ -404,7 +408,7 @@ namespace OrgPalThreeDemo
                 Thread.Sleep(1000); //ensure that we are ready (and connected)???
                 _logger.LogInformation("");
                 _logger.LogInformation($"Attempting to get AWS IOT shadow... Result was: ");
-                
+
                 var shadow = AwsIotCore.MqttConnector.Client.GetShadow(new CancellationTokenSource(30000).Token);
                 if (shadow != null)
                 {
@@ -423,6 +427,8 @@ namespace OrgPalThreeDemo
                 else
                 {
                     _logger.LogWarning("Failed!");
+                    AwsIotCore.MqttConnector.Client.Close();
+                    Thread.Sleep(1000);
                     return false;
                 }
 
@@ -506,7 +512,7 @@ namespace OrgPalThreeDemo
                     };
 
                     _logger.LogInformation($"Updating shadow reported properties... "); //wait for result before writeline.
-                                                                                        //TODO: this should be worked out as part of the shadow property collection?!
+                    //TODO: this should be worked out as part of the shadow property collection?!
                     const string shadowUpdateHeader = "{\"state\":{\"reported\":";
                     const string shadowUpdateFooter = "}}";
                     string shadowJson = $"{shadowUpdateHeader}{JsonConvert.SerializeObject(shadowReportedState)}{shadowUpdateFooter}";
