@@ -36,8 +36,6 @@ using nanoFramework.Logging;
 using nanoFramework.Logging.Debug;
 using nanoFramework.Networking;
 using nanoFramework.Hardware.Stm32;
-// TODO: add logging to find out why it does not work when debugger is not attached!
-//using nanoFramework.Logging.Stream; //should probably be only when orgpal?
 
 #if ORGPAL_THREE
 using OrgPal.Three;
@@ -65,7 +63,6 @@ namespace OrgPalThreeDemo
         private static Timer sendTelemetryTimer; // Dont GC
         private static Timer sendShadowTimer; // Dont GC
 
-        //private static ILoggerFactory _loggerFactory;
         private static ILogger _logger;
 
         public static void Main()
@@ -76,7 +73,6 @@ namespace OrgPalThreeDemo
 
             if (Debugger.IsAttached)
             {
-                //_loggerFactory = (ILoggerFactory)new DebugLoggerFactory();
                 LogDispatcher.LoggerFactory = new DebugLoggerFactory();
             }
             else
@@ -506,6 +502,7 @@ namespace OrgPalThreeDemo
                     };
 
                     _logger.LogInformation($"Updating shadow reported properties... "); //wait for result before writeline.
+                    
                     //TODO: this should be worked out as part of the shadow property collection?!
                     const string shadowUpdateHeader = "{\"state\":{\"reported\":";
                     const string shadowUpdateFooter = "}}";
