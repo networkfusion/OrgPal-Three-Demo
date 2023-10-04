@@ -264,7 +264,7 @@ namespace OrgPalThreeDemo
                 palthreeDisplay.Output.Clear();
 
                 palthreeDisplay.Output.WriteLine($"{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm")}"); //Time shortened to fit on display (excludes seconds)
-                palthreeDisplay.Output.WriteLine($"*{IpHelper.GetWanAddressIpv4()}");
+                palthreeDisplay.Output.WriteLine($"*{IpHelper.GetWanIpAddress()}");
                 Thread.Sleep(cycleDelay);
 
                 palthreeDisplay.Output.Clear();
@@ -475,7 +475,7 @@ namespace OrgPalThreeDemo
                         cpu = SystemInfo.Platform,
                         serialNumber = $"SN_{_serialNumber}", //TODO: "SN" should not be needed! but might help in the long run anyway?!
                         bootTimestamp = startTime,
-                        endpointAddressIpv4 = $"{IpHelper.GetWanAddressIpv4()}"
+                        endpointAddressIpv4 = $"{IpHelper.GetWanIpAddress()}"
 
                     };
 
@@ -526,12 +526,12 @@ namespace OrgPalThreeDemo
                         serialNumber = $"SN_{_serialNumber}", //TODO: "SN" should not be needed! but might help in the long run anyway?!
                         sendTimestamp = DateTime.UtcNow,
                         messageNumber = IncrementTelemtryMessageSentCount(),
-                        memoryFreeBytes = nanoFramework.Runtime.Native.GC.Run(false),
+                        memoryFreeBytes = nanoFramework.Runtime.Native.GC.Run(false), // TODO: we only want to monitor rather than change.
 #if ORGPAL_THREE
                         batteryVoltage = palthreeInternalAdc.GetBatteryUnregulatedVoltage(),
-                        enclosureTemperatureCelsius = palthreeInternalAdc.GetPcbTemperature(),
+                        pcbTemperatureCelsius = palthreeInternalAdc.GetPcbTemperature(),
                         mcuTemperatureCelsius = palthreeInternalAdc.GetMcuTemperature(),
-                        airTemperatureCelsius = palAdcExpBoard.GetTemperatureFromPT100(),
+                        pt100TemperatureCelsius = palAdcExpBoard.GetTemperatureFromPT100(),
 #if BETA_FEATURE_THERMISTOR
                         thermistorTemperatureCelsius = palAdcExpBoard.GetTemperatureFromThermistorNTC1000()
 #endif
