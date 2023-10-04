@@ -146,9 +146,6 @@ namespace OrgPalThreeDemo
                 palthreeDisplay.Output.Clear();
                 palthreeDisplay.Output.WriteLine("Initializing:");
                 palthreeDisplay.Output.WriteLine($"Network...");
-            //Thread.Sleep(1000);
-            //palthreeDisplay.Output.WriteLine($"Network... {netConnectionAttempt}");
-            //Thread.Sleep(1000);
 #endif
             netConnected = SetupNetwork();
 
@@ -156,6 +153,7 @@ namespace OrgPalThreeDemo
             {
                 // We cannot get an IP or valid time so the only thing we can do is reboot to try again!
                 nanoFramework.Runtime.Native.Power.RebootDevice();
+                // FIXME: Actually, we "should" use an event to wait for a valid IP?!
             }
 
 
@@ -323,17 +321,6 @@ namespace OrgPalThreeDemo
                 else
                 {
                     _logger.LogWarning("Failed to get valid IP (and time)");
-
-                    //#if ORGPAL_THREE
-                    //                    palthreeDisplay.Output.Clear();
-                    //                    palthreeDisplay.Output.WriteLine("No Network:");
-                    //                    palthreeDisplay.Output.WriteLine($"DT... {DateTime.UtcNow}");
-                    //                    Thread.Sleep(2000);
-                    //                    palthreeDisplay.Output.Clear();
-                    //                    palthreeDisplay.Output.WriteLine("No Network:");
-                    //                    palthreeDisplay.Output.WriteLine($"IP... {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
-                    //                    Thread.Sleep(2000);
-                    //#endif
                 }
 
                 _logger.LogInformation($"IP = {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");

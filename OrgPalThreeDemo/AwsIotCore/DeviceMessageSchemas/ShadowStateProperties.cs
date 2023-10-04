@@ -11,6 +11,8 @@ namespace OrgPalThreeDemo.AwsIotCore.DeviceMessageSchemas
         public string serialNumber { get; set; } = string.Empty;
         public DateTime bootTimestamp { get; set; } = new DateTime();
         public string endpointAddressIpv4 { get; set; } = string.Empty;
+        // public string endpointAddressIpv6 { get; set; } = string.Empty;
+        // public string endpointGeoLocation { get; set; } = string.Empty;
 #pragma warning restore IDE1006 // Naming Styles
     }
 }
