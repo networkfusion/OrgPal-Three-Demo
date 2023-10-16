@@ -16,7 +16,7 @@
 // #define BETA_FEATURE_FLAG
 
 // #define ALPHA_FEATURE_FLAG_CL31 // Commented out as needs more work (and inherent issues with STM32 boards)
-// #define BETA_FEATURE_THERMISTOR //Commented out as sometimes causes PRT to be null for some reason!
+//#define BETA_FEATURE_THERMISTOR //Commented out as sometimes causes PT100 temp to be null for some reason!
 
 using nanoFramework.Json;
 using nanoFramework.Runtime.Native;
@@ -78,7 +78,7 @@ namespace OrgPalThreeDemo
             else
             {
                 // TODO: Dont bother with logging, but we should (potentially) redirect to a file!
-                //TODO: Cannot actually use this yet as storage is not setup!
+                // Cannot actually use this yet as storage is not setup!
                 //var _stream = new FileStream("D:\\logging.txt", FileMode.Open, FileAccess.ReadWrite);
                 //LogDispatcher.LoggerFactory = new StreamLoggerFactory(_stream);
             }
@@ -139,9 +139,6 @@ namespace OrgPalThreeDemo
             _logger.LogInformation($"Time before network available: {DateTime.UtcNow.ToString("o")}");
 
             var netConnected = false;
-            //int netConnectionAttempt = 0;
-            //while (!netConnected)
-            //{
 #if ORGPAL_THREE
                 palthreeDisplay.Output.Clear();
                 palthreeDisplay.Output.WriteLine("Initializing:");
@@ -152,7 +149,7 @@ namespace OrgPalThreeDemo
             if (!netConnected)
             {
                 // We cannot get an IP or valid time so the only thing we can do is reboot to try again!
-                nanoFramework.Runtime.Native.Power.RebootDevice();
+                //nanoFramework.Runtime.Native.Power.RebootDevice();
                 // FIXME: Actually, we "should" use an event to wait for a valid IP?!
             }
 
@@ -257,6 +254,7 @@ namespace OrgPalThreeDemo
                 const int cycleDelay = 2000;  //TODO: arbitary value... what should the update rate be?!
                 //TODO: create a menu handler to scroll through the display!
                 palthreeDisplay.Output.Clear();
+
                 palthreeDisplay.Output.WriteLine($"{DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm")}"); //Time shortened to fit on display (excludes seconds)
                 palthreeDisplay.Output.WriteLine($"{System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
                 Thread.Sleep(cycleDelay);
@@ -268,9 +266,11 @@ namespace OrgPalThreeDemo
                 Thread.Sleep(cycleDelay);
 
                 palthreeDisplay.Output.Clear();
+
                 palthreeDisplay.Output.WriteLine($"PCB Temp: {palthreeInternalAdc.GetPcbTemperature().ToString("n2")}C");
-                palthreeDisplay.Output.WriteLine($"Voltage: {palthreeInternalAdc.GetBatteryUnregulatedVoltage().ToString("n2")}VDC");
+                palthreeDisplay.Output.WriteLine($"Voltage: {palthreeInternalAdc.GetUnregulatedInputVoltage().ToString("n2")}VDC");
                 Thread.Sleep(cycleDelay);
+
             }
             catch (Exception e)
             {
@@ -282,7 +282,7 @@ namespace OrgPalThreeDemo
 
         private static bool SetupNetwork()
         {
-            CancellationTokenSource cs = new CancellationTokenSource(30000); //30 seconds.
+            CancellationTokenSource cs = new CancellationTokenSource(60000); //60 seconds.
                                                                             // We are using TLS and it requires valid date & time (so we should set the option to true, but SNTP is run in the background, and setting it manually causes issues for the moment!!!)
                                                                             // Although setting it to false seems to cause a worse issue. Let us fix this by using a managed class instead.
 
@@ -526,16 +526,17 @@ namespace OrgPalThreeDemo
                         serialNumber = $"SN_{_serialNumber}", //TODO: "SN" should not be needed! but might help in the long run anyway?!
                         sendTimestamp = DateTime.UtcNow,
                         messageNumber = IncrementTelemtryMessageSentCount(),
-                        memoryFreeBytes = nanoFramework.Runtime.Native.GC.Run(false), // TODO: we only want to monitor rather than change.
 #if ORGPAL_THREE
-                        batteryVoltage = palthreeInternalAdc.GetBatteryUnregulatedVoltage(),
+                        batteryVoltage = palthreeInternalAdc.GetUnregulatedInputVoltage(),
                         pcbTemperatureCelsius = palthreeInternalAdc.GetPcbTemperature(),
                         mcuTemperatureCelsius = palthreeInternalAdc.GetMcuTemperature(),
                         pt100TemperatureCelsius = palAdcExpBoard.GetTemperatureFromPT100(),
 #if BETA_FEATURE_THERMISTOR
-                        thermistorTemperatureCelsius = palAdcExpBoard.GetTemperatureFromThermistorNTC1000()
+                        thermistorTemperatureCelsius = palAdcExpBoard.GetTemperatureFromThermistorNTC1000(),
 #endif
 #endif
+                        // Run last to ensure it does not affect readings.
+                        memoryFreeBytes = nanoFramework.Runtime.Native.GC.Run(false) // FIXME: we only want to monitor rather than change.
                     };
 
                     string sampleData = JsonConvert.SerializeObject(statusTelemetry);

@@ -32,6 +32,7 @@ namespace OrgPalThreeDemo.Networking
                 SetMacFromUniqueDeviceId();
 
                 Debug.WriteLine($"New MAC Set: {GetMacAsString()}");
+                nanoFramework.Runtime.Native.Power.RebootDevice(); // Reboot to make sure MAC is used properly.
             }
         }
 

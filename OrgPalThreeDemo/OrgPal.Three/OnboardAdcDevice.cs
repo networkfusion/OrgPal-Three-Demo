@@ -13,13 +13,21 @@ namespace OrgPal.Three
         private AdcController adcController = new AdcController();
         //private AdcChannel adc420mA;
 
+        // ADC constants
+        private const int ANALOG_REF_VALUE = 3300;
+        private const int MAX_ADC_VALUE = 4095;
+
         /// <summary>
-        /// Returns the value of the 12V battery voltage coming in the system 
+        /// Read the power supply input voltage.
         /// </summary>
-        /// <returns></returns>
-        public double GetBatteryUnregulatedVoltage()
+        /// <remarks>
+        /// This should be 9-24VDC
+        /// </remarks>
+        /// <param name="samplesToTake">Number of samples to read for an average</param>
+        /// <returns>The voltage as VDC.</returns>
+        public double GetUnregulatedInputVoltage(byte samplesToTake = 5)
         {
-            float voltage = 0;
+            var voltage = 0f;
 
             if (adcVBAT == null)
             {
@@ -27,50 +35,53 @@ namespace OrgPal.Three
             }
 
             var average = 0;
-            for (byte i = 0; i < 5; i++)
+            for (byte i = 0; i < samplesToTake; i++)
             {
                 average += adcVBAT.ReadValue();
 
-                Thread.Sleep(50);//pause to stabilize
+                Thread.Sleep(50); // pause to stabilize
             }
 
             try
             {
-                average /= 5;
+                average /= samplesToTake;
 
-                //maximumValue = 4095;
-                //analogReference = 3300;
                 //VBat = 0.25 x VIN adc count
-                //float voltage = ((3300 * average) / 4096)* 4;
+                //float voltage = ((ANALOG_REF_VALUE * average) / MAX_ADC_VALUE)* 4;
 
-                voltage = ((3300 * average) / 4096) * 0.004f;
+                voltage = ((ANALOG_REF_VALUE * average) / MAX_ADC_VALUE) * 0.004f;
 
-                voltage += 0.25f;//small offset calibration factor for board to even drop on measure
+                voltage += 0.25f; // small offset calibration factor for board to even drop on measure
             }
             catch
             {
-                Debug.WriteLine("OnboardAdcDevice: GetBatteryUnregulatedVoltage failed!");
+                Debug.WriteLine("OnboardAdcDevice: GetUnregulatedInputVoltage failed!");
             }
 
             return voltage;
         }
 
+        /// <summary>
+        /// Reads the board PCB temperature sensor value.
+        /// </summary>
+        /// <param name="celsius">Return celsius by default, otherwise f</param>
+        /// <param name="samplesToTake">Number of samples to read for average</param>
+        /// <returns>Temperature value.</returns>
         public double GetPcbTemperature(bool celsius = true)
         {
             adcTemp = adcController.OpenChannel(Pinout.AdcChannel.ADC1_IN13_TEMP);
 
-            double tempInCent = 0;
+            var tempInCent = 0.0d;
+
 
             try
             {
-                var maximumValue = 4095.0;
-                var analogReference = 3300.0;
-                double adcTempCalcValue = (analogReference * adcTemp.ReadValue()) / maximumValue;
-                tempInCent = ((13.582f - Math.Sqrt(184.470724f + (0.01732f * (2230.8f - adcTempCalcValue)))) / (-0.00866f)) + 30;
+                double adcTempCalcValue = (ANALOG_REF_VALUE * adcTemp.ReadValue()) / MAX_ADC_VALUE;
+                tempInCent = ((13.582f - Math.Sqrt(184.470724f + (0.01732f * (2230.8f - adcTempCalcValue)))) / (-0.00866f)) + 30f;
             }
             catch
             {
-                Debug.WriteLine("OnboardAdcDevice: GetTemperatureOnBoard failed!");
+                Debug.WriteLine("OnboardAdcDevice: GetPcbTemperature failed!");
             }
             if (celsius)
             {
