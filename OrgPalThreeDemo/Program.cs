@@ -98,7 +98,7 @@ namespace OrgPalThreeDemo
             });
 #endif
 
-
+            Sounds.PlayDefaultSound();
 
             palthreeButtons = new Buttons();
             palthreeInternalAdc = new OnboardAdcDevice();
@@ -290,32 +290,32 @@ namespace OrgPalThreeDemo
             {
 
                 _logger.LogInformation("Waiting for network up and IP address...");
-                var success = NetworkHelper.SetupAndConnectNetwork(requiresDateTime: false, token: cs.Token); // SNTP is dodgy, always use our managed class!
+                var success = NetworkHelper.SetupAndConnectNetwork(requiresDateTime: true, token: cs.Token); // TODO: if SNTP is dodgy, use our managed class!
 
 
                 if (success) // We received a valid IP
                 {
 
-                    success = Rtc.SetSystemTime(ManagedNtpClient.GetNetworkTime());
-                    if (success)
-                    {
-#if ORGPAL_THREE
-                        palthreeDisplay.Output.Clear();
-                        palthreeDisplay.Output.WriteLine("NTP DATETIME");
-                        palthreeDisplay.Output.WriteLine("UPDATED");
-#endif
-                        _logger.LogInformation("Retrived DateTime using Managed NTP Helper class...");
-                    }
-                    else
-                    {
-#if ORGPAL_THREE
-                        palthreeDisplay.Output.Clear();
-                        palthreeDisplay.Output.WriteLine("NTP DATETIME");
-                        palthreeDisplay.Output.WriteLine("FAILED");
-                        Thread.Sleep(1000);
-#endif
-                        _logger.LogWarning("Failed to Retrive Managed DateTime!");
-                    }
+//                    success = Rtc.SetSystemTime(ManagedNtpClient.GetNetworkTime());
+//                    if (success)
+//                    {
+//#if ORGPAL_THREE
+//                        palthreeDisplay.Output.Clear();
+//                        palthreeDisplay.Output.WriteLine("NTP DATETIME");
+//                        palthreeDisplay.Output.WriteLine("UPDATED");
+//#endif
+//                        _logger.LogInformation("Retrived DateTime using Managed NTP Helper class...");
+//                    }
+//                    else
+//                    {
+//#if ORGPAL_THREE
+//                        palthreeDisplay.Output.Clear();
+//                        palthreeDisplay.Output.WriteLine("NTP DATETIME");
+//                        palthreeDisplay.Output.WriteLine("FAILED");
+//                        Thread.Sleep(1000);
+//#endif
+//                        _logger.LogWarning("Failed to Retrive Managed DateTime!");
+//                    }
 
                 }
                 else
