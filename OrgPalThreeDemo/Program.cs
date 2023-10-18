@@ -360,8 +360,7 @@ namespace OrgPalThreeDemo
 
                     _logger.LogInformation($"Converted shadow to a json (string):");
                     _logger.LogInformation("------------------");
-                    Debug.WriteLine($"{shadow.ToJson()}");
-                    //_logger.LogInformation($"{shadow.ToJson()}"); //TODO: Throws exception!
+                    _logger.LogInformation($"{shadow.ToJson()}");
                     _logger.LogInformation("------------------");
                     _logger.LogInformation("");
                 }
@@ -415,12 +414,11 @@ namespace OrgPalThreeDemo
         private static void Client_StatusUpdated(object sender, StatusUpdatedEventArgs e)
         {
             //TODO: handle it properly!
-            Debug.WriteLine($"Program: Received a status update: {e.Status.State}"); //TODO: preferabily as a string?!
-            //_logger.LogInformation($"Program: Received a status update: {e.Status.State}"); //TODO: Throws exception!
+            _logger.LogInformation($"Program: Received a status update: {e.Status.State}");
             if (!string.IsNullOrEmpty(e.Status.Message))
             {
-                Debug.WriteLine($" with message {e.Status.Message}"); //TODO: does this need converting?
-                //_logger.LogInformation($" with message {e.Status.Message}"); //TODO: Throws exception!
+                //Debug.WriteLine($" with message {e.Status.Message}"); //TODO: does this need converting?
+                _logger.LogInformation($" with message {e.Status.Message}"); //TODO: Throws exception!
             }
         }
 
@@ -458,8 +456,7 @@ namespace OrgPalThreeDemo
                     const string shadowUpdateHeader = "{\"state\":{\"reported\":";
                     const string shadowUpdateFooter = "}}";
                     string shadowJson = $"{shadowUpdateHeader}{JsonConvert.SerializeObject(shadowReportedState)}{shadowUpdateFooter}";
-                    Debug.WriteLine($"  With json: {shadowJson}");
-                    //_logger.LogInformation($"  With json: {shadowJson}"); //TODO: Throws exception!
+                    _logger.LogInformation($"  With json: {shadowJson}");
                     var shadow = new Shadow(shadowJson);
                     bool updateResult = AwsIotCore.MqttConnector.Client.UpdateReportedState(shadow);
 
@@ -515,8 +512,7 @@ namespace OrgPalThreeDemo
                     string sampleData = JsonConvert.SerializeObject(statusTelemetry);
                     AwsIotCore.MqttConnector.Client.SendMessage(sampleData); // ($"{AwsMqtt.ThingName}/data", Encoding.UTF8.GetBytes(sampleData), MqttQoSLevel.AtMostOnce, false);
 
-                    Debug.WriteLine("Message sent: " + sampleData);
-                    //_logger.LogInformation("Message sent: " + sampleData); //TODO: Throws exception!
+                    _logger.LogInformation("Message sent: " + sampleData);
                 }
                 catch (Exception ex)
                 {
