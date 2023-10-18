@@ -58,7 +58,7 @@ namespace OrgPalThreeDemo
         private static DateTime startTime = DateTime.UtcNow;
         private static uint messagesSent = 0;
         public const int shadowSendInterval = 1000 * 60 * 60; // 60 minutes, since delta can be sent as and when neccessary 
-        public const int telemetrySendInterval = 1000 * 60 * 10; // 10 minute...
+        public const int telemetrySendInterval = 1000 * 60; // 1 minute (for debugging) // * 10; // 10 minute...
 
         private static Timer sendTelemetryTimer; // Dont GC
         private static Timer sendShadowTimer; // Dont GC
@@ -284,43 +284,17 @@ namespace OrgPalThreeDemo
         {
             CancellationTokenSource cs = new CancellationTokenSource(60000); //60 seconds.
                                                                             // We are using TLS and it requires valid date & time (so we should set the option to true, but SNTP is run in the background, and setting it manually causes issues for the moment!!!)
-                                                                            // Although setting it to false seems to cause a worse issue. Let us fix this by using a managed class instead.
 
             try
             {
 
                 _logger.LogInformation("Waiting for network up and IP address...");
-                var success = NetworkHelper.SetupAndConnectNetwork(requiresDateTime: true, token: cs.Token); // TODO: if SNTP is dodgy, use our managed class!
+                var success = NetworkHelper.SetupAndConnectNetwork(requiresDateTime: true, token: cs.Token);
 
-
-                if (success) // We received a valid IP
-                {
-
-//                    success = Rtc.SetSystemTime(ManagedNtpClient.GetNetworkTime());
-//                    if (success)
-//                    {
-//#if ORGPAL_THREE
-//                        palthreeDisplay.Output.Clear();
-//                        palthreeDisplay.Output.WriteLine("NTP DATETIME");
-//                        palthreeDisplay.Output.WriteLine("UPDATED");
-//#endif
-//                        _logger.LogInformation("Retrived DateTime using Managed NTP Helper class...");
-//                    }
-//                    else
-//                    {
-//#if ORGPAL_THREE
-//                        palthreeDisplay.Output.Clear();
-//                        palthreeDisplay.Output.WriteLine("NTP DATETIME");
-//                        palthreeDisplay.Output.WriteLine("FAILED");
-//                        Thread.Sleep(1000);
-//#endif
-//                        _logger.LogWarning("Failed to Retrive Managed DateTime!");
-//                    }
-
-                }
-                else
+                if (!success)
                 {
                     _logger.LogWarning("Failed to get valid IP (and time)");
+
                 }
 
                 _logger.LogInformation($"IP = {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
@@ -332,7 +306,6 @@ namespace OrgPalThreeDemo
             {
                 _logger.LogWarning(e.Message.ToString());
                 
-
                 return false;
             }
 
