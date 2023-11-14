@@ -159,7 +159,6 @@ namespace OrgPalThreeDemo
             _logger.LogInformation($"Time after network available: {startTime.ToString("o")}");
             _logger.LogInformation("");
 
-            // TODO: handle the case where network is not connected! (should we retry or reboot)?!
 #if ORGPAL_THREE
             palthreeDisplay.Output.Clear();
             palthreeDisplay.Output.WriteLine("Initializing:");
@@ -240,9 +239,9 @@ namespace OrgPalThreeDemo
         {
             for( ; ; )
             {
-                //palthreeDisplay.Display.BacklightOn = true;
+                //palthreeDisplay.Output.BacklightOn = true;
                 CycleDisplay();
-                //palthreeDisplay.Display.BacklightOn = false;
+                //palthreeDisplay.Output.BacklightOn = false;
                 //Thread.Sleep(2000); //TODO: arbitary value... what should the update rate be?!
             }
         }
@@ -407,7 +406,7 @@ namespace OrgPalThreeDemo
             //TODO: check against the last received shadow (or something)!
             _logger.LogInformation("Program: Received a shadow update!");
             //_logger.LogInformation("------------------");
-            //DecodeShadow(e.Shadow);
+            //DecodeShadowAsHashtable(e.Shadow);
             //_logger.LogInformation("------------------");
         }
 
@@ -417,8 +416,7 @@ namespace OrgPalThreeDemo
             _logger.LogInformation($"Program: Received a status update: {e.Status.State}");
             if (!string.IsNullOrEmpty(e.Status.Message))
             {
-                //Debug.WriteLine($" with message {e.Status.Message}"); //TODO: does this need converting?
-                _logger.LogInformation($" with message {e.Status.Message}"); //TODO: Throws exception!
+                _logger.LogInformation($" with message {e.Status.Message}");
             }
         }
 
