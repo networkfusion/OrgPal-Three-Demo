@@ -2,8 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 /*
-    This program targets (and is tested against) firmware  ORGPAL_PALTHREE-1.9.0.823
-    `nanoff --masserase --update --target ORGPAL_PALTHREE --fwversion 1.9.0.823`
+    This program targets (and is tested against) firmware  ORGPAL_PALTHREE-1.9.0.888
+    `nanoff --masserase --update --target ORGPAL_PALTHREE --fwversion 1.9.0.888`
     Future firmware (or nuget updates) might break it!!!
 */
 
@@ -144,12 +144,13 @@ namespace OrgPalThreeDemo
                 palthreeDisplay.Output.WriteLine("Initializing:");
                 palthreeDisplay.Output.WriteLine($"Network...");
 #endif
+
             netConnected = SetupNetwork();
 
             if (!netConnected)
             {
                 // We cannot get an IP or valid time so the only thing we can do is reboot to try again!
-                //nanoFramework.Runtime.Native.Power.RebootDevice();
+                // nanoFramework.Runtime.Native.Power.RebootDevice();
                 // FIXME: Actually, we "should" use an event to wait for a valid IP?!
             }
 
@@ -281,6 +282,10 @@ namespace OrgPalThreeDemo
 
         private static bool SetupNetwork()
         {
+            Sntp.Stop();
+            Sntp.Server1 = "time.cloudflare.com";
+            Sntp.Server2 = "uk.pool.ntp.org";
+            
             CancellationTokenSource cs = new CancellationTokenSource(60000); //60 seconds.
                                                                             // We are using TLS and it requires valid date & time (so we should set the option to true, but SNTP is run in the background, and setting it manually causes issues for the moment!!!)
 
@@ -288,12 +293,18 @@ namespace OrgPalThreeDemo
             {
 
                 _logger.LogInformation("Waiting for network up and IP address...");
-                var success = NetworkHelper.SetupAndConnectNetwork(requiresDateTime: true, token: cs.Token);
+                var success = NetworkHelper.SetupAndConnectNetwork(requiresDateTime: false, token: cs.Token);
 
                 if (!success)
                 {
-                    _logger.LogWarning("Failed to get valid IP (and time)");
+                    _logger.LogWarning("Failed to get valid IP");
 
+                }
+                else
+                {
+                    Rtc.SetSystemTime(ManagedNtpClient.GetNetworkTime());
+                    Sntp.Start();
+                    _logger.LogInformation("Retrived DateTime using Managed NTP Helper class...");
                 }
 
                 _logger.LogInformation($"IP = {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
