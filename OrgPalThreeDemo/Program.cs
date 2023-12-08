@@ -51,7 +51,7 @@ namespace OrgPalThreeDemo
         private static Lcd palthreeDisplay;
         private static AdcExpansionBoard palAdcExpBoard;
 #endif
-        private static object monitor = new object();
+        private static object monitor = new();
         private bool _disposed;
         private static string _serialNumber = string.Empty;
 
@@ -231,7 +231,7 @@ namespace OrgPalThreeDemo
             palthreeDisplay.Output.WriteLine("Initializing:");
             palthreeDisplay.Output.WriteLine("Finished!");
 
-            Thread lcdUpdateThread = new Thread(new ThreadStart(LcdUpdate_Thread));
+            Thread lcdUpdateThread = new(new ThreadStart(LcdUpdate_Thread));
             lcdUpdateThread.Start();
 #endif
 
@@ -287,8 +287,8 @@ namespace OrgPalThreeDemo
         private static bool SetupNetwork()
         {
             
-            CancellationTokenSource cs = new CancellationTokenSource(60000); // 60 seconds.
-                                                                             // We are using TLS and it requires valid date & time (so we should set the option to true, but SNTP is run in the background, and setting it manually causes issues for the moment!!!)
+            CancellationTokenSource cs = new(60000); // 60 seconds.
+                                                     // We are using TLS and it requires valid date & time (so we should set the option to true, but SNTP is run in the background, and setting it manually causes issues for the moment!!!)
 
             try
             {
@@ -359,9 +359,9 @@ namespace OrgPalThreeDemo
                 //    AwsIotCore.MqttConnector.Client.Dispose();
                 //}
 
-                X509Certificate caCert = new X509Certificate(AwsIotCore.MqttConnector.RootCA); //commented out as alternative: //Resources.GetBytes(Resources.BinaryResources.AwsCAroot)); //should this be in secure storage, or is it fine where it is?
+                X509Certificate caCert = new(AwsIotCore.MqttConnector.RootCA); //commented out as alternative: //Resources.GetBytes(Resources.BinaryResources.AwsCAroot)); //should this be in secure storage, or is it fine where it is?
                 Thread.Sleep(1000);
-                X509Certificate2 clientCert = new X509Certificate2(AwsIotCore.MqttConnector.ClientRsaSha256Crt, AwsIotCore.MqttConnector.ClientRsaKey, ""); //make sure to add a correct pfx certificate
+                X509Certificate2 clientCert = new(AwsIotCore.MqttConnector.ClientRsaSha256Crt, AwsIotCore.MqttConnector.ClientRsaKey, ""); //make sure to add a correct pfx certificate
                 Thread.Sleep(1000);
                 AwsIotCore.MqttConnector.Client = new MqttConnectionClient(AwsIotCore.MqttConnector.Host, AwsIotCore.MqttConnector.ThingName, clientCert, MqttConnectionClient.QoSLevel.AtLeastOnce, caCert);
 
@@ -627,7 +627,7 @@ namespace OrgPalThreeDemo
                     if (file.Contains(".crt"))
                     {
 
-                        using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read))
+                        using (FileStream fs = new(file, FileMode.Open, FileAccess.Read))
                         {
                             var success = false;
                             while (!success)
@@ -656,7 +656,7 @@ namespace OrgPalThreeDemo
                     }
                     if (file.Contains(".der"))
                     {
-                        using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read))
+                        using (FileStream fs = new(file, FileMode.Open, FileAccess.Read))
                         {
                             var success = false;
                             while (!success)
@@ -682,7 +682,7 @@ namespace OrgPalThreeDemo
                     }
                     if (file.Contains("key"))
                     {
-                        using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read))
+                        using (FileStream fs = new(file, FileMode.Open, FileAccess.Read))
                         {
                             var success = false;
                             while (!success)
@@ -709,7 +709,7 @@ namespace OrgPalThreeDemo
                     }
                     if (file.Contains("mqttconfig.json"))
                     {
-                        using (FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read))
+                        using (FileStream fs = new(file, FileMode.Open, FileAccess.Read))
                         {
                             var success = false;
                             while (!success)

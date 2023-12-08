@@ -73,7 +73,7 @@ namespace OrgPalThreeDemo.Networking
                 Debug.WriteLine($"Could not resolve DNS for the IP address of the NTP server: {ntpServer}");
                 throw new ArgumentException($"Could not resolve DNS for the IP address of the the NTP server: {ntpServer}");
             }
-            IPEndPoint ep = new IPEndPoint(address[0], 123);
+            IPEndPoint ep = new(address[0], 123);
 
             return GetNetworkTime(ep);
         }
@@ -85,7 +85,7 @@ namespace OrgPalThreeDemo.Networking
         /// <returns>A DateTime containing the current time.</returns>
         public static DateTime GetNetworkTime(IPEndPoint ep)
         {
-            Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            Socket s = new(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
 
             s.Connect(ep);
 
@@ -112,7 +112,7 @@ namespace OrgPalThreeDemo.Networking
 
             TimeSpan timeSpan = TimeSpan.FromTicks((long)milliseconds * TimeSpan.TicksPerMillisecond);
 
-            DateTime dateTime = new DateTime(1900, 1, 1);
+            DateTime dateTime = new(1900, 1, 1);
             dateTime += timeSpan;
 
             // We dont use Offsets, but left here just incase...

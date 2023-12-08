@@ -216,7 +216,7 @@ namespace Iot.Device.CharacterLcd
             //text = text.Replace("\r\n", "\n"); // Change to linux format only, so we have to consider only this case further
 
             //ListString lines = text.Split('\n').ToList();
-            ListString lines = new ListString();
+            ListString lines = new();
             var linesSplit = text.Split('\n');
             for (int i = 0; i < linesSplit.Length; i++)
             {
