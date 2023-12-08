@@ -18,7 +18,7 @@
 
 //            const short DEFAULT_UMB_MASTER_DEVICE = 0x01 + 0x80; // From (device & class (Master unit))
 //            const byte DEFAULT_UMB_CMD_LENGTH = 0x04; // This should remain consistant with UMB_PROTOCOL_VERSION V1.0
-//            const byte DEFAULT_UMB_REQUEST_TYPE = 0x23; // Tjis is the only know type... Defined as: the command for the online data request
+//            const byte DEFAULT_UMB_REQUEST_TYPE = 0x23; // This is the only know type... Defined as: the command for the online data request
 
 //            public class UmbBinaryMessage
 //            {
@@ -30,6 +30,7 @@
 //                public enum SensorType : short
 //                {
 //                    VENTUS = 0x01 + 0x80 // To (device ID & class)
+//                    SHM31 = 0x01 + 0xB0 // To (device ID & class)
 //                }
 
 //                public enum ParameterChannelType : short

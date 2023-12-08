@@ -150,7 +150,10 @@ namespace OrgPalThreeDemo
             if (!netConnected)
             {
                 // We cannot get an IP or valid time so the only thing we can do is reboot to try again!
-                // nanoFramework.Runtime.Native.Power.RebootDevice();
+                if (DateTime.UtcNow.Year < 2023)
+                {
+                    nanoFramework.Runtime.Native.Power.RebootDevice();
+                }
                 // FIXME: Actually, we "should" use an event to wait for a valid IP?!
             }
 
@@ -282,18 +285,14 @@ namespace OrgPalThreeDemo
 
         private static bool SetupNetwork()
         {
-            Sntp.Stop();
-            Sntp.Server1 = "time.cloudflare.com";
-            Sntp.Server2 = "uk.pool.ntp.org";
             
-            CancellationTokenSource cs = new CancellationTokenSource(60000); //60 seconds.
-                                                                            // We are using TLS and it requires valid date & time (so we should set the option to true, but SNTP is run in the background, and setting it manually causes issues for the moment!!!)
+            CancellationTokenSource cs = new CancellationTokenSource(60000); // 60 seconds.
+                                                                             // We are using TLS and it requires valid date & time (so we should set the option to true, but SNTP is run in the background, and setting it manually causes issues for the moment!!!)
 
             try
             {
-
                 _logger.LogInformation("Waiting for network up and IP address...");
-                var success = NetworkHelper.SetupAndConnectNetwork(requiresDateTime: false, token: cs.Token);
+                var success = NetworkHelper.SetupAndConnectNetwork(requiresDateTime: true, token: cs.Token);
 
                 if (!success)
                 {
@@ -302,12 +301,34 @@ namespace OrgPalThreeDemo
                 }
                 else
                 {
-                    Rtc.SetSystemTime(ManagedNtpClient.GetNetworkTime());
+                    _logger.LogInformation($"IP = {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
+
+                    if (Sntp.IsStarted)
+                    {
+                        Sntp.Stop();
+                    }
+                    Sntp.Server1 = "time.cloudflare.com"; // use DHCP server
+                    Sntp.Server2 = "uk.pool.ntp.org";
+
                     Sntp.Start();
-                    _logger.LogInformation("Retrived DateTime using Managed NTP Helper class...");
+
+                    Thread.Sleep(500);
+
+                    //if (DateTime.UtcNow.Year < 2023)
+                    //{
+                    //    _logger.LogInformation("Retriving DateTime using Managed NTP Helper class (DHCP...");
+                    //    Rtc.SetSystemTime(ManagedNtpClient.GetNetworkTimeDhcp("10.0.0.1"));
+                    //    Thread.Sleep(500);
+                    //}
+
+                    if (DateTime.UtcNow.Year < 2023)
+                    {
+                        _logger.LogInformation("Retriving DateTime using Managed NTP Helper class (NTP)...");
+                        Rtc.SetSystemTime(ManagedNtpClient.GetNetworkTimeDefaultNtp());
+                        Thread.Sleep(500);
+                    }         
                 }
 
-                _logger.LogInformation($"IP = {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
                 _logger.LogInformation($"RTC = {DateTime.UtcNow}");
 
                 return success;

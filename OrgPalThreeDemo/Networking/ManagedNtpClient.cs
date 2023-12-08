@@ -41,12 +41,22 @@ namespace OrgPalThreeDemo.Networking
     public static class ManagedNtpClient
     {
         /// <summary>
+        /// Gets the current DateTime from cloudflare
+        /// </summary>
+        /// <returns>A DateTime containing the current time.</returns>
+        public static DateTime GetNetworkTimeDefaultNtp()
+        {
+            return GetNetworkTime("time.cloudflare.com");
+        }
+
+        /// <summary>
         /// Gets the current DateTime from time-a.nist.gov.
         /// </summary>
         /// <returns>A DateTime containing the current time.</returns>
-        public static DateTime GetNetworkTime()
+        public static DateTime GetNetworkTimeDhcp(string ipAddress)
         {
-            return GetNetworkTime("time.cloudflare.com");
+            var endpoint = new IPEndPoint(IPAddress.Parse(ipAddress), 123);
+            return GetNetworkTime(endpoint);
         }
 
         /// <summary>
