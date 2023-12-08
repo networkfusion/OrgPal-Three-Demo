@@ -243,6 +243,7 @@ namespace OrgPalThreeDemo
         {
             for( ; ; )
             {
+                // TODO: if the external button has been pressed, turn on the backlight for 2 itterations.
                 //palthreeDisplay.Output.BacklightOn = true;
                 CycleDisplay();
                 //palthreeDisplay.Output.BacklightOn = false;
