@@ -2,8 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 /*
-    This program targets (and is tested against) firmware  ORGPAL_PALTHREE-1.9.0.888
-    `nanoff --masserase --update --target ORGPAL_PALTHREE --fwversion 1.9.0.888`
+    This program targets (and is tested against) firmware  ORGPAL_PALTHREE-1.9.0.823
+    `nanoff --masserase --update --target ORGPAL_PALTHREE --fwversion 1.9.0.823`
     Future firmware (or nuget updates) might break it!!!
 */
 
