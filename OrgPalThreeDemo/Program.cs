@@ -2,8 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 /*
-    This program targets (and is tested against) firmware  ORGPAL_PALTHREE-1.9.0.823
-    `nanoff --masserase --update --target ORGPAL_PALTHREE --fwversion 1.9.0.823`
+    This program targets (and is tested against) firmware  ORGPAL_PALTHREE-1.9.0.888
+    `nanoff --masserase --update --target ORGPAL_PALTHREE --fwversion 1.9.0.888`
     Future firmware (or nuget updates) might break it!!!
 */
 
@@ -292,7 +292,7 @@ namespace OrgPalThreeDemo
             try
             {
                 _logger.LogInformation("Waiting for network up and IP address...");
-                var success = NetworkHelper.SetupAndConnectNetwork(requiresDateTime: true, token: cs.Token);
+                var success = NetworkHelper.SetupAndConnectNetwork(requiresDateTime: false, token: cs.Token);
 
                 if (!success)
                 {
