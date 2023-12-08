@@ -8,18 +8,19 @@ namespace OrgPal.Three
         public static class GpioPin
         {
 
-            //XXX CRITITAL PINS IF NOT SET PROPERLY SYSTEM WILL SELF POWER OFF XXX
+            // !--- CRITICAL PINS. IF NOT SET PROPERLY SYSTEM WILL SELF POWER OFF ---!
 
             public static readonly int MAIN_POWER_HOLD_PH2 = PortPin('H', 2);
             public static readonly int MAIN_POWER_OFF_PJ15 = PortPin('J', 15);
 
 
             public static readonly int GPIO_NONE = -1;
+ 
             /// <summary>
             /// Debug LED definition
             /// </summary>
-            public static readonly int Led1 = PortPin('G', 6); // located on the right of the RJ45 port
-            public static readonly int Led2 = PortPin('G', 7); // located bottom middle
+            public static readonly int LED_1 = PortPin('G', 6); // located on the right of the RJ45 port
+            public static readonly int LED_2 = PortPin('G', 7); // located bottom middle
 
             // Buttons located on bottom of board (apart from diagnostics which is on the right middle)
             public static readonly int BUTTON_USER_BOOT1_PK7 = PortPin('K', 7);
@@ -113,7 +114,7 @@ namespace OrgPal.Three
             /// </summary>
             public static readonly int SD_CARD_DETECT = PortPin('E', 5);
 
-            //POWER ON/OFF FOR VARIOUS ON BOARD PERIPHERALS
+            // POWER ON/OFF FOR VARIOUS ON BOARD PERIPHERALS
             public static readonly int POWER_LCD_ON_OFF = PortPin('K', 3);
             public static readonly int POWER_4V_ON_OFF_PJ13 = PortPin('J', 13);
             public static readonly int POWER_RS485_ON_OFF_PJ14 = PortPin('J', 14);
@@ -121,11 +122,11 @@ namespace OrgPal.Three
             public static readonly int POWER_IO_0_P20_ON_OFF_PI0 = PortPin('I', 0);
             public static readonly int POWER_IO_1_P20_ON_OFF_PK6 = PortPin('K', 6);
 
-            //MULTIPLEXING VARIOUS INTERFACES
+            // MULTIPLEXING VARIOUS INTERFACES
             public static readonly int USB_HOST_SEL_SWITCH_PE3 = PortPin('E', 3);
 
 
-            //unused/low power pins to be put low 
+            // Unused & low power pins to be put low.
 
             public static readonly int RMII_REF_CLK = PortPin('A', 1);
             public static readonly int RMII_MDIO = PortPin('A', 2);
@@ -139,7 +140,7 @@ namespace OrgPal.Three
             public static readonly int RMII_TXD1 = PortPin('C', 14);
             public static readonly int RMII_RXER = PortPin('I', 10);
 
-            //lvds unused at moment pins
+            // LVDS pins (unused at moment).
 
         }
 
@@ -216,7 +217,7 @@ namespace OrgPal.Three
         {
             public static class Speaker
             {
-                public const string Id = "TIM5";//TIM5_CH3
+                public const string Id = "TIM5"; //TIM5_CH3
             }
         }
 

@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
-using System.Globalization;
+//using System.Globalization;
 //using Iot.Device.Graphics;
 
 namespace Iot.Device.CharacterLcd

@@ -87,23 +87,23 @@ namespace OrgPal.Three
             // We are going to currently set all pins to high (by default) as most likely to work!
             if (transmitterEnabled) //TODO: is this actually the transmitter???
             {
-                //must be high for IC to be on, low turns off the IC
+                // Must be high for IC to be on, low turns off the IC
                 _driverEnablePin.Write(PinValue.High); //rs485SHTD
             }
 
             if (receiverEnabled)
             {
-                //Drive Receiver Enabled high to let the AutoDirection circuit control the receiver
+                // Drive Receiver Enabled high to let the AutoDirection circuit control the receiver
                 _receiveEnablePin.Write(PinValue.High);
             }
 
             if (termination)
             {
-                //if node is at ends of RS485 circuit, enable the 120Ohms resistor.
+                //if node is at end of RS485 circuit, enable the 120Ohms resistor.
                 _terminationResistorPin.Write(PinValue.High);
             }
 
-            //may need to turn power on RS 485 on board, but may be already done in other places so only try to do it.
+            // may need to turn power on RS 485 on board, but may be already done in other places so only try to do it.
             if (_portPowerPin.Read() == PinValue.Low)
             {
                 _portPowerPin.Write(PinValue.High);

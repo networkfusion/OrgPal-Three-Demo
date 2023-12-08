@@ -19,7 +19,7 @@ namespace OrgPal.Three
 
                 buzzer.DutyCycle = 0.5;
 
-                for (short i = 0; i < lengthInSeconds; i++)
+                for (var i = 0; i < lengthInSeconds; i++)
                 {
                     buzzer.Frequency = freq;
 
@@ -34,8 +34,10 @@ namespace OrgPal.Three
                     Thread.Sleep(500);
                     buzzer.Stop();
 
-                    if (freq < 1000 || freq > 3000)
+                    if (freq < 1000)
+                    {
                         delta *= -1;
+                    }
                 }
 
 
