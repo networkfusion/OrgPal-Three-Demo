@@ -15,8 +15,9 @@
 // #define ALPHA_FEATURE_FLAG
 // #define BETA_FEATURE_FLAG
 
+// #define ALPHA_FEATURE_FLAG_HMP155 // Commented out as needs more work (and inherent issues with STM32 boards)
 // #define ALPHA_FEATURE_FLAG_CL31 // Commented out as needs more work (and inherent issues with STM32 boards)
-//#define BETA_FEATURE_THERMISTOR //Commented out as sometimes causes PT100 temp to be null for some reason!
+// #define BETA_FEATURE_THERMISTOR // Commented out as sometimes causes PT100 temp to be null for some reason!
 
 using nanoFramework.Json;
 using nanoFramework.Runtime.Native;
@@ -51,7 +52,8 @@ namespace OrgPalThreeDemo
         private static Lcd palthreeDisplay;
         private static AdcExpansionBoard palAdcExpBoard;
 #endif
-        private static object monitor = new();
+
+        private static readonly object monitor = new();
         private bool _disposed;
         private static string _serialNumber = string.Empty;
 
@@ -88,15 +90,26 @@ namespace OrgPalThreeDemo
             _logger.LogInformation("");
 
 #if ORGPAL_THREE
+#if ALPHA_FEATURE_FLAG_HMP155
+            new Thread(() =>
+            {
+                var sensorHmp155 = new Peripherals.VaisalaHMP155();
+                sensorHmp155.Open(); // This seems to take too long (given its low baud rate and message size)...
+                Thread.Sleep(Timeout.Infinite);
+            }).Start();
+#endif
 
 #if ALPHA_FEATURE_FLAG_CL31
             new Thread(() =>
             {
-                var sensorCL31 = new OrgPalThreeDemo.Peripherals.VaisalaCL31();
+                var sensorCL31 = new Peripherals.VaisalaCL31();
                 sensorCL31.Open(); // This seems to take too long (given its low baud rate and message size)...
                 Thread.Sleep(Timeout.Infinite);
-            });
+            }).Start();
 #endif
+#endif
+
+#if ORGPAL_THREE
 
             Sounds.PlayDefaultSound();
 

@@ -14,8 +14,8 @@ namespace OrgPalThreeDemo.Peripherals
     /// </remarks>
     public class VaisalaHMP155 : IDisposable
     {
-        readonly SerialPortRS485 sensor;
-        public int probeAddress { get; set; } = 0;
+        private SerialPortRS485 sensor;
+        public int ProbeAddress { get; set; } = 0;
 
         public VaisalaHMP155(int connector = 0)
         {
@@ -26,6 +26,7 @@ namespace OrgPalThreeDemo.Peripherals
             sensor.Port.Parity = Parity.Even;
             sensor.Port.StopBits = StopBits.One;
             sensor.Port.Handshake = Handshake.None;
+            //sensor.Port.Mode = SerialMode.RS485;
 
         }
 
@@ -47,7 +48,7 @@ namespace OrgPalThreeDemo.Peripherals
             sensor.Port.Open();
             Debug.WriteLine("HMP155 serial port opened!");
 
-            //TODO: support poll mode?
+            // TODO: support poll mode?
 
             sensor.Port.WriteLine("s"); //stop the output. (we might need to send this more than once to make sure!)
             Thread.Sleep(10);
@@ -70,7 +71,7 @@ namespace OrgPalThreeDemo.Peripherals
             sensor.Port.DataReceived += Port_DataReceived;
         }
 
-        private void Port_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
+        private void Port_DataReceived(object sender, SerialDataReceivedEventArgs e)
         {
             SerialPort serialDevice = (SerialPort)sender;
             DecodeMessage(serialDevice.ReadLine().TrimEnd(new char[] {'\r','\n' }));
