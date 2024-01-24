@@ -165,6 +165,7 @@ namespace OrgPalThreeDemo
                 // We cannot get an IP or valid time so the only thing we can do is reboot to try again!
                 if (DateTime.UtcNow.Year < 2023)
                 {
+                    Thread.Sleep(10000);
                     nanoFramework.Runtime.Native.Power.RebootDevice();
                 }
                 // FIXME: Actually, we "should" use an event to wait for a valid IP?!
@@ -193,6 +194,7 @@ namespace OrgPalThreeDemo
             StorageEventManager.RemovableDeviceInserted += StorageEventManager_RemovableDeviceInserted;
             StorageEventManager.RemovableDeviceRemoved += StorageEventManager_RemovableDeviceRemoved;
 
+            Thread.Sleep(1000);
             var storageReadCount = 0;
             while (!AwsIotCore.MqttConnector.CheckConfigValid())
             {
@@ -601,7 +603,7 @@ namespace OrgPalThreeDemo
             {
                 _logger.LogInformation($"Found logical drive {drive}");
                 rootPath = drive;
-                if (drive.StartsWith("D")) break; // Always use the SDcard as the default device.
+                if (drive.StartsWith("D:")) break; // Always use the SDcard as the default device.
             }
 
             if (string.IsNullOrEmpty(rootPath))
@@ -637,7 +639,7 @@ namespace OrgPalThreeDemo
                 {
                     _logger.LogInformation($"Found file: {file}");
                     //TODO: we should really check if certs are in the mcu flash before retreiving them from the filesystem (SD).
-                    if (file.Contains(".crt"))
+                    if (file.EndsWith(".crt"))
                     {
 
                         using (FileStream fs = new(file, FileMode.Open, FileAccess.Read))
@@ -667,7 +669,7 @@ namespace OrgPalThreeDemo
                         
                         //Should load into secure storage (somewhere) and delete file on removable device?
                     }
-                    if (file.Contains(".der"))
+                    if (file.EndsWith(".der"))
                     {
                         using (FileStream fs = new(file, FileMode.Open, FileAccess.Read))
                         {
@@ -693,7 +695,7 @@ namespace OrgPalThreeDemo
 
                         //Should load into secure storage (somewhere) and delete file on removable device?
                     }
-                    if (file.Contains("key"))
+                    if (file.EndsWith(".key"))
                     {
                         using (FileStream fs = new(file, FileMode.Open, FileAccess.Read))
                         {
@@ -731,28 +733,27 @@ namespace OrgPalThreeDemo
                                 {
                                     var buffer = new byte[fs.Length];
                                     fs.Read(buffer, 0, (int)fs.Length);
+                                    Debug.WriteLine(Encoding.UTF8.GetString(buffer, 0, buffer.Length));
 
-                                    lock (monitor)
+                                    MqttConfigFileSchema config = (MqttConfigFileSchema)JsonConvert.DeserializeObject(Encoding.UTF8.GetString(buffer, 0, buffer.Length), typeof(MqttConfigFileSchema));
+
+                                    AwsIotCore.MqttConnector.Host = config.Url;
+                                    if (config.Port != null)
                                     {
-                                        MqttConfigFileSchema config = (MqttConfigFileSchema)JsonConvert.DeserializeObject(Encoding.UTF8.GetString(buffer, 0, buffer.Length), typeof(MqttConfigFileSchema));
-
-                                        AwsIotCore.MqttConnector.Host = config.Url;
-                                        if (config.Port != null)
-                                        {
-                                            AwsIotCore.MqttConnector.Port = int.Parse(config.Port);
-                                        }
-                                        if (!string.IsNullOrEmpty(config.ThingName))
-                                        {
-                                            AwsIotCore.MqttConnector.ThingName = config.ThingName;
-                                        }
-                                        else
-                                        {
-                                            AwsIotCore.MqttConnector.ThingName = _serialNumber;
-                                        }
-                                        fs.Flush();
-                                        fs.Close();
-                                        success = true;
+                                        AwsIotCore.MqttConnector.Port = int.Parse(config.Port);
                                     }
+                                    if (!string.IsNullOrEmpty(config.ThingName))
+                                    {
+                                        AwsIotCore.MqttConnector.ThingName = config.ThingName;
+                                    }
+                                    else
+                                    {
+                                        AwsIotCore.MqttConnector.ThingName = _serialNumber;
+                                    }
+                                    fs.Flush();
+                                    fs.Close();
+                                    success = true;
+                                    
                                 }
                                 catch (Exception)
                                 {
