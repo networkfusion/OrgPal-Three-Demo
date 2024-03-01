@@ -300,7 +300,7 @@ namespace OrgPalThreeDemo
         private static bool SetupNetwork()
         {
             
-            CancellationTokenSource cs = new(60000); // 60 seconds.
+            CancellationTokenSource cs = new(60_000); // 60 seconds.
                                                      // We are using TLS and it requires valid date & time (so we should set the option to true, but SNTP is run in the background, and setting it manually causes issues for the moment!!!)
 
             try
@@ -311,37 +311,43 @@ namespace OrgPalThreeDemo
                 if (!success)
                 {
                     _logger.LogWarning("Failed to get valid IP");
+                    return false;
 
                 }
-                else
+                _logger.LogInformation($"IP = {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
+
+                // Make sure we use cloudflare time as default (if possible).
+                if (Sntp.IsStarted)
                 {
-                    _logger.LogInformation($"IP = {System.Net.NetworkInformation.IPGlobalProperties.GetIPAddress()}");
+                    Sntp.Stop();
+                }
+                Sntp.Server1 = "time.cloudflare.com"; // use DHCP server
+                Sntp.Server2 = "uk.pool.ntp.org";
 
-                    if (Sntp.IsStarted)
-                    {
-                        Sntp.Stop();
-                    }
-                    Sntp.Server1 = "time.cloudflare.com"; // use DHCP server
-                    Sntp.Server2 = "uk.pool.ntp.org";
+                Sntp.Start();
 
-                    Sntp.Start();
+                Thread.Sleep(500); // allow time for update?!
 
+                //if (DateTime.UtcNow.Year < 2023)
+                //{
+                //    _logger.LogInformation("Retriving DateTime using Managed NTP Helper class (DHCP...");
+                //    Rtc.SetSystemTime(ManagedNtpClient.GetNetworkTimeDhcp("10.0.0.1"));
+                //    Thread.Sleep(500);
+                //}
+
+                if (DateTime.UtcNow.Year < 2023)
+                {
+                    //_logger.LogInformation("Retriving DateTime using Managed NTP Helper class (NTP)...");
+                    //Rtc.SetSystemTime(ManagedNtpClient.GetNetworkTimeDefaultNtp());
+                    Sntp.UpdateNow();
                     Thread.Sleep(500);
-
-                    //if (DateTime.UtcNow.Year < 2023)
-                    //{
-                    //    _logger.LogInformation("Retriving DateTime using Managed NTP Helper class (DHCP...");
-                    //    Rtc.SetSystemTime(ManagedNtpClient.GetNetworkTimeDhcp("10.0.0.1"));
-                    //    Thread.Sleep(500);
-                    //}
-
                     if (DateTime.UtcNow.Year < 2023)
                     {
-                        _logger.LogInformation("Retriving DateTime using Managed NTP Helper class (NTP)...");
-                        Rtc.SetSystemTime(ManagedNtpClient.GetNetworkTimeDefaultNtp());
-                        Thread.Sleep(500);
-                    }         
+                        _logger.LogInformation("Failed to get valid time!");
+                        success = false;
+                    }
                 }
+
 
                 _logger.LogInformation($"RTC = {DateTime.UtcNow}");
 
@@ -350,7 +356,7 @@ namespace OrgPalThreeDemo
             catch (Exception e)
             {
                 _logger.LogWarning(e.Message.ToString());
-                
+
                 return false;
             }
 
@@ -372,10 +378,8 @@ namespace OrgPalThreeDemo
                 //    AwsIotCore.MqttConnector.Client.Dispose();
                 //}
 
-                X509Certificate caCert = new(AwsIotCore.MqttConnector.RootCA); //commented out as alternative: //Resources.GetBytes(Resources.BinaryResources.AwsCAroot)); //should this be in secure storage, or is it fine where it is?
-                Thread.Sleep(1000);
-                X509Certificate2 clientCert = new(AwsIotCore.MqttConnector.ClientRsaSha256Crt, AwsIotCore.MqttConnector.ClientRsaKey, ""); //make sure to add a correct pfx certificate
-                Thread.Sleep(1000);
+                X509Certificate caCert = new(AwsIotCore.MqttConnector.PrimaryConnectionCertificates.RootCA); //commented out as alternative: //Resources.GetBytes(Resources.BinaryResources.AwsCAroot)); //should this be in secure storage, or is it fine where it is?
+                X509Certificate2 clientCert = new(AwsIotCore.MqttConnector.PrimaryConnectionCertificates.ClientRsaSha256Crt, AwsIotCore.MqttConnector.PrimaryConnectionCertificates.ClientRsaKey, ""); //make sure to add a correct pfx certificate
                 AwsIotCore.MqttConnector.Client = new MqttConnectionClient(AwsIotCore.MqttConnector.Host, AwsIotCore.MqttConnector.ThingName, clientCert, MqttConnectionClient.QoSLevel.AtLeastOnce, caCert);
 
                 bool success = AwsIotCore.MqttConnector.Client.Open("nanoframework/device");
@@ -654,7 +658,7 @@ namespace OrgPalThreeDemo
                             var bytes = new byte[buffer.Length];
                             dataReader.ReadBytes(bytes);
                             var cert = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
-                            AwsIotCore.MqttConnector.ClientRsaSha256Crt = cert;
+                            AwsIotCore.MqttConnector.PrimaryConnectionCertificates.ClientRsaSha256Crt = cert;
                             //Should load into secure storage (somewhere) and delete file on removable device?
                         }
                         catch (Exception ex)
@@ -670,8 +674,8 @@ namespace OrgPalThreeDemo
                         using DataReader dataReader = DataReader.FromBuffer(buffer);
                         try
                         {
-                            AwsIotCore.MqttConnector.RootCA = new byte[buffer.Length];
-                            dataReader.ReadBytes(AwsIotCore.MqttConnector.RootCA);
+                            AwsIotCore.MqttConnector.PrimaryConnectionCertificates.RootCA = new byte[buffer.Length];
+                            dataReader.ReadBytes(AwsIotCore.MqttConnector.PrimaryConnectionCertificates.RootCA);
                             //Should load into secure storage (somewhere) and delete file on removable device?
                         }
                         catch (Exception ex)
@@ -689,7 +693,7 @@ namespace OrgPalThreeDemo
                             var bytes = new byte[buffer.Length];
                             dataReader.ReadBytes(bytes);
                             var key = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
-                            AwsIotCore.MqttConnector.ClientRsaKey = key;
+                            AwsIotCore.MqttConnector.PrimaryConnectionCertificates.ClientRsaKey = key;
                             //Should load into secure storage (somewhere) and delete file on removable device?
                         }
                         catch (Exception ex)
