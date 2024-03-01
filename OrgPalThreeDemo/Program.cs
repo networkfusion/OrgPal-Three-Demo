@@ -27,7 +27,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Windows.Storage;
 using Windows.Storage.Streams;
-using System.IO;
 using nanoFramework.Aws.IoTCore.Devices;
 using OrgPalThreeDemo.TempDebugHelpers;
 using OrgPalThreeDemo.Networking;
@@ -54,7 +53,6 @@ namespace OrgPalThreeDemo
         private static AdcExpansionBoard palAdcExpBoard;
 #endif
 
-        private static readonly object monitor = new();
         private bool _disposed;
         private static string _serialNumber = string.Empty;
 
@@ -186,8 +184,6 @@ namespace OrgPalThreeDemo
 
             var rootPath = @"D:\"; //string.Empty;
 
-            Thread.Sleep(5000); // wait for storage to init
-
             //while (rootPath == string.Empty)
             //{
             //    rootPath = CheckStorageDevices(); // does not seem to like this on non debug!!
@@ -214,7 +210,7 @@ namespace OrgPalThreeDemo
 #endif
                     _logger.LogWarning(e.Message.ToString());
                 }
-                Thread.Sleep(1000);
+                Thread.Sleep(5000); // re-wait for storage
             }
 
 
@@ -711,7 +707,6 @@ namespace OrgPalThreeDemo
                             var bytes = new byte[buffer.Length];
                             dataReader.ReadBytes(bytes);
                             var txtconfig = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
-                            Debug.WriteLine(txtconfig);
                             MqttConfigFileSchema config = (MqttConfigFileSchema)JsonConvert.DeserializeObject(txtconfig, typeof(MqttConfigFileSchema));
 
                             AwsIotCore.MqttConnector.Host = config.Url;
