@@ -25,7 +25,8 @@ using System;
 using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
-using nanoFramework.System.IO.FileSystem; //used for removable device events.
+using Windows.Storage;
+using Windows.Storage.Streams;
 using System.IO;
 using nanoFramework.Aws.IoTCore.Devices;
 using OrgPalThreeDemo.TempDebugHelpers;
@@ -183,7 +184,9 @@ namespace OrgPalThreeDemo
             palthreeDisplay.Output.WriteLine("Storage");
 #endif
 
-            var rootPath = "D:\\"; //string.Empty;
+            var rootPath = @"D:\"; //string.Empty;
+
+            Thread.Sleep(5000); // wait for storage to init
 
             //while (rootPath == string.Empty)
             //{
@@ -194,7 +197,6 @@ namespace OrgPalThreeDemo
             StorageEventManager.RemovableDeviceInserted += StorageEventManager_RemovableDeviceInserted;
             StorageEventManager.RemovableDeviceRemoved += StorageEventManager_RemovableDeviceRemoved;
 
-            Thread.Sleep(1000);
             var storageReadCount = 0;
             while (!AwsIotCore.MqttConnector.CheckConfigValid())
             {
@@ -581,186 +583,145 @@ namespace OrgPalThreeDemo
             }
         }
 
-        private static string CheckStorageDevices()
-        {
-            // in nanoFramework, currently the drive letters are fixed, being:
-            // D: SD Card
-            // E: USB Mass Storage Device
-            // I: Internal
+        //private static string CheckStorageDevices()
+        //{
+        //    // in nanoFramework, currently the drive letters are fixed, being:
+        //    // D: SD Card
+        //    // E: USB Mass Storage Device
+        //    // I: Internal
 
-            // list all removable drives
-            var removableDrives = Directory.GetLogicalDrives(); //TODO: FEEDBACK... I Cannot help but feel (since we are no longer attached to UWP, that this should be `SD:` and `USB:`
+        //    // list all removable drives
+        //    var removableDrives = Directory.GetLogicalDrives();
 
-            //TODO: Better handle no removable MSD avaliable?!
-            if (removableDrives.Length == 0) // Arrays are counted by Length. (not a collection!)
-            {
-                _logger.LogError("NO REMOVABLE STORAGE DEVICE FOUND");
-                // FIXME: what should we do?!
-            }
+        //    //TODO: Better handle no removable MSD avaliable?!
+        //    if (removableDrives.Length == 0) // Arrays are counted by Length. (not a collection!)
+        //    {
+        //        _logger.LogError("NO REMOVABLE STORAGE DEVICE FOUND");
+        //        // FIXME: what should we do?!
+        //    }
 
-            var rootPath = string.Empty;
-            foreach (var drive in removableDrives)
-            {
-                _logger.LogInformation($"Found logical drive {drive}");
-                rootPath = drive;
-                if (drive.StartsWith("D:")) break; // Always use the SDcard as the default device.
-            }
+        //    var rootPath = string.Empty;
+        //    foreach (var drive in removableDrives)
+        //    {
+        //        _logger.LogInformation($"Found logical drive {drive}");
+        //        rootPath = drive;
+        //        if (drive.StartsWith("D:")) break; // Always use the SDcard as the default device.
+        //    }
 
-            if (string.IsNullOrEmpty(rootPath))
-            {
-                return string.Empty;
-            }
-            else
-            {
-                return rootPath;
-            }    
-        }
+        //    if (string.IsNullOrEmpty(rootPath))
+        //    {
+        //        return string.Empty;
+        //    }
+        //    else
+        //    {
+        //        return rootPath;
+        //    }    
+        //}
 
         private static bool ReadStorage(string path = "") //TODO: this can fail on redeploy or exiting debug!!!
         {
+            StorageFolder externalDevices = KnownFolders.RemovableDevices;
 
-            if (!string.IsNullOrEmpty(path))
+            // list all removable storage devices
+            var removableDevices = externalDevices.GetFolders();
+
+            if (removableDevices.Length > 0)
             {
                 _logger.LogInformation("Reading storage...");
 
                 // get folders on 1st removable device
-                var foldersOnDevice = Directory.GetDirectories(path);
+                var foldersOnDevice = removableDevices[0].GetFolders();
 
                 foreach (var folder in foldersOnDevice)
                 {
-                    _logger.LogInformation($"Found folder: {folder}");
+                    _logger.LogInformation($"Found folder: {folder.DisplayName}");
                 }
 
                 // get files on the root of the 1st removable device
-                var filesInDevice = Directory.GetFiles(path);
-
-                //TODO: in certain cases it would be helpful to support File.ReadAllText -- https://zetcode.com/csharp/file/ (Helper lib??)
-                foreach (var file in filesInDevice)
+                var filesInRootFolder = removableDevices[0].GetFiles();
+                foreach (var file in filesInRootFolder)
                 {
-                    _logger.LogInformation($"Found file: {file}");
+                    _logger.LogInformation($"Found Root File: {file.Name}");
+                }
+
+                foreach (var file in filesInRootFolder)
+                {
+                    _logger.LogInformation($"Found file: {file.Name}");
                     //TODO: we should really check if certs are in the mcu flash before retreiving them from the filesystem (SD).
-                    if (file.EndsWith(".crt"))
+                    if (file.FileType == "crt")
                     {
 
-                        using (FileStream fs = new(file, FileMode.Open, FileAccess.Read))
+                        try
                         {
-                            var success = false;
-                            while (!success)
-                            {
-                                try
-                                {
-                                    var buffer = new byte[fs.Length];
-                                    fs.Read(buffer, 0, (int)fs.Length);
-
-                                    AwsIotCore.MqttConnector.ClientRsaSha256Crt = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
-
-                                    fs.Flush();
-                                    fs.Close();
-                                    success = true;
-                                }
-                                catch (Exception)
-                                {
-                                    //TODO: sometimes a json deserialize exception happens. For the moment, just try again.
-                                    _logger.LogWarning("Failed to decode crt, Retrying...");
-                                }
-
-                            }
+                            var buffer = FileIO.ReadBuffer(file);
+                            using DataReader dataReader = DataReader.FromBuffer(buffer);
+                            var key = dataReader.ReadString(buffer.Length - 1);
+                            AwsIotCore.MqttConnector.ClientRsaSha256Crt = key;
+                            //Should load into secure storage (somewhere) and delete file on removable device?
                         }
-                        
-                        //Should load into secure storage (somewhere) and delete file on removable device?
-                    }
-                    if (file.EndsWith(".der"))
-                    {
-                        using (FileStream fs = new(file, FileMode.Open, FileAccess.Read))
+                        catch (Exception ex)
                         {
-                            var success = false;
-                            while (!success)
-                            {
-                                try
-                                {
-                                    AwsIotCore.MqttConnector.RootCA = new byte[fs.Length];
-                                    fs.Read(AwsIotCore.MqttConnector.RootCA, 0, (int)fs.Length);
-                                    fs.Flush();
-                                    fs.Close();
-                                    success = true;
-                                }
-                                catch (Exception)
-                                {
-                                    //TODO: sometimes a json deserialize exception happens. For the moment, just try again.
-                                    _logger.LogWarning("Failed to decode der, Retrying...");
-                                }
-
-                            }
+                            _logger.LogWarning($"Failed to decode crt, {ex}");
+                            return false;
                         }
 
-                        //Should load into secure storage (somewhere) and delete file on removable device?
                     }
-                    if (file.EndsWith(".key"))
+                    if (file.FileType == "der")
                     {
-                        using (FileStream fs = new(file, FileMode.Open, FileAccess.Read))
+                        var buffer = FileIO.ReadBuffer(file);
+                        using DataReader dataReader = DataReader.FromBuffer(buffer);
+                        try
                         {
-                            var success = false;
-                            while (!success)
-                            {
-                                try
-                                {
-                                    var buffer = new byte[fs.Length];
-                                    fs.Read(buffer, 0, (int)fs.Length);
-                                    AwsIotCore.MqttConnector.ClientRsaKey = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
-
-                                    fs.Flush();
-                                    fs.Close();
-                                    success = true;
-                                }
-                                catch (Exception)
-                                {
-                                    //TODO: sometimes a json deserialize exception happens. For the moment, just try again.
-                                    _logger.LogWarning("Failed to decode key, Retrying...");
-                                }
-                            }
+                            AwsIotCore.MqttConnector.RootCA = new byte[buffer.Length];
+                            dataReader.ReadBytes(AwsIotCore.MqttConnector.RootCA);
+                            //Should load into secure storage (somewhere) and delete file on removable device?
                         }
-
-                        //Should load into secure storage (somewhere) and delete file on removable device?
-                    }
-                    if (file.Contains("mqttconfig.json"))
-                    {
-                        using (FileStream fs = new(file, FileMode.Open, FileAccess.Read))
+                        catch (Exception ex)
                         {
-                            var success = false;
-                            while (!success)
+                            _logger.LogWarning($"Failed to decode der, {ex}");
+                            return false;
+                        }
+                    }
+                    if (file.FileType == "key")
+                    {
+                        try
+                        {
+                            AwsIotCore.MqttConnector.ClientRsaKey = FileIO.ReadText(file);
+                            //Should load into secure storage (somewhere) and delete file on removable device?
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning($"Failed to decode key, {ex}");
+                            return false;
+                        }
+                    }
+                    if (file.Name == "mqttconfig.json")
+                    {
+                        try
+                        {
+                            var txtconfig = FileIO.ReadText(file);
+                            Debug.WriteLine(txtconfig);
+                            MqttConfigFileSchema config = (MqttConfigFileSchema)JsonConvert.DeserializeObject(txtconfig, typeof(MqttConfigFileSchema));
+
+                            AwsIotCore.MqttConnector.Host = config.Url;
+                            if (config.Port != null)
                             {
-                                try
-                                {
-                                    var buffer = new byte[fs.Length];
-                                    fs.Read(buffer, 0, (int)fs.Length);
-                                    Debug.WriteLine(Encoding.UTF8.GetString(buffer, 0, buffer.Length));
-
-                                    MqttConfigFileSchema config = (MqttConfigFileSchema)JsonConvert.DeserializeObject(Encoding.UTF8.GetString(buffer, 0, buffer.Length), typeof(MqttConfigFileSchema));
-
-                                    AwsIotCore.MqttConnector.Host = config.Url;
-                                    if (config.Port != null)
-                                    {
-                                        AwsIotCore.MqttConnector.Port = int.Parse(config.Port);
-                                    }
-                                    if (!string.IsNullOrEmpty(config.ThingName))
-                                    {
-                                        AwsIotCore.MqttConnector.ThingName = config.ThingName;
-                                    }
-                                    else
-                                    {
-                                        AwsIotCore.MqttConnector.ThingName = _serialNumber;
-                                    }
-                                    fs.Flush();
-                                    fs.Close();
-                                    success = true;
-                                    
-                                }
-                                catch (Exception)
-                                {
-                                    //TODO: sometimes a json deserialize exception happens. For the moment, just try again.
-                                    _logger.LogWarning("Failed to decode MqttConfig.json, Retrying...");
-                                }
+                                AwsIotCore.MqttConnector.Port = int.Parse(config.Port);
                             }
+                            if (!string.IsNullOrEmpty(config.ThingName))
+                            {
+                                AwsIotCore.MqttConnector.ThingName = config.ThingName;
+                            }
+                            else
+                            {
+                                AwsIotCore.MqttConnector.ThingName = _serialNumber;
+                            }
+
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogWarning($"Failed to decode MqttConfig.json, {ex}");
+                            return false;
                         }
                     }
                 }
