@@ -655,8 +655,10 @@ namespace OrgPalThreeDemo
                         {
                             var buffer = FileIO.ReadBuffer(file);
                             using DataReader dataReader = DataReader.FromBuffer(buffer);
-                            var key = dataReader.ReadString(buffer.Length - 1);
-                            AwsIotCore.MqttConnector.ClientRsaSha256Crt = key;
+                            var bytes = new byte[buffer.Length];
+                            dataReader.ReadBytes(bytes);
+                            var cert = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+                            AwsIotCore.MqttConnector.ClientRsaSha256Crt = cert;
                             //Should load into secure storage (somewhere) and delete file on removable device?
                         }
                         catch (Exception ex)
@@ -686,7 +688,12 @@ namespace OrgPalThreeDemo
                     {
                         try
                         {
-                            AwsIotCore.MqttConnector.ClientRsaKey = FileIO.ReadText(file);
+                            var buffer = FileIO.ReadBuffer(file);
+                            using DataReader dataReader = DataReader.FromBuffer(buffer);
+                            var bytes = new byte[buffer.Length];
+                            dataReader.ReadBytes(bytes);
+                            var key = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+                            AwsIotCore.MqttConnector.ClientRsaKey = key;
                             //Should load into secure storage (somewhere) and delete file on removable device?
                         }
                         catch (Exception ex)
@@ -699,7 +706,11 @@ namespace OrgPalThreeDemo
                     {
                         try
                         {
-                            var txtconfig = FileIO.ReadText(file);
+                            var buffer = FileIO.ReadBuffer(file);
+                            using DataReader dataReader = DataReader.FromBuffer(buffer);
+                            var bytes = new byte[buffer.Length];
+                            dataReader.ReadBytes(bytes);
+                            var txtconfig = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
                             Debug.WriteLine(txtconfig);
                             MqttConfigFileSchema config = (MqttConfigFileSchema)JsonConvert.DeserializeObject(txtconfig, typeof(MqttConfigFileSchema));
 
