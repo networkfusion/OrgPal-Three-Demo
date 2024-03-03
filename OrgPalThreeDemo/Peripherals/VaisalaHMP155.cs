@@ -15,6 +15,7 @@ namespace OrgPalThreeDemo.Peripherals
     public class VaisalaHMP155 : IDisposable
     {
         private SerialPortRS485 sensor;
+
         public int ProbeAddress { get; set; } = 0;
 
         public VaisalaHMP155(int connector = 0)
@@ -37,17 +38,22 @@ namespace OrgPalThreeDemo.Peripherals
                 sensor.Port.Close();
             }
             sensor.Port.DataReceived -= Port_DataReceived;
+
         }
 
         public void Open()
         {
-            if (sensor.Port.IsOpen)
-            {
-                sensor.Port.Close();
-            }
+            Close();
             sensor.Port.Open();
             Debug.WriteLine("HMP155 serial port opened!");
 
+            //InitializeSensor();
+
+            sensor.Port.DataReceived += Port_DataReceived;
+        }
+
+        private void InitializeSensor()
+        {
             // TODO: support poll mode?
 
             sensor.Port.WriteLine("s"); //stop the output. (we might need to send this more than once to make sure!)
@@ -67,8 +73,6 @@ namespace OrgPalThreeDemo.Peripherals
             sensor.Port.WriteLine("r"); // Start sending the telemetry.
 
             // We should possibily disable the transmit line now (unless we are in poll mode)?!
-
-            sensor.Port.DataReceived += Port_DataReceived;
         }
 
         private void Port_DataReceived(object sender, SerialDataReceivedEventArgs e)

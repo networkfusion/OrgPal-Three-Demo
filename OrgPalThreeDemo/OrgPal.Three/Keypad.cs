@@ -13,7 +13,7 @@ namespace OrgPal.Three
 
         public Keypad()
         {
-            GpioController gpioController = new GpioController();
+            GpioController gpioController = new();
             _keypadPin1 = gpioController.OpenPin(Pinout.GpioPin.KEYPAD_PORT.KEY_PIN1);
             _keypadPin2 = gpioController.OpenPin(Pinout.GpioPin.KEYPAD_PORT.KEY_PIN2);
             _keypadPin3 = gpioController.OpenPin(Pinout.GpioPin.KEYPAD_PORT.KEY_PIN3);

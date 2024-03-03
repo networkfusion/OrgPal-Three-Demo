@@ -37,6 +37,8 @@ using nanoFramework.Logging;
 using nanoFramework.Logging.Debug;
 using nanoFramework.Networking;
 using nanoFramework.Hardware.Stm32;
+using System.IO.Ports;
+
 
 #if ORGPAL_THREE
 using OrgPal.Three;
@@ -87,6 +89,26 @@ namespace OrgPalThreeDemo
             //_logger.MinLogLevel = LogLevel.Trace;
             _logger.LogInformation($"{SystemInfo.TargetName} AWS MQTT Demo.");
             _logger.LogInformation("");
+
+            var ports = SerialPort.GetPortNames();
+            _logger.LogInformation("Available serial ports:");
+            foreach (string port in ports)
+            {
+                _logger.LogInformation($"  {port}");
+                // FIXME: this causes the board to reboot constantly if OneWire is enabled in FW!
+                try
+                {
+                    // Also, we should never enumerate "COM4" as it is used by wire protocol!
+                    using SerialPort testSerialPort = new(port);
+                    testSerialPort.Open();
+                    testSerialPort.Close();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogInformation($"{port}  Exception: {ex}");
+                }
+
+            }
 
 #if ORGPAL_THREE
 #if ALPHA_FEATURE_FLAG_HMP155
@@ -164,7 +186,7 @@ namespace OrgPalThreeDemo
                 // We cannot get an IP or valid time so the only thing we can do is reboot to try again!
                 if (DateTime.UtcNow.Year < 2023)
                 {
-                    Thread.Sleep(10000);
+                    Thread.Sleep(10_000);
                     nanoFramework.Runtime.Native.Power.RebootDevice();
                 }
                 // FIXME: Actually, we "should" use an event to wait for a valid IP?!
@@ -228,7 +250,7 @@ namespace OrgPalThreeDemo
                 if (!mqttConnected)
                 {
                     mqttConnectionAttempt += 1;
-                    Thread.Sleep(10000);
+                    Thread.Sleep(10_000);
                 }
             }
 
@@ -403,7 +425,7 @@ namespace OrgPalThreeDemo
                 if (shadow != null)
                 {
                     _logger.LogInformation("Success!");
-                    DecodeShadowAsHashtable(shadow);
+                    //DecodeShadowAsHashtable(shadow);
                     //Debug.WriteLine($"Desired:  {shadow.state.desired.ToJson()}");
                     //Debug.WriteLine($"Reported:  {shadow.state.reported.ToJson()}");
 
@@ -431,25 +453,25 @@ namespace OrgPalThreeDemo
 
         }
 
-        private static void DecodeShadowAsHashtable(Shadow shadow)
-        {
-            _logger.LogInformation("Decoded shadow as Hashtable was:");
-            _logger.LogInformation("------------------");
-            _logger.LogInformation("state.desired:");
-            DebugHelper.DumpHashTable(shadow.state.desired, 1);
-            _logger.LogInformation("state.reported:");
-            DebugHelper.DumpHashTable(shadow.state.reported, 1);
-            _logger.LogInformation("metadata.desired:");
-            DebugHelper.DumpHashTable(shadow.metadata.desired, 1);
-            _logger.LogInformation("metadata.reported:");
-            DebugHelper.DumpHashTable(shadow.metadata.reported, 1);
-            _logger.LogInformation($"timestamp={shadow.timestamp}");
-            _logger.LogInformation($"as ISO date: {DateTime.FromUnixTimeSeconds(shadow.timestamp).ToString("o")}");
-            _logger.LogInformation($"version={shadow.version}");
-            _logger.LogInformation($"clienttoken={shadow.clienttoken}");
-            _logger.LogInformation("------------------");
-            _logger.LogInformation("");
-        }
+        //private static void DecodeShadowAsHashtable(Shadow shadow)
+        //{
+        //    _logger.LogInformation("Decoded shadow as Hashtable was:");
+        //    _logger.LogInformation("------------------");
+        //    _logger.LogInformation("state.desired:");
+        //    DebugHelper.DumpHashTable(shadow.state.desired, 1);
+        //    _logger.LogInformation("state.reported:");
+        //    DebugHelper.DumpHashTable(shadow.state.reported, 1);
+        //    _logger.LogInformation("metadata.desired:");
+        //    DebugHelper.DumpHashTable(shadow.metadata.desired, 1);
+        //    _logger.LogInformation("metadata.reported:");
+        //    DebugHelper.DumpHashTable(shadow.metadata.reported, 1);
+        //    _logger.LogInformation($"timestamp={shadow.timestamp}");
+        //    _logger.LogInformation($"as ISO date: {DateTime.FromUnixTimeSeconds(shadow.timestamp).ToString("o")}");
+        //    _logger.LogInformation($"version={shadow.version}");
+        //    _logger.LogInformation($"clienttoken={shadow.clienttoken}");
+        //    _logger.LogInformation("------------------");
+        //    _logger.LogInformation("");
+        //}
 
         private static void Client_ShadowUpdated(object sender, ShadowUpdateEventArgs e)
         {
