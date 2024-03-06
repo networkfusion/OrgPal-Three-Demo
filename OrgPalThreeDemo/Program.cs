@@ -28,7 +28,7 @@ using System.Threading;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using nanoFramework.Aws.IoTCore.Devices;
-using OrgPalThreeDemo.TempDebugHelpers;
+//using OrgPalThreeDemo.TempDebugHelpers;
 using OrgPalThreeDemo.Networking;
 using nanoFramework.Aws.IoTCore.Devices.Shadows;
 using System.Text;
@@ -94,14 +94,24 @@ namespace OrgPalThreeDemo
             _logger.LogInformation("Available serial ports:");
             foreach (string port in ports)
             {
-                _logger.LogInformation($"  {port}");
                 // FIXME: this causes the board to reboot constantly if OneWire is enabled in FW!
                 try
                 {
                     // Also, we should never enumerate "COM4" as it is used by wire protocol!
-                    using SerialPort testSerialPort = new(port);
-                    testSerialPort.Open();
-                    testSerialPort.Close();
+                    if (port == "COM3")
+                    {
+                        // FIXME: opening the port for longer than a few MS is broken!
+                        _logger.LogInformation($" {port}  TESTING");
+                        using SerialPort SerialPort3 = new(port);
+                        SerialPort3.Open();
+                        Thread.Sleep(250);
+                        SerialPort3.Close();
+                    }
+                    else
+                    {
+                        _logger.LogInformation($" {port}");
+                    }
+
                 }
                 catch (Exception ex)
                 {
