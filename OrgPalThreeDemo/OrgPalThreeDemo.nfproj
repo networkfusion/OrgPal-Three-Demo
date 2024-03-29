@@ -89,6 +89,9 @@
     <Reference Include="Iot.Device.Mcp3428">
       <HintPath>..\packages\nanoFramework.Iot.Device.Mcp3428.1.2.436\lib\Iot.Device.Mcp3428.dll</HintPath>
     </Reference>
+    <Reference Include="Iot.Device.Modbus">
+      <HintPath>..\packages\nanoFramework.Iot.Device.Modbus.1.0.89\lib\Iot.Device.Modbus.dll</HintPath>
+    </Reference>
     <Reference Include="mscorlib">
       <HintPath>..\packages\nanoFramework.CoreLibrary.1.15.5\lib\mscorlib.dll</HintPath>
     </Reference>
