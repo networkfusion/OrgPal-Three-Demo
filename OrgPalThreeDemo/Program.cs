@@ -100,11 +100,10 @@ namespace OrgPalThreeDemo
                     // Also, we should never enumerate "COM4" as it is used by wire protocol!
                     if (port == "COM3")
                     {
-                        // FIXME: opening the port for longer than a few MS is broken!
                         _logger.LogInformation($" {port}  TESTING");
-                        using SerialPort SerialPort3 = new(port);
+                        using SerialPort SerialPort3 = new(port, 4800, Parity.Even, 7, StopBits.One);
                         SerialPort3.Open();
-                        Thread.Sleep(250);
+                        Thread.Sleep(5000);
                         SerialPort3.Close();
                     }
                     else
