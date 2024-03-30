@@ -19,39 +19,39 @@ namespace OrgPalThreeDemo.Peripherals
             /// <summary>
             /// Initiate a reboot of the sensor.
             /// </summary>
-            Reboot = 0,
+            InitiateReboot = 0,
             /// <summary>
             /// Start performing measurement operations.
             /// </summary>
-            MeasurementStart,
+            StartMeasurements,
             /// <summary>
             /// Stop performing measurement operations.
             /// </summary>
-            MeasurementStop,
+            StopMeasurements,
             /// <summary>
             /// Turn the laser on permanently (e.g. for installation alignment).
             /// </summary>
-            LaserOnAlways,
+            TurnLaserOnPermanently,
             /// <summary>
-            /// Put the laser back into its normal operating mode.
+            /// Put the laser back into its normal operating mode (after TurnLaserOnPermanently).
             /// </summary>
-            LaserResumeSchedule,
+            ResumeNormalLaserSchedule,
             /// <summary>
             /// Perform calibration of the height using the tilt angle from the gyroscope.
             /// </summary>
-            CalibrateAll,
+            InitiateFullCalibration,
             /// <summary>
             /// Perform calibration of the height using the reference angle (ignore gyroscope).
             /// </summary>
-            CalibrateHeightOnly,
+            InitiateHeightCalibration,
             /// <summary>
             /// Start a defrost process.
             /// </summary>
-            DefrostStart,
+            InitiateDefrost,
             /// <summary>
             /// Stop a defrost process.
             /// </summary>
-            DefrostStop = 8,
+            StopDefrosting = 8,
 
             SetBlockHeatingMode = 9,
             SetWindowHeatingMode,
@@ -357,7 +357,7 @@ namespace OrgPalThreeDemo.Peripherals
                 var res = client.WriteSingleRegister(DeviceId, (ushort)actionRegister, (short)value);
                 if (!res)
                 {
-                    res = PerformAction(SensorAction.Reboot);
+                    res = PerformAction(SensorAction.InitiateReboot);
                 }
                 return res;
             }
