@@ -1,7 +1,17 @@
 ﻿using Iot.Device.Modbus.Client;
+using Iot.Device.Modbus.Util;
+using System;
 
 namespace OrgPalThreeDemo.Peripherals
 {
+    /// <summary>
+    /// Lufft SHM31 Modbus RTU
+    /// </summary>
+    /// <remarks>
+    /// Snow depth sensor.
+    /// Manufacturer: OTT Hydromet (Lufft, Jenoptik).
+    /// Manual: https://www.lufft.com/download/manual-lufft-shm31-en/
+    /// </remarks>
     public class LufftShm31ModbusRTU
     {
         public enum SensorAction
@@ -42,10 +52,7 @@ namespace OrgPalThreeDemo.Peripherals
             /// Stop a defrost process.
             /// </summary>
             DefrostStop = 8,
-        }
 
-        public enum ParameterRegisterAddress
-        {
             SetBlockHeatingMode = 9,
             SetWindowHeatingMode,
             SetExternalHeatingMode,
@@ -61,13 +68,37 @@ namespace OrgPalThreeDemo.Peripherals
 
         public enum HeatingMode
         {
+            /// <summary>
+            /// The heating is OFF.
+            /// </summary>
             Off = 0,
+            /// <summary>
+            /// The heating is ON using 12 VDC power input.
+            /// </summary>
             On_12Volts,
+            /// <summary>
+            /// The heating is ON using 24 VDC power input.
+            /// </summary>
             On_24Volts,
+            /// <summary>
+            /// The heating is ON and currently defrosting using 12 VDC power input.
+            /// </summary>
             Defrosting_12Volts,
+            /// <summary>
+            /// The heating is ON and currently defrosting using 24 VDC power input.
+            /// </summary>
             Defrosting_24Volts,
+            /// <summary>
+            /// The heating mode is disabled.
+            /// </summary>
             HeatingDisabled,
+            /// <summary>
+            /// There was an internal voltage control error.
+            /// </summary>
             VoltageControlError,
+            /// <summary>
+            /// The operation is unavailable due to either incorrect configuration or temperature values.
+            /// </summary>
             Unavailable = 7,
         }
 
@@ -116,44 +147,44 @@ namespace OrgPalThreeDemo.Peripherals
         public enum InputRegisterAddress
         {
             // Status Information registers
-            SI_DeviceIdentification = 0,
+            SI_DeviceIdentification = 0, // value = High byte: device subtype, Low byte: software version
             SI_DeviceStatusLower,
             SI_DeviceStatusUpper,
-            SI_BlockHeatingState,
-            SI_WindowHeatingState,
-            SI_BlockTemperatureStatus,
-            SI_AmbientTemperatureStatus,
-            SI_LaserTemperatureStatus,
-            SI_TiltAngleStatus,
-            SI_SnowHeightStatus,
-            SI_DistanceStatus,
-            SI_NormalizedSignalStatus,
+            SI_BlockHeatingState, // value = HeatingMode
+            SI_WindowHeatingState, // value = HeatingMode
+            SI_BlockTemperatureStatus, // value = StatusCode
+            SI_AmbientTemperatureStatus, // value = StatusCode
+            SI_LaserTemperatureStatus, // value = StatusCode
+            SI_TiltAngleStatus, // value = StatusCode
+            SI_SnowHeightStatus, // value = StatusCode
+            SI_DistanceStatus, // value = StatusCode
+            SI_NormalizedSignalStatus, // value = StatusCode
             Reserved_12,
             Reserved_13,
-            SI_ErrorCode = 14,
-            SI_ErrorCode_Current,
+            SI_ErrorCode = 14, // value = DeviceErrorCode
+            SI_ErrorCode_Current, // value = DeviceErrorCode
             SI_AccumulatedOpperatingTimeLower,
             SI_AccumulatedOpperatingTimeUpper,
             SI_SystemTimeLower,
             SI_SystemTimeUpper,
             // Standard data registers (metric units)
-            SDM_SnowHeightMillimeter_Current,
-            SDM_BlockTemperatureDegC_Current,
-            SDM_AmbientTemperatureDegC_Current,
-            SDM_LaserTemperatureDegC_Current,
+            SDM_SnowHeightMillimeter_Current, // value = signed short
+            SDM_BlockTemperatureDegC_Current, // value = signed short scaled by 10
+            SDM_AmbientTemperatureDegC_Current, // value = signed short scaled by 10
+            SDM_LaserTemperatureDegC_Current, // value = signed short scaled by 10
             SDM_NormalizedSignal_Metric,
-            SDM_TiltAngle_Metric_Current,
+            SDM_TiltAngle_Metric_Current, // value = signed short scaled by 10
             SDM_ErrorCode_Metric,
             Reserved_27,
             Reserved_28,
             Reserved_29,
             // Standard data set registers (imperial units)
-            SDI_SnowHeightInches_Current = 30,
-            SDI_BlockTemperatureDegF_Current,
-            SDI_AmbientTemperatureDegF_Current,
-            SDI_LaserTemperatureDegF_Current,
+            SDI_SnowHeightInches_Current = 30, // value = signed short scaled by 20
+            SDI_BlockTemperatureDegF_Current, // value = signed short scaled by 10
+            SDI_AmbientTemperatureDegF_Current, // value = signed short scaled by 10
+            SDI_LaserTemperatureDegF_Current, // value = signed short scaled by 10
             SDI_NormalizedSignal_Imperial,
-            SDI_TiltAngle_Imperial_Current,
+            SDI_TiltAngle_Imperial_Current, // value = signed short scaled by 10
             SDI_ErrorCode_Imperial,
             Reserved_37,
             Reserved_38,
@@ -165,12 +196,12 @@ namespace OrgPalThreeDemo.Peripherals
             D_SnowHeight_Millimeter_Average,
             D_Calibrated_Millimeter_Current,
             D_Raw_Millimeter_Current,
-            D_SnowHeight_Inches_Current,
-            D_SnowHeight_Inches_Minimum,
-            D_SnowHeight_Inches_Maximum,
-            D_SnowHeight_Inches_Average,
-            D_Calibrated_Inches_Current,
-            D_Raw_Inches_Current,
+            D_SnowHeight_Inches_Current, // value = signed short scaled by 20
+            D_SnowHeight_Inches_Minimum, // value = signed short scaled by 20
+            D_SnowHeight_Inches_Maximum, // value = signed short scaled by 20
+            D_SnowHeight_Inches_Average, // value = signed short scaled by 20
+            D_Calibrated_Inches_Current, // value = signed short scaled by 20
+            D_Raw_Inches_Current, // value = signed short scaled by 20
             D_ReferenceHeight_millimeter = 52,
             D_SnowHeight_millimeter_HighRes,
             Reserved_54,
@@ -219,7 +250,7 @@ namespace OrgPalThreeDemo.Peripherals
             Reserved_94,
             // Logic and normalized values registers
             LNV_SnowFlag = 95,
-            Reserved_96, // TODO: Note: this is not in the manual!
+            Reserved_96, // TODO: Note: this is missing in the manual!
             LNV_NormalizedSignal_Current = 97,
             LNV_NormalizedSignal_Minimum,
             LNV_NormalizedSignal_Maximum,
@@ -248,11 +279,26 @@ namespace OrgPalThreeDemo.Peripherals
 
         public enum StatusCode
         {
+            /// <summary>
+            /// The operation was successful.
+            /// </summary>
             Success = 0,
+            /// <summary>
+            /// The command was unknown.
+            /// </summary>
             UnknownCommand = 16,
+            /// <summary>
+            /// The parameter was invalid.
+            /// </summary>
             InvalidParameter = 17,
+            /// <summary>
+            /// The channel was invalid.
+            /// </summary>
             InvalidChannel = 36,
-            DeviceBusy = 40, // initialization / calibration in progress
+            /// <summary>
+            /// The device is busy with initialization or calibration processes.
+            /// </summary>
+            DeviceBusy = 40,
             DisplayRangeOffsetOverflow = 80,
             DisplayRangeOffsetOverflow2 = 81,
             MeasurementRangeOverflow = 82,
@@ -260,9 +306,6 @@ namespace OrgPalThreeDemo.Peripherals
             MeasurementDataReadError = 84,
             AmbientConditionsError = 85
         }
-
-        //private const ushort VALUE_ERROR_UINT16 = ushort.MaxValue; // 65530
-        //private const short VALUE_ERROR_INT16 = short.MaxValue; // 32767
 
         private const short ACTION_APPLY = 12871;
 
@@ -277,27 +320,64 @@ namespace OrgPalThreeDemo.Peripherals
             client.ReadTimeout = client.WriteTimeout = 500;
         }
 
-        public short[] ReadRegistersRaw()
+        public short[] ReadAllRegistersRaw()
         {
+            // TODO: is there a way to check if the read has happened successfully!? probably returns null...
+            // read and return all (0..119) registers on the device.
+            return client.ReadInputRegisters(DeviceId, 0, 120);
+        }
+
+        public short[] ReadNormalRegistersRaw()
+        {
+            // TODO: is there a way to check if the read has happened successfully!? probably returns null...
             // read and return the info and standard measurements
             return client.ReadInputRegisters(DeviceId, 0, 27);
             // TODO: add the snow flag:
             //short[] regsRead = client.ReadInputRegisters(DeviceId, 95, 1);
         }
 
-        public void PerformAction(SensorAction actionRegister)
+        public bool PerformAction(SensorAction actionRegister)
         {
-            client.WriteSingleRegister(DeviceId, (ushort)actionRegister, ACTION_APPLY);
+            if ((ushort)actionRegister < 9)
+            {
+                return client.WriteSingleRegister(DeviceId, (ushort)actionRegister, ACTION_APPLY);
+            }
+            return false; // it involved a register that required a settable value.
         }
 
-        public void ApplyParameter(ParameterRegisterAddress parameterRegister, short value)
+        public bool PerformAction(SensorAction actionRegister, ushort value)
         {
-            client.WriteSingleRegister(DeviceId, (ushort)parameterRegister, value);
+            if (value >= short.MaxValue)
+            {
+                return false; // FIXME: certain values might need ushort (like height change acceptance time)
+            }
+
+            if ((ushort)actionRegister > 8) // make sure this is a settable register
+            {
+                var res = client.WriteSingleRegister(DeviceId, (ushort)actionRegister, (short)value);
+                if (!res)
+                {
+                    res = PerformAction(SensorAction.Reboot);
+                }
+                return res;
+            }
+            return false;
         }
 
-        public float ApplyScaleFactor(short regValue, short scaleFactor)
+        public float AdjustValue_ScaleFactor(short regValue, short scaleFactor)
         {
             return (regValue / scaleFactor);
+        }
+
+        // convert short to ushort for most regs.
+
+        public uint GetValueAsUInt32(ushort lowerValue, ushort upperValue)
+        {
+            // TODO: switch to Iot.Device.Modbus.Util
+            uint value = upperValue;
+            value <<= 16;
+            value |= lowerValue;
+            return value;
         }
     }
 }
