@@ -349,7 +349,11 @@ namespace OrgPalThreeDemo.Peripherals
         {
             if (value >= short.MaxValue)
             {
-                return false; // FIXME: certain values might need ushort (like height change acceptance time)
+                // FIXME: certain values might need ushort (like height change acceptance time)
+                // TODO: apply twos complement
+                //Iot.Device.Modbus.Util.Int16Converter
+
+                return false; 
             }
 
             if ((ushort)actionRegister > 8) // make sure this is a settable register
