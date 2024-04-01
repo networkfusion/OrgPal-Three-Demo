@@ -54,7 +54,12 @@
     <Compile Include="OrgPal.Three\Rtc\NumberHelper.cs" />
     <Compile Include="OrgPal.Three\SerialPortRS485.cs" />
     <Compile Include="Peripherals\BiralSWSxx0.cs" />
-    <Compile Include="Peripherals\LufftShm31ModbusRTU.cs" />
+    <Compile Include="Peripherals\LufftShm31\DeviceErrorCode.cs" />
+    <Compile Include="Peripherals\LufftShm31\HeatingModeState.cs" />
+    <Compile Include="Peripherals\LufftShm31\LufftShm31ModbusRTU.cs" />
+    <Compile Include="Peripherals\LufftShm31\ModbusInputRegisterAddress.cs" />
+    <Compile Include="Peripherals\LufftShm31\SensorAction.cs" />
+    <Compile Include="Peripherals\LufftShm31\StatusCode.cs" />
     <Compile Include="Peripherals\VaisalaHMT330.cs" />
     <Compile Include="MqttConfigFileSchema.cs" />
     <Compile Include="Peripherals\LufftVentus.cs" />
