@@ -57,7 +57,7 @@
     <Compile Include="Peripherals\LufftShm31\DeviceErrorCode.cs" />
     <Compile Include="Peripherals\LufftShm31\HeatingModeState.cs" />
     <Compile Include="Peripherals\LufftShm31\LufftShm31ModbusRTU.cs" />
-    <Compile Include="Peripherals\LufftShm31\ModbusInputRegisterAddress.cs" />
+    <Compile Include="Peripherals\LufftShm31\ModbusInputRegisters.cs" />
     <Compile Include="Peripherals\LufftShm31\SensorAction.cs" />
     <Compile Include="Peripherals\LufftShm31\StatusCode.cs" />
     <Compile Include="Peripherals\VaisalaHMT330.cs" />
