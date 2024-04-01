@@ -176,8 +176,8 @@
 
     public class ModbusInputRegister
     {
-        public ModbusInputRegisterType RegisterType { get; set; }
         public ModbusInputRegisterAddress RegisterAddress { get; set; }
+        public ModbusInputRegisterType RegisterType { get; set; }
         // TODO: add integral type (uint16, int16, etc.). 
         public int RegisterScaleFactor { get; set; }
         // TODO: add units (mm, inch, etc.).

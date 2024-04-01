@@ -1,5 +1,25 @@
 ﻿namespace OrgPalThreeDemo.Peripherals.LufftShm31
 {
+    public enum HeatingMode
+    {
+        /// <summary>
+        /// Turn the heating off.
+        /// </summary>
+        Off = 0,
+        /// <summary>
+        /// Set the heating mode to automatic.
+        /// </summary>
+        Automatic = 1,
+        /// <summary>
+        /// Start a defrost operation.
+        /// </summary>
+        StartDefrosting = 2,
+        /// <summary>
+        /// Stop a defrost opperation.
+        /// </summary>
+        StopDefrosting = 3
+    }
+
     public enum HeatingModeState
     {
         /// <summary>
