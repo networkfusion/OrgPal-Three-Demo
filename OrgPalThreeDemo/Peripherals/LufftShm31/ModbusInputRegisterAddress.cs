@@ -6,8 +6,8 @@
         SI_DeviceIdentification = 0, // value = High byte: device subtype, Low byte: software version
         SI_DeviceStatusLower,
         SI_DeviceStatusUpper,
-        SI_BlockHeatingState, // value = HeatingMode
-        SI_WindowHeatingState, // value = HeatingMode
+        SI_BlockHeatingState, // value = HeatingModeState
+        SI_WindowHeatingState, // value = HeatingModeState
         SI_BlockTemperatureStatus, // value = StatusCode
         SI_AmbientTemperatureStatus, // value = StatusCode
         SI_LaserTemperatureStatus, // value = StatusCode
@@ -116,7 +116,7 @@
         Reserved_103,
         Reserved_104,
         // Service Channel Registers
-        SC_BlockHeatingState = 105,
+        SC_BlockHeatingState = 105, // value = HeatingModeState
         SC_InternalTemperatureDegC_NTC,
         Reserved_107,
         SC_BlockHeatingDefrostTime_Seconds,
