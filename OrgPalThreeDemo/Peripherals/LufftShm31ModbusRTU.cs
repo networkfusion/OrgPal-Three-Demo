@@ -52,17 +52,49 @@ namespace OrgPalThreeDemo.Peripherals
             /// Stop a defrost process.
             /// </summary>
             StopDefrosting = 8,
-
+            /// <summary>
+            /// Set the Block Heating Mode.
+            /// </summary>
             SetBlockHeatingMode = 9,
+            /// <summary>
+            /// Set the Window Heating Mode.
+            /// </summary>
             SetWindowHeatingMode,
+            /// <summary>
+            /// Enable or Disable External Heating Control
+            /// </summary>
             SetExternalHeatingMode,
-            SetDefrostingMode,
+            /// <summary>
+            /// Enable or Disable automatic defrost cycle after power on.
+            /// </summary>
+            SetDefrostingModeAfterPowerOn,
+            /// <summary>
+            /// Set the Reference Height Measurement in milimeters.
+            /// </summary>
             SetReferenceHeight,
+            /// <summary>
+            /// Set the tilt angle in degrees.
+            /// </summary>
             SetTiltAngle,
+            /// <summary>
+            /// Set whether to use the reference angle or the accelerometer for calculations.
+            /// </summary>
             SetTiltAngleMode,
+            /// <summary>
+            /// Set the time to ignore height changes that exceed the maximum difference.
+            /// </summary>
             SetSnowHeightChangeTimeAcceptance = 16,
+            /// <summary>
+            /// Set the maximum snow height change difference between two measurements.
+            /// </summary>
             SetSnowHightChangeMaxDiffAcceptance,
+            /// <summary>
+            /// Set the laser operating mode.
+            /// </summary>
             SetLaserOperatingMode,
+            /// <summary>
+            /// Set the laser measurement interval.
+            /// </summary>
             SetLaserMeasurementInterval = 19,
         }
 
@@ -99,7 +131,7 @@ namespace OrgPalThreeDemo.Peripherals
             /// <summary>
             /// The operation is unavailable due to either incorrect configuration or temperature values.
             /// </summary>
-            Unavailable = 7,
+            OpperationUnavailable = 7,
         }
 
         public enum DeviceErrorCode
@@ -299,11 +331,29 @@ namespace OrgPalThreeDemo.Peripherals
             /// The device is busy with initialization or calibration processes.
             /// </summary>
             DeviceBusy = 40,
+            /// <summary>
+            /// Measurement variable (+offset) is outside the set display range.
+            /// </summary>
             DisplayRangeOffsetOverflow = 80,
+            /// <summary>
+            /// Measurement variable (+offset) is outside the set display range.
+            /// </summary>
             DisplayRangeOffsetOverflow2 = 81,
+            /// <summary>
+            /// Measurement value (physical) is outside the measuring range (e.g. ADC over range).
+            /// </summary>
             MeasurementRangeOverflow = 82,
+            /// <summary>
+            /// Measurement value (physical) is outside the measuring range (e.g. ADC over range).
+            /// </summary>
             MeasurementRangeOverflow2 = 83,
+            /// <summary>
+            /// Error in measurement data or no valid data available.
+            /// </summary>
             MeasurementDataReadError = 84,
+            /// <summary>
+            /// Device / sensor is unable to perform valid measurement due to ambient conditions.
+            /// </summary>
             AmbientConditionsError = 85
         }
 
@@ -313,10 +363,10 @@ namespace OrgPalThreeDemo.Peripherals
 
         private readonly ModbusClient client;
 
-        public LufftShm31ModbusRTU(string port = "COM3", byte deviceId = 1)
+        public LufftShm31ModbusRTU(string port = "COM3", byte deviceId = 1, int baudRate = 19200)
         {
             DeviceId = deviceId;
-            client = new(port, 19200);
+            client = new(port, baudRate);
             client.ReadTimeout = client.WriteTimeout = 500;
         }
 
@@ -350,8 +400,7 @@ namespace OrgPalThreeDemo.Peripherals
             if (value >= short.MaxValue)
             {
                 // FIXME: certain values might need ushort (like height change acceptance time)
-                // TODO: apply twos complement
-                //Iot.Device.Modbus.Util.Int16Converter
+                // TODO: apply twos complement and write it raw?
 
                 return false; 
             }
