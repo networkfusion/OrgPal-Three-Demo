@@ -15,6 +15,7 @@
 // #define ALPHA_FEATURE_FLAG
 // #define BETA_FEATURE_FLAG
 
+// #define ALPHA_FEATURE_FLAG_SHM31 // Commented out as needs more work
 // #define ALPHA_FEATURE_FLAG_HMP155 // Commented out as needs more work (and inherent issues with STM32 boards)
 // #define ALPHA_FEATURE_FLAG_CL31 // Commented out as needs more work (and inherent issues with STM32 boards)
 // #define BETA_FEATURE_THERMISTOR // Commented out as sometimes causes PT100 temp to be null for some reason!
@@ -120,6 +121,13 @@ namespace OrgPalThreeDemo
             }
 
 #if ORGPAL_THREE
+#if ALPHA_FEATURE_FLAG_SHM31
+            new Thread(() =>
+            {
+                var sensorShm31 = new Peripherals.LufftShm31.LufftShm31ModbusRTU("COM3");
+                Thread.Sleep(Timeout.Infinite);
+            }).Start();
+#endif
 #if ALPHA_FEATURE_FLAG_HMP155
             new Thread(() =>
             {

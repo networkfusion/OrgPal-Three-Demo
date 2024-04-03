@@ -21,12 +21,18 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
 
         private readonly ModbusClient client;
 
-        public LufftShm31ModbusRTU(string port = "COM3", byte deviceId = 1, int baudRate = 19200)
+        public LufftShm31ModbusRTU(string port, byte deviceId = 1, int baudRate = 19200)
         {
             DeviceId = deviceId;
             client = new(port, baudRate);
             client.ReadTimeout = client.WriteTimeout = 500;
         }
+
+        // FIXME: should be able to close the connection!
+        //public void Close()
+        //{
+        //    client.Dispose();
+        //}
 
         public short[] ReadAllRegistersRaw()
         {
@@ -44,7 +50,7 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
             //short[] regsRead = client.ReadInputRegisters(DeviceId, 95, 1);
         }
 
-        public bool PerformAction(SensorAction actionRegister)
+        public bool PerformAction(ModbusSensorAction actionRegister)
         {
             if ((ushort)actionRegister < 9)
             {
@@ -53,7 +59,7 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
             return false; // it involved a register that required a settable value.
         }
 
-        public bool PerformAction(SensorAction actionRegister, ushort value)
+        public bool PerformAction(ModbusSensorAction actionRegister, ushort value)
         {
             if (value >= short.MaxValue)
             {
@@ -68,7 +74,7 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
                 var res = client.WriteSingleRegister(DeviceId, (ushort)actionRegister, (short)value);
                 if (!res)
                 {
-                    res = PerformAction(SensorAction.InitiateReboot);
+                    res = PerformAction(ModbusSensorAction.InitiateReboot);
                 }
                 return res;
             }

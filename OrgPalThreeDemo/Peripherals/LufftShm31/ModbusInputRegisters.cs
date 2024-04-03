@@ -43,6 +43,29 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
 
     }
 
+    public enum ModbusRegisterValueType
+    {
+        /// <summary>
+        /// The value is an unsigned short (uint16)
+        /// </summary>
+        UnsignedShort,
+        /// <summary>
+        /// The value is a signed short (int16)
+        /// </summary>
+        /// <remarks>
+        /// Might need conversion.
+        /// </remarks>
+        SignedShort,
+        /// <summary>
+        /// The value is the upper half of a Unt32
+        /// </summary>
+        PartalUIntUpper16,
+        /// <summary>
+        /// The value is the lower half of a Unt32
+        /// </summary>
+        PartialUIntLower16,
+    }
+
     public enum ModbusInputRegisterAddress
     {
         // Status Information registers
@@ -67,7 +90,7 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
         SI_SystemTimeLower,
         SI_SystemTimeUpper,
         // Standard data registers (metric units)
-        SDM_SnowHeightMillimeter_Current, // value = signed short
+        SDM_SnowHeightMillimeter_Current = 20, // value = signed short
         SDM_BlockTemperatureDegC_Current, // value = signed short scaled by 10
         SDM_AmbientTemperatureDegC_Current, // value = signed short scaled by 10
         SDM_LaserTemperatureDegC_Current, // value = signed short scaled by 10
@@ -180,15 +203,19 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
     {
         public ModbusInputRegisterAddress RegisterAddress { get; set; }
         public ModbusInputRegisterType RegisterType { get; set; }
-        // TODO: add integral type (uint16, int16, etc.). 
-        public int RegisterScaleFactor { get; set; }
-        // TODO: add units (mm, inch, etc.).
+        public ModbusRegisterValueType ValueType { get; set; }
+        public int RegisterValueScaleFactor { get; set; }
+        // public int RegisterValueUnitType { get; set; } // TODO: add units (mm, inch, etc.).
 
-        public ModbusInputRegister(ModbusInputRegisterAddress address, ModbusInputRegisterType type, int scaleFactor = 0)
+        public ModbusInputRegister(ModbusInputRegisterAddress address,
+            ModbusInputRegisterType regType,
+            ModbusRegisterValueType valueType = ModbusRegisterValueType.UnsignedShort,
+            int scaleFactor = 0)
         {
             RegisterAddress = address;
-            RegisterType = type;
-            RegisterScaleFactor = scaleFactor;
+            RegisterType = regType;
+            ValueType = valueType;
+            RegisterValueScaleFactor = scaleFactor;
         }
 
     }
@@ -205,6 +232,63 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
                     ModbusInputRegisterAddress.SI_DeviceIdentification,
                     ModbusInputRegisterType.StatusInformation)
                 );
+            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_DeviceStatusLower,
+                new ModbusInputRegister(
+                    ModbusInputRegisterAddress.SI_DeviceStatusLower,
+                    ModbusInputRegisterType.StatusInformation, ModbusRegisterValueType.PartialUIntLower16)
+                );
+            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_DeviceStatusUpper,
+                new ModbusInputRegister(
+                    ModbusInputRegisterAddress.SI_DeviceStatusUpper,
+                    ModbusInputRegisterType.StatusInformation, ModbusRegisterValueType.PartalUIntUpper16)
+                );
+
+            // ...
+            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDM_SnowHeightMillimeter_Current,
+                new ModbusInputRegister(
+                    ModbusInputRegisterAddress.SDM_SnowHeightMillimeter_Current,
+                    ModbusInputRegisterType.StandardMetric,
+                    ModbusRegisterValueType.SignedShort)
+                );
+            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDM_BlockTemperatureDegC_Current,
+                new ModbusInputRegister(
+                    ModbusInputRegisterAddress.SDM_BlockTemperatureDegC_Current,
+                    ModbusInputRegisterType.StandardMetric,
+                    ModbusRegisterValueType.SignedShort,
+                    10)
+                );
+            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDM_AmbientTemperatureDegC_Current,
+                new ModbusInputRegister(
+                    ModbusInputRegisterAddress.SDM_AmbientTemperatureDegC_Current,
+                    ModbusInputRegisterType.StandardMetric,
+                    ModbusRegisterValueType.SignedShort,
+                    10)
+                );
+            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDM_LaserTemperatureDegC_Current,
+                new ModbusInputRegister(
+                    ModbusInputRegisterAddress.SDM_LaserTemperatureDegC_Current,
+                    ModbusInputRegisterType.StandardMetric,
+                    ModbusRegisterValueType.SignedShort,
+                    10)
+                );
+            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDM_NormalizedSignal_Metric,
+                new ModbusInputRegister(
+                    ModbusInputRegisterAddress.SDM_NormalizedSignal_Metric,
+                    ModbusInputRegisterType.StandardMetric)
+                );
+            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDM_TiltAngle_Metric_Current,
+                new ModbusInputRegister(
+                    ModbusInputRegisterAddress.SDM_TiltAngle_Metric_Current,
+                    ModbusInputRegisterType.StandardMetric,
+                    ModbusRegisterValueType.SignedShort,
+                    10)
+                );
+            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDM_ErrorCode_Metric,
+                new ModbusInputRegister(
+                    ModbusInputRegisterAddress.SDM_ErrorCode_Metric,
+                    ModbusInputRegisterType.StandardMetric)
+                );
+            // ...
         }
     }
 }

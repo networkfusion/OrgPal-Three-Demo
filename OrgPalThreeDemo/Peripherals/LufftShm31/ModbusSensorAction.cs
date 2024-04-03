@@ -1,6 +1,6 @@
 ﻿namespace OrgPalThreeDemo.Peripherals.LufftShm31
 {
-    public enum SensorAction
+    public enum ModbusSensorAction
     {
         /// <summary>
         /// Initiate a reboot of the sensor.
@@ -9,31 +9,31 @@
         /// <summary>
         /// Start performing measurement operations.
         /// </summary>
-        StartMeasurements,
+        StartMeasurements = 1,
         /// <summary>
         /// Stop performing measurement operations.
         /// </summary>
-        StopMeasurements,
+        StopMeasurements = 2,
         /// <summary>
         /// Turn the laser on permanently (e.g. for installation alignment).
         /// </summary>
-        TurnLaserOnPermanently,
+        TurnLaserOnPermanently = 3,
         /// <summary>
         /// Put the laser back into its normal operating mode (after TurnLaserOnPermanently).
         /// </summary>
-        ResumeNormalLaserSchedule,
+        ResumeNormalLaserSchedule = 4,
         /// <summary>
         /// Perform calibration of the height using the tilt angle from the gyroscope.
         /// </summary>
-        InitiateFullCalibration,
+        InitiateFullCalibration = 5,
         /// <summary>
         /// Perform calibration of the height using the reference angle (ignore gyroscope).
         /// </summary>
-        InitiateHeightCalibration,
+        InitiateHeightCalibration = 6,
         /// <summary>
         /// Start a defrost process.
         /// </summary>
-        InitiateDefrost,
+        InitiateDefrost = 7,
         /// <summary>
         /// Stop a defrost process.
         /// </summary>
@@ -45,27 +45,27 @@
         /// <summary>
         /// Set the Window Heating Mode.
         /// </summary>
-        SetWindowHeatingMode,
+        SetWindowHeatingMode = 10,
         /// <summary>
         /// Enable or Disable External Heating Control
         /// </summary>
-        SetExternalHeatingMode,
+        SetExternalHeatingMode = 11,
         /// <summary>
         /// Enable or Disable automatic defrost cycle after power on.
         /// </summary>
-        SetDefrostingModeAfterPowerOn,
+        SetDefrostingModeAfterPowerOn = 12,
         /// <summary>
         /// Set the Reference Height Measurement in milimeters.
         /// </summary>
-        SetReferenceHeight,
+        SetReferenceHeight = 13,
         /// <summary>
         /// Set the tilt angle in degrees.
         /// </summary>
-        SetTiltAngle,
+        SetTiltAngle = 14,
         /// <summary>
         /// Set whether to use the reference angle or the accelerometer for calculations.
         /// </summary>
-        SetTiltAngleMode,
+        SetTiltAngleMode = 15,
         /// <summary>
         /// Set the time to ignore height changes that exceed the maximum difference.
         /// </summary>
@@ -73,11 +73,11 @@
         /// <summary>
         /// Set the maximum snow height change difference between two measurements.
         /// </summary>
-        SetSnowHightChangeMaxDiffAcceptance,
+        SetSnowHightChangeMaxDiffAcceptance = 17,
         /// <summary>
         /// Set the laser operating mode.
         /// </summary>
-        SetLaserOperatingMode,
+        SetLaserOperatingMode = 18,
         /// <summary>
         /// Set the laser measurement interval.
         /// </summary>

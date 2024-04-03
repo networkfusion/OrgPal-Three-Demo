@@ -58,7 +58,7 @@
     <Compile Include="Peripherals\LufftShm31\HeatingModes.cs" />
     <Compile Include="Peripherals\LufftShm31\LufftShm31ModbusRTU.cs" />
     <Compile Include="Peripherals\LufftShm31\ModbusInputRegisters.cs" />
-    <Compile Include="Peripherals\LufftShm31\SensorAction.cs" />
+    <Compile Include="Peripherals\LufftShm31\ModbusSensorAction.cs" />
     <Compile Include="Peripherals\LufftShm31\StatusCode.cs" />
     <Compile Include="Peripherals\VaisalaHMT330.cs" />
     <Compile Include="MqttConfigFileSchema.cs" />
