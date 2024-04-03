@@ -41,6 +41,10 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
         /// Service Channel registers.
         /// </summary>
         ServiceChannels,
+        /// <summary>
+        /// The Register type was not recognised.
+        /// </summary>
+        Unknown
 
     }
 
@@ -211,7 +215,7 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
     public class ModbusInputRegister
     {
         public ModbusInputRegisterAddress RegisterAddress { get; set; } = 0;
-        public ModbusInputRegisterType RegisterType { get; set; } = ModbusInputRegisterType.StatusInformation;
+        public ModbusInputRegisterType RegisterType { get; set; } = ModbusInputRegisterType.Unknown;
         public ModbusRegisterValueType ValueType { get; set; } = ModbusRegisterValueType.UnsignedShort;
         public float ValueScaleFactor { get; set; } = 0.0f;
         public ModbusRegisterValueRange ValueRange { get; set; } = new ModbusRegisterValueRange();
@@ -245,6 +249,7 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
                 });
 
             // ...
+            // Standard Data Metric
             Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDM_SnowHeightMillimeter_Current,
                 new ModbusInputRegister {
                     RegisterAddress = ModbusInputRegisterAddress.SDM_SnowHeightMillimeter_Current,
@@ -299,6 +304,68 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
                     RegisterType = ModbusInputRegisterType.StandardMetric,
                     ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 255 }
                 });
+            // Standard Data Imperial
+            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDI_SnowHeightInches_Current,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SDI_SnowHeightInches_Current,
+                    RegisterType = ModbusInputRegisterType.StandardImperial,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 20,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -12598, MaximumValue = 12598 }
+                });
+            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDI_BlockTemperatureDegF_Current,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SDI_BlockTemperatureDegF_Current,
+                    RegisterType = ModbusInputRegisterType.StandardImperial,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -400, MaximumValue = 2120 }
+                });
+            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDI_AmbientTemperatureDegF_Current,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SDI_AmbientTemperatureDegF_Current,
+                    RegisterType = ModbusInputRegisterType.StandardImperial,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -580, MaximumValue = 2120 }
+                });
+            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDI_LaserTemperatureDegF_Current,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SDI_LaserTemperatureDegF_Current,
+                    RegisterType = ModbusInputRegisterType.StandardImperial,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -760, MaximumValue = 1760 }
+                });
+            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDI_NormalizedSignal_Imperial,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SDI_NormalizedSignal_Imperial,
+                    RegisterType = ModbusInputRegisterType.StandardImperial,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 255 }
+                });
+            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDI_TiltAngle_Imperial_Current,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SDI_TiltAngle_Imperial_Current,
+                    RegisterType = ModbusInputRegisterType.StandardImperial,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -1800, MaximumValue = 1800 }
+                });
+            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDI_ErrorCode_Imperial,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SDI_ErrorCode_Imperial,
+                    RegisterType = ModbusInputRegisterType.StandardImperial,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 255 }
+                });
+            // ...
+            // Service channels
             // ...
         }
     }
