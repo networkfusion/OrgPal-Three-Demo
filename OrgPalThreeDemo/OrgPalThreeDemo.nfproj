@@ -86,6 +86,7 @@
   <ItemGroup>
     <None Include="..\.editorconfig" Link=".editorconfig" />
     <None Include="packages.config" />
+    <None Include="peripherals\lufftshm31\README.md" />
     <None Include="Resources\AwsCAroot.der" />
   </ItemGroup>
   <ItemGroup>

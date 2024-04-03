@@ -1,4 +1,6 @@
-﻿namespace OrgPalThreeDemo.Peripherals.LufftShm31
+﻿using System.Collections;
+
+namespace OrgPalThreeDemo.Peripherals.LufftShm31
 {
     public enum ModbusInputRegisterType
     {
@@ -100,49 +102,49 @@
         D_Calibrated_Inches_Current, // value = signed short scaled by 20
         D_Raw_Inches_Current, // value = signed short scaled by 20
         D_ReferenceHeight_millimeter = 52,
-        D_SnowHeight_millimeter_HighRes,
+        D_SnowHeight_millimeter_HighRes, //value = unsigned short scaled by 10
         D_Reserved_54,
         // Temperature Registers (metric units)
-        TM_BlockTemperatureDegC_Current = 55,
-        TM_BlockTemperatureDegC_Minimum,
-        TM_BlockTemperatureDegC_Maximum,
-        TM_BlockTemperatureDegC_Average,
-        TM_AmbientTemperatureDegC_Current,
-        TM_AmbientTemperatureDegC_Minimum,
-        TM_AmbientTemperatureDegC_Maximum,
-        TM_AmbientTemperatureDegC_Average,
-        TM_LaserTemperatureDegC_Current,
-        TM_LaserTemperatureDegC_Minimum,
-        TM_LaserTemperatureDegC_Maximum,
-        TM_LaserTemperatureDegC_Average,
+        TM_BlockTemperatureDegC_Current = 55, // value = signed short scaled by 10
+        TM_BlockTemperatureDegC_Minimum, // value = signed short scaled by 10
+        TM_BlockTemperatureDegC_Maximum, // value = signed short scaled by 10
+        TM_BlockTemperatureDegC_Average, // value = signed short scaled by 10
+        TM_AmbientTemperatureDegC_Current, // value = signed short scaled by 10
+        TM_AmbientTemperatureDegC_Minimum, // value = signed short scaled by 10
+        TM_AmbientTemperatureDegC_Maximum, // value = signed short scaled by 10
+        TM_AmbientTemperatureDegC_Average, // value = signed short scaled by 10
+        TM_LaserTemperatureDegC_Current, // value = signed short scaled by 10
+        TM_LaserTemperatureDegC_Minimum, // value = signed short scaled by 10
+        TM_LaserTemperatureDegC_Maximum, // value = signed short scaled by 10
+        TM_LaserTemperatureDegC_Average, // value = signed short scaled by 10
         TM_Reserved_67,
         TM_Reserved_68,
         TM_Reserved_69,
         // Temperature Registers (imperial units)
-        TI_BlockTemperatureDegF_Current = 70,
-        TI_BlockTemperatureDegF_Minimum,
-        TI_BlockTemperatureDegF_Maximum,
-        TI_BlockTemperatureDegF_Average,
-        TI_AmbientTemperatureDegF_Current,
-        TI_AmbientTemperatureDegF_Minimum,
-        TI_AmbientTemperatureDegF_Maximum,
-        TI_AmbientTemperatureDegF_Average,
-        TI_LaserTemperatureDegF_Current,
-        TI_LaserTemperatureDegF_Minimum,
-        TI_LaserTemperatureDegF_Maximum,
-        TI_LaserTemperatureDegF_Average,
+        TI_BlockTemperatureDegF_Current = 70, // value = signed short scaled by 10
+        TI_BlockTemperatureDegF_Minimum, // value = signed short scaled by 10
+        TI_BlockTemperatureDegF_Maximum, // value = signed short scaled by 10
+        TI_BlockTemperatureDegF_Average, // value = signed short scaled by 10
+        TI_AmbientTemperatureDegF_Current, // value = signed short scaled by 10
+        TI_AmbientTemperatureDegF_Minimum, // value = signed short scaled by 10
+        TI_AmbientTemperatureDegF_Maximum, // value = signed short scaled by 10
+        TI_AmbientTemperatureDegF_Average, // value = signed short scaled by 10
+        TI_LaserTemperatureDegF_Current, // value = signed short scaled by 10
+        TI_LaserTemperatureDegF_Minimum, // value = signed short scaled by 10
+        TI_LaserTemperatureDegF_Maximum, // value = signed short scaled by 10
+        TI_LaserTemperatureDegF_Average, // value = signed short scaled by 10
         TI_Reserved_82,
         TI_Reserved_83,
         TI_Reserved_84,
         // Angles registers
-        A_AngleTilt_Current = 85,
-        A_AngleTilt_Minimum,
-        A_AngleTilt_Maximum,
-        A_AngleTilt_Average,
-        A_AngleX_Current = 89,
-        A_AngleY_Current,
-        A_AngleZ_Current,
-        A_TiltAngleReference,
+        A_AngleTilt_Current = 85, // value = signed short scaled by 10
+        A_AngleTilt_Minimum, // value = signed short scaled by 10
+        A_AngleTilt_Maximum, // value = signed short scaled by 10
+        A_AngleTilt_Average, // value = signed short scaled by 10
+        A_AngleX_Current = 89, // value = signed short scaled by 10
+        A_AngleY_Current, // value = signed short scaled by 10
+        A_AngleZ_Current, // value = signed short scaled by 10
+        A_TiltAngleReference, // value = signed short scaled by 10
         A_Reserved_93,
         A_Reserved_94,
         // Logic and normalized values registers
@@ -158,18 +160,18 @@
         LNV_Reserved_104,
         // Service Channel Registers
         SC_BlockHeatingState = 105, // value = HeatingModeState
-        SC_InternalTemperatureDegC_NTC,
+        SC_InternalTemperatureDegC_NTC, // value = signed short scaled by 10
         SC_Reserved_107,
         SC_BlockHeatingDefrostTime_Seconds,
         SC_WindowHeatingState,
-        SC_ExternalTemperatureDegC_NTC = 110,
+        SC_ExternalTemperatureDegC_NTC = 110, // value = signed short scaled by 10
         SC_Reserved_111,
         SC_WindowHeatingDefrostTime_Seconds = 112,
         SC_LaserGainCode = 113,
-        SC_LaserSignalIntensity_uV = 114,
+        SC_LaserSignalIntensity_uV = 114, // value = signed short scaled by 0.1
         SC_LaserDistance_Millimeter = 115,
-        SC_LaserTemperatureDegC = 116,
-        SC_OperatingVoltage = 117,
+        SC_LaserTemperatureDegC = 116, // value = signed short scaled by 10
+        SC_OperatingVoltage = 117, // value = signed short scaled by 10
         SC_Reserved_118,
         SC_Reserved_119,
     }
@@ -181,12 +183,28 @@
         // TODO: add integral type (uint16, int16, etc.). 
         public int RegisterScaleFactor { get; set; }
         // TODO: add units (mm, inch, etc.).
+
+        public ModbusInputRegister(ModbusInputRegisterAddress address, ModbusInputRegisterType type, int scaleFactor = 0)
+        {
+            RegisterAddress = address;
+            RegisterType = type;
+            RegisterScaleFactor = scaleFactor;
+        }
+
     }
 
-    public static class ModbusInputRegisters
+    public class ModbusInputRegisters
     {
-        public static ModbusInputRegister[] Shm31InputRegisters;
+        public Hashtable Shm31InputRegisters;
 
-        // TODO: add the registers.
+        // TODO: add all the registers.
+        public ModbusInputRegisters()
+        {
+            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_DeviceIdentification,
+                new ModbusInputRegister(
+                    ModbusInputRegisterAddress.SI_DeviceIdentification,
+                    ModbusInputRegisterType.StatusInformation)
+                );
+        }
     }
 }
