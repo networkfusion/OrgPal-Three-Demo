@@ -21,7 +21,7 @@ VDC__IN_- (0) = White (sensor connector pin 7).
 
 ## Usage
 
-* Ensure the device is configured to Modbus RTU using the Lufft Config Tool.
+* Ensure the device is configured to Modbus RTU using UMB ConfigTool.NET.
 
 
 ```csharp
