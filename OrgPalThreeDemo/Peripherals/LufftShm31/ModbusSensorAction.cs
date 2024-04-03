@@ -1,6 +1,6 @@
 ﻿namespace OrgPalThreeDemo.Peripherals.LufftShm31
 {
-    public enum ModbusSensorAction
+    public enum ModbusSensorAction : byte
     {
         /// <summary>
         /// Initiate a reboot of the sensor.
@@ -82,5 +82,9 @@
         /// Set the laser measurement interval.
         /// </summary>
         SetLaserMeasurementInterval = 19,
+        /// <summary>
+        /// Unknown or above the allowed value.
+        /// </summary>
+        Unknown = 0xFF
     }
 }

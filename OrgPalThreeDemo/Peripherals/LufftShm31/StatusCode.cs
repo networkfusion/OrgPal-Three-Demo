@@ -1,6 +1,6 @@
 ﻿namespace OrgPalThreeDemo.Peripherals.LufftShm31
 {
-    public enum StatusCode
+    public enum StatusCode : byte
     {
         /// <summary>
         /// The operation was successful.
@@ -45,6 +45,10 @@
         /// <summary>
         /// Device / sensor is unable to perform valid measurement due to ambient conditions.
         /// </summary>
-        AmbientConditionsError = 85
+        AmbientConditionsError = 85,
+        /// <summary>
+        /// Unknown or above the allowed value.
+        /// </summary>
+        Unknown = 0xFF
     }
 }

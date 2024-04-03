@@ -1,6 +1,6 @@
 ﻿namespace OrgPalThreeDemo.Peripherals.LufftShm31
 {
-    public enum HeatingMode
+    public enum HeatingMode : byte
     {
         /// <summary>
         /// Turn the heating off.
@@ -17,10 +17,14 @@
         /// <summary>
         /// Stop a defrost opperation.
         /// </summary>
-        StopDefrosting = 3
+        StopDefrosting = 3,
+        /// <summary>
+        /// Unknown or above the allowed value.
+        /// </summary>
+        Unknown = 0xFF
     }
 
-    public enum HeatingModeState
+    public enum HeatingModeState : byte
     {
         /// <summary>
         /// The heating is OFF.
@@ -54,5 +58,9 @@
         /// The operation is unavailable due to either incorrect configuration or temperature values.
         /// </summary>
         OpperationUnavailable = 7,
+        /// <summary>
+        /// Unknown or above the allowed value.
+        /// </summary>
+        Unknown = 0xFF
     }
 }

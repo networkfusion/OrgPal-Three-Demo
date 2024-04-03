@@ -8,7 +8,7 @@
     /// The codes are based on those of the SHM 30 snow depth sensor and have been specifically
     /// expanded.
     /// </remarks>
-    public enum DeviceErrorCode
+    public enum DeviceErrorCode : byte
     {
         /// <summary>
         /// Laser: Signal too weak; distance too short.
@@ -169,5 +169,9 @@
         /// Evaluation routine could not initialise ring buffer for avg / min / max channels.
         /// </summary>
         RingBufferInitialization = 83,
+        /// <summary>
+        /// Unknown or above the allowed value.
+        /// </summary>
+        Unknown = 0xFF
     }
 }

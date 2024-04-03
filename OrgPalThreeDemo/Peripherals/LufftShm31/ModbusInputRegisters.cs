@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace OrgPalThreeDemo.Peripherals.LufftShm31
 {
-    public enum ModbusInputRegisterType
+    public enum ModbusInputRegisterType : byte
     {
         /// <summary>
         /// Status Information registers.
@@ -42,13 +42,13 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
         /// </summary>
         ServiceChannels,
         /// <summary>
-        /// The Register type was not recognised.
+        /// The Register type was not recognised or above the allowed value.
         /// </summary>
-        Unknown
+        Unknown = 0xFF
 
     }
 
-    public enum ModbusRegisterValueType
+    public enum ModbusRegisterValueType : byte
     {
         /// <summary>
         /// The value is an unsigned short (uint16)
@@ -69,9 +69,13 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
         /// The value is the lower half of a Unt32
         /// </summary>
         PartialUIntLower16,
+        /// <summary>
+        /// The value type was unknown or above the allowed value.
+        /// </summary>
+        Unknown = 0xFF
     }
 
-    public enum ModbusInputRegisterAddress
+    public enum ModbusInputRegisterAddress : byte
     {
         // Status Information registers
         SI_DeviceIdentification = 0, // value = High byte: device subtype, Low byte: software version
@@ -202,8 +206,15 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
         SC_OperatingVoltage = 117, // value = signed short scaled by 10
         SC_Reserved_118,
         SC_Reserved_119,
+        /// <summary>
+        /// The register is unknown or above the allowed value.
+        /// </summary>
+        Unknown = 0xFF
     }
 
+    /// <summary>
+    /// The valid range of a register value.
+    /// </summary>
     public class ModbusRegisterValueRange
     {
         // requires int as the value might be short or ushort, but by default should use ushort.
