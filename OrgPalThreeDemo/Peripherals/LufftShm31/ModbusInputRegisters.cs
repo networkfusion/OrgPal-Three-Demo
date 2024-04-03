@@ -199,23 +199,32 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
         SC_Reserved_119,
     }
 
+    public class ModbusRegisterValueRange
+    {
+        public int MaximumValue { get; set; } = ushort.MinValue;
+        public int MinimumValue { get; set; } = ushort.MaxValue;
+
+    }
+
     public class ModbusInputRegister
     {
         public ModbusInputRegisterAddress RegisterAddress { get; set; }
         public ModbusInputRegisterType RegisterType { get; set; }
         public ModbusRegisterValueType ValueType { get; set; }
-        public int RegisterValueScaleFactor { get; set; }
-        // public int RegisterValueUnitType { get; set; } // TODO: add units (mm, inch, etc.).
+        public float ValueScaleFactor { get; set; } = 0;
+        public ModbusRegisterValueRange ValueRawRange { get; set; }
+        public ModbusRegisterValueRange ValueScaledRange { get; set; }
+        // public int ValueUnitsType { get; set; } // TODO: add units (mm, inch, etc.).
 
         public ModbusInputRegister(ModbusInputRegisterAddress address,
             ModbusInputRegisterType regType,
             ModbusRegisterValueType valueType = ModbusRegisterValueType.UnsignedShort,
-            int scaleFactor = 0)
+            float scaleFactor = 0)
         {
             RegisterAddress = address;
             RegisterType = regType;
             ValueType = valueType;
-            RegisterValueScaleFactor = scaleFactor;
+            ValueScaleFactor = scaleFactor;
         }
 
     }
