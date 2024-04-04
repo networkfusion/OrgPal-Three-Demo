@@ -234,31 +234,31 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
 
     }
 
-    public class ModbusInputRegisters
+    public class InitializeInputRegisters
     {
-        public Hashtable Shm31InputRegisters;
+        public Hashtable InputRegisters;
 
         // TODO: add all the registers.
-        public ModbusInputRegisters()
+        public InitializeInputRegisters()
         {
-            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_DeviceIdentification,
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_DeviceIdentification,
                 new ModbusInputRegister {
                     RegisterAddress = ModbusInputRegisterAddress.SI_DeviceIdentification,
                     RegisterType = ModbusInputRegisterType.StatusInformation
                 });
-            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_DeviceStatusLower,
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_DeviceStatusLower,
                 new ModbusInputRegister {
                     RegisterAddress = ModbusInputRegisterAddress.SI_DeviceStatusLower,
                     RegisterType = ModbusInputRegisterType.StatusInformation,
                     ValueType = ModbusRegisterValueType.PartialUIntLower16
                 });
-            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_DeviceStatusUpper,
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_DeviceStatusUpper,
                 new ModbusInputRegister {
                     RegisterAddress = ModbusInputRegisterAddress.SI_DeviceStatusUpper,
                     RegisterType = ModbusInputRegisterType.StatusInformation,
                     ValueType = ModbusRegisterValueType.PartalUIntUpper16
                 });
-            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_BlockHeatingState,
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_BlockHeatingState,
                 new ModbusInputRegister
                 {
                     RegisterAddress = ModbusInputRegisterAddress.SI_BlockHeatingState,
@@ -267,14 +267,14 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
                 });
             // ...
             // Standard Data Metric
-            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDM_SnowHeightMillimeter_Current,
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDM_SnowHeightMillimeter_Current,
                 new ModbusInputRegister {
                     RegisterAddress = ModbusInputRegisterAddress.SDM_SnowHeightMillimeter_Current,
                     RegisterType = ModbusInputRegisterType.StandardMetric,
                     ValueType = ModbusRegisterValueType.SignedShort,
                     ValueRange = new ModbusRegisterValueRange { MinimumValue = -16000, MaximumValue = 16000 }
                 });
-            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDM_BlockTemperatureDegC_Current,
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDM_BlockTemperatureDegC_Current,
                 new ModbusInputRegister {
                     RegisterAddress = ModbusInputRegisterAddress.SDM_BlockTemperatureDegC_Current,
                     RegisterType = ModbusInputRegisterType.StandardMetric,
@@ -282,7 +282,7 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
                     ValueScaleFactor = 10,
                     ValueRange = new ModbusRegisterValueRange { MinimumValue = -400, MaximumValue = 1000 }
                 });
-            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDM_AmbientTemperatureDegC_Current,
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDM_AmbientTemperatureDegC_Current,
                 new ModbusInputRegister
                 {
                     RegisterAddress = ModbusInputRegisterAddress.SDM_AmbientTemperatureDegC_Current,
@@ -291,7 +291,7 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
                     ValueScaleFactor = 10,
                     ValueRange = new ModbusRegisterValueRange { MinimumValue = -500, MaximumValue = 1000 }
                 });
-            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDM_LaserTemperatureDegC_Current,
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDM_LaserTemperatureDegC_Current,
                 new ModbusInputRegister
                 {
                     RegisterAddress = ModbusInputRegisterAddress.SDM_LaserTemperatureDegC_Current,
@@ -300,14 +300,14 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
                     ValueScaleFactor = 10,
                     ValueRange = new ModbusRegisterValueRange { MinimumValue = -600, MaximumValue = 800 }
                 });
-            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDM_NormalizedSignal_Metric,
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDM_NormalizedSignal_Metric,
                 new ModbusInputRegister
                 {
                     RegisterAddress = ModbusInputRegisterAddress.SDM_NormalizedSignal_Metric,
                     RegisterType = ModbusInputRegisterType.StandardMetric,
                     ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 255 }
                 });
-            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDM_TiltAngle_Metric_Current,
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDM_TiltAngle_Metric_Current,
                 new ModbusInputRegister {
                     RegisterAddress = ModbusInputRegisterAddress.SDM_TiltAngle_Metric_Current,
                     RegisterType = ModbusInputRegisterType.StandardMetric,
@@ -315,14 +315,14 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
                     ValueScaleFactor = 10,
                     ValueRange = new ModbusRegisterValueRange { MinimumValue = -1800, MaximumValue = 1800 }
                 });
-            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDM_ErrorCode_Metric,
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDM_ErrorCode_Metric,
                 new ModbusInputRegister {
                     RegisterAddress = ModbusInputRegisterAddress.SDM_ErrorCode_Metric,
                     RegisterType = ModbusInputRegisterType.StandardMetric,
                     ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 255 }
                 });
             // Standard Data Imperial
-            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDI_SnowHeightInches_Current,
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDI_SnowHeightInches_Current,
                 new ModbusInputRegister
                 {
                     RegisterAddress = ModbusInputRegisterAddress.SDI_SnowHeightInches_Current,
@@ -331,7 +331,7 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
                     ValueScaleFactor = 20,
                     ValueRange = new ModbusRegisterValueRange { MinimumValue = -12598, MaximumValue = 12598 }
                 });
-            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDI_BlockTemperatureDegF_Current,
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDI_BlockTemperatureDegF_Current,
                 new ModbusInputRegister
                 {
                     RegisterAddress = ModbusInputRegisterAddress.SDI_BlockTemperatureDegF_Current,
@@ -340,7 +340,7 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
                     ValueScaleFactor = 10,
                     ValueRange = new ModbusRegisterValueRange { MinimumValue = -400, MaximumValue = 2120 }
                 });
-            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDI_AmbientTemperatureDegF_Current,
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDI_AmbientTemperatureDegF_Current,
                 new ModbusInputRegister
                 {
                     RegisterAddress = ModbusInputRegisterAddress.SDI_AmbientTemperatureDegF_Current,
@@ -349,7 +349,7 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
                     ValueScaleFactor = 10,
                     ValueRange = new ModbusRegisterValueRange { MinimumValue = -580, MaximumValue = 2120 }
                 });
-            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDI_LaserTemperatureDegF_Current,
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDI_LaserTemperatureDegF_Current,
                 new ModbusInputRegister
                 {
                     RegisterAddress = ModbusInputRegisterAddress.SDI_LaserTemperatureDegF_Current,
@@ -358,14 +358,14 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
                     ValueScaleFactor = 10,
                     ValueRange = new ModbusRegisterValueRange { MinimumValue = -760, MaximumValue = 1760 }
                 });
-            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDI_NormalizedSignal_Imperial,
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDI_NormalizedSignal_Imperial,
                 new ModbusInputRegister
                 {
                     RegisterAddress = ModbusInputRegisterAddress.SDI_NormalizedSignal_Imperial,
                     RegisterType = ModbusInputRegisterType.StandardImperial,
                     ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 255 }
                 });
-            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDI_TiltAngle_Imperial_Current,
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDI_TiltAngle_Imperial_Current,
                 new ModbusInputRegister
                 {
                     RegisterAddress = ModbusInputRegisterAddress.SDI_TiltAngle_Imperial_Current,
@@ -374,7 +374,7 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
                     ValueScaleFactor = 10,
                     ValueRange = new ModbusRegisterValueRange { MinimumValue = -1800, MaximumValue = 1800 }
                 });
-            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDI_ErrorCode_Imperial,
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDI_ErrorCode_Imperial,
                 new ModbusInputRegister
                 {
                     RegisterAddress = ModbusInputRegisterAddress.SDI_ErrorCode_Imperial,
@@ -384,7 +384,7 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
             // ...
             // Service channels
             // ...
-            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SC_LaserSignalIntensity_uV,
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SC_LaserSignalIntensity_uV,
                 new ModbusInputRegister
                 {
                     RegisterAddress = ModbusInputRegisterAddress.SC_LaserSignalIntensity_uV,
@@ -394,7 +394,7 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
                     // FIXME: This register is not implicitly clear on values in the manual!
                 });
             // ...
-            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SC_OperatingVoltage,
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SC_OperatingVoltage,
                 new ModbusInputRegister
                 {
                     RegisterAddress = ModbusInputRegisterAddress.SC_OperatingVoltage,
