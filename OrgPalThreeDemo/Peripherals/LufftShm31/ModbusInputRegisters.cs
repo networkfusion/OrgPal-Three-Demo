@@ -258,7 +258,13 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
                     RegisterType = ModbusInputRegisterType.StatusInformation,
                     ValueType = ModbusRegisterValueType.PartalUIntUpper16
                 });
-
+            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_BlockHeatingState,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SI_BlockHeatingState,
+                    RegisterType = ModbusInputRegisterType.StatusInformation,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 0xFF } // FIXME: Max should be the count of HeatingModeState
+                });
             // ...
             // Standard Data Metric
             Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDM_SnowHeightMillimeter_Current,
@@ -378,6 +384,25 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
             // ...
             // Service channels
             // ...
+            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SC_LaserSignalIntensity_uV,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SC_LaserSignalIntensity_uV,
+                    RegisterType = ModbusInputRegisterType.ServiceChannels,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 0.1f
+                    // FIXME: This register is not implicitly clear on values in the manual!
+                });
+            // ...
+            Shm31InputRegisters.Add((ushort)ModbusInputRegisterAddress.SC_OperatingVoltage,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SC_OperatingVoltage,
+                    RegisterType = ModbusInputRegisterType.ServiceChannels,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -400, MaximumValue = 400 }
+                });
         }
     }
 }

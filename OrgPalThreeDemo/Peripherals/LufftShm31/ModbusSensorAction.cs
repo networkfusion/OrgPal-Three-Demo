@@ -81,10 +81,6 @@
         /// <summary>
         /// Set the laser measurement interval.
         /// </summary>
-        SetLaserMeasurementInterval = 19,
-        /// <summary>
-        /// Unknown or above the allowed value.
-        /// </summary>
-        Unknown = 0xFF
+        SetLaserMeasurementInterval = 19
     }
 }

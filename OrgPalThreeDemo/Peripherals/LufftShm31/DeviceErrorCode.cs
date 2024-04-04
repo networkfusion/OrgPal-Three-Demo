@@ -172,6 +172,6 @@
         /// <summary>
         /// Unknown or above the allowed value.
         /// </summary>
-        Unknown = 0xFF
+        UnknownError
     }
 }

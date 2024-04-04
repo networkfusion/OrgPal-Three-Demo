@@ -17,11 +17,7 @@
         /// <summary>
         /// Stop a defrost opperation.
         /// </summary>
-        StopDefrosting = 3,
-        /// <summary>
-        /// Unknown or above the allowed value.
-        /// </summary>
-        Unknown = 0xFF
+        StopDefrosting = 3
     }
 
     public enum HeatingModeState : byte
@@ -61,6 +57,6 @@
         /// <summary>
         /// Unknown or above the allowed value.
         /// </summary>
-        Unknown = 0xFF
+        UnknownError
     }
 }
