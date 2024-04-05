@@ -234,12 +234,17 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
 
     }
 
-    public class InitializeInputRegisters
+    public class ModbusInputValue
     {
-        public Hashtable InputRegisters;
+        public short RawValue { get; set; } = short.MaxValue;
+        public float AdjustedValue { get; set; } = float.NaN;
+    }
 
+    public class ModbusInputRegisters
+    {
+        public Hashtable InputRegisters = new();
 
-        public InitializeInputRegisters()
+        public ModbusInputRegisters()
         {
             InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_DeviceIdentification,
                 new ModbusInputRegister {

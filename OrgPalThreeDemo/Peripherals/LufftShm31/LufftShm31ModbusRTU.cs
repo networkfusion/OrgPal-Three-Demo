@@ -21,11 +21,15 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
 
         private readonly ModbusClient client;
 
+        private readonly ModbusInputRegisters inputRegisters;
+
         public LufftShm31ModbusRTU(string port, byte deviceId = 1, int baudRate = 19200)
         {
             DeviceId = deviceId;
             client = new(port, baudRate);
             client.ReadTimeout = client.WriteTimeout = 500;
+            inputRegisters = new();
+            DebugHelper.DebugListAvailableInputRegisters(inputRegisters.InputRegisters);
         }
 
         // FIXME: should be able to close the connection!
@@ -38,7 +42,7 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
         {
             // TODO: is there a way to check if the read has happened successfully!? probably returns null...
             // read and return all (0..119) registers on the device.
-            return client.ReadInputRegisters(DeviceId, 0, 120); // TODO: use the enum count.
+            return client.ReadInputRegisters(DeviceId, 0, 120); // TODO: use the ModbusInputRegisterAddress enum count.
         }
 
         public short[] ReadNormalRegistersRaw()
