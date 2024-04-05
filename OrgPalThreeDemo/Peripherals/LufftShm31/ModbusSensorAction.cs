@@ -1,5 +1,11 @@
 ﻿namespace OrgPalThreeDemo.Peripherals.LufftShm31
 {
+    public enum ModbusSensorActionType
+    {
+        ApplyOnly = 0,
+        SettableValue = 9
+    }
+
     public enum ModbusSensorAction : byte
     {
         /// <summary>
@@ -38,6 +44,10 @@
         /// Stop a defrost process.
         /// </summary>
         StopDefrosting = 8,
+
+
+        // The following actions use settable values:
+
         /// <summary>
         /// Set the Block Heating Mode.
         /// </summary>

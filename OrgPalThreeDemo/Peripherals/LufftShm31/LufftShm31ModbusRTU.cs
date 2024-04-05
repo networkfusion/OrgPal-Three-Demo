@@ -42,7 +42,7 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
         {
             // TODO: is there a way to check if the read has happened successfully!? probably returns null...
             // read and return all (0..119) registers on the device.
-            return client.ReadInputRegisters(DeviceId, 0, 120); // TODO: use the ModbusInputRegisterAddress enum count.
+            return client.ReadInputRegisters(DeviceId, 0, ModbusInputRegisters.REG_ADDRESS_MAX); // TODO: use the ModbusInputRegisterAddress enum count.
         }
 
         public short[] ReadNormalRegistersRaw()

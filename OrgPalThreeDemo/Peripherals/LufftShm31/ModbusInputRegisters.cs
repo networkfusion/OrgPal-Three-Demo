@@ -8,38 +8,47 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
         /// <summary>
         /// Status Information registers.
         /// </summary>
+        /// <remarks> 0..19 </remarks>
         StatusInformation,
         /// <summary>
         /// Standard data registers (metric units).
         /// </summary>
+        /// <remarks> 20..29 </remarks>
         StandardMetric,
         /// <summary>
         /// Standard data set registers (imperial units).
         /// </summary>
+        /// <remarks> 30..39 </remarks>
         StandardImperial,
         /// <summary>
         /// Distance registers.
         /// </summary>
+        /// <remarks> 40..54 </remarks>
         Distance,
         /// <summary>
         /// Temperature registers (metric units).
         /// </summary>
+        /// <remarks> 55..69 </remarks>
         TemperaturesMetric,
         /// <summary>
         /// Temperature registers (imperial units).
         /// </summary>
+        /// <remarks> 70..84 </remarks>
         TemperaturesImperial,
         /// <summary>
         /// Angles registers.
         /// </summary>
+        /// <remarks> 85..94 </remarks>
         Angles,
         /// <summary>
         /// Logic and normalized values registers.
         /// </summary>
+        /// <remarks> 95..104 </remarks>
         LogicAndNormalizedValues,
         /// <summary>
         /// Service Channel registers.
         /// </summary>
+        /// <remarks> 105..119 </remarks>
         ServiceChannels,
         /// <summary>
         /// The Register type was not recognised or above the allowed value.
@@ -64,10 +73,12 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
         /// <summary>
         /// The value is the upper half of a Unt32
         /// </summary>
+        /// <remarks> received as an unsigned short (uint16) </remarks>
         PartalUIntUpper16,
         /// <summary>
         /// The value is the lower half of a Unt32
         /// </summary>
+        /// <remarks> received as an unsigned short (uint16) </remarks>
         PartialUIntLower16,
         /// <summary>
         /// The value type was unknown or above the allowed value.
@@ -225,12 +236,27 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
 
     public class ModbusInputRegister
     {
+        /// <summary>
+        /// The address of the register.
+        /// </summary>
         public ModbusInputRegisterAddress RegisterAddress { get; set; } = 0;
+        /// <summary>
+        /// The Register Type.
+        /// </summary>
         public ModbusInputRegisterType RegisterType { get; set; } = ModbusInputRegisterType.Unknown;
+        /// <summary>
+        /// The Register Value Type.
+        /// </summary>
         public ModbusRegisterValueType ValueType { get; set; } = ModbusRegisterValueType.UnsignedShort;
+        /// <summary>
+        /// The scale factor of the registers value.
+        /// </summary>
         public float ValueScaleFactor { get; set; } = 0.0f;
+        /// <summary>
+        /// The allowed range of the registers value.
+        /// </summary>
         public ModbusRegisterValueRange ValueRange { get; set; } = new ModbusRegisterValueRange();
-        // public int ValueUnitsType { get; set; } // TODO: add units (mm, inch, etc.).
+        // public int ValueUnitsType { get; set; } // TODO: add units (mm, inch, etc.). (Units.Net)
 
     }
 
@@ -242,6 +268,11 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
 
     public class ModbusInputRegisters
     {
+        /// <summary>
+        /// The maximum input register address available.
+        /// </summary>
+        public const ushort REG_ADDRESS_MAX = 119;
+
         public Hashtable InputRegisters = new();
 
         public ModbusInputRegisters()
