@@ -238,7 +238,7 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
     {
         public Hashtable InputRegisters;
 
-        // TODO: add all the registers.
+
         public InitializeInputRegisters()
         {
             InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_DeviceIdentification,
@@ -263,9 +263,106 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
                 {
                     RegisterAddress = ModbusInputRegisterAddress.SI_BlockHeatingState,
                     RegisterType = ModbusInputRegisterType.StatusInformation,
-                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 0xFF } // FIXME: Max should be the count of HeatingModeState
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 7 } // FIXME: Max should be the count of HeatingModeState
                 });
-            // ...
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_WindowHeatingState,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SI_WindowHeatingState,
+                    RegisterType = ModbusInputRegisterType.StatusInformation,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 7 } // FIXME: Max should be the count of StatusCode
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_BlockTemperatureStatus,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SI_BlockTemperatureStatus,
+                    RegisterType = ModbusInputRegisterType.StatusInformation,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 0xFF } // FIXME: Max should be the count of StatusCode
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_AmbientTemperatureStatus,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SI_AmbientTemperatureStatus,
+                    RegisterType = ModbusInputRegisterType.StatusInformation,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 0xFF } // FIXME: Max should be the count of StatusCode
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_LaserTemperatureStatus,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SI_LaserTemperatureStatus,
+                    RegisterType = ModbusInputRegisterType.StatusInformation,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 0xFF } // FIXME: Max should be the count of StatusCode
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_TiltAngleStatus,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SI_TiltAngleStatus,
+                    RegisterType = ModbusInputRegisterType.StatusInformation,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 0xFF } // FIXME: Max should be the count of StatusCode
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_SnowHeightStatus,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SI_SnowHeightStatus,
+                    RegisterType = ModbusInputRegisterType.StatusInformation,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 0xFF } // FIXME: Max should be the count of StatusCode
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_DistanceStatus,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SI_DistanceStatus,
+                    RegisterType = ModbusInputRegisterType.StatusInformation,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 0xFF } // FIXME: Max should be the count of StatusCode
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_NormalizedSignalStatus,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SI_NormalizedSignalStatus,
+                    RegisterType = ModbusInputRegisterType.StatusInformation,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 0xFF } // FIXME: Max should be the count of StatusCode
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_ErrorCode,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SI_ErrorCode,
+                    RegisterType = ModbusInputRegisterType.StatusInformation,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 0xFF } // FIXME: Max should be the count of DeviceErrorCode
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_ErrorCode_Current,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SI_ErrorCode_Current,
+                    RegisterType = ModbusInputRegisterType.StatusInformation,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 0xFF } // FIXME: Max should be the count of DeviceErrorCode
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_AccumulatedOpperatingTimeLower,
+                 new ModbusInputRegister
+                 {
+                     RegisterAddress = ModbusInputRegisterAddress.SI_AccumulatedOpperatingTimeLower,
+                     RegisterType = ModbusInputRegisterType.StatusInformation,
+                     ValueType = ModbusRegisterValueType.PartialUIntLower16
+                 });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_AccumulatedOpperatingTimeUpper,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SI_AccumulatedOpperatingTimeUpper,
+                    RegisterType = ModbusInputRegisterType.StatusInformation,
+                    ValueType = ModbusRegisterValueType.PartalUIntUpper16
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_SystemTimeLower,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SI_SystemTimeLower,
+                    RegisterType = ModbusInputRegisterType.StatusInformation,
+                    ValueType = ModbusRegisterValueType.PartialUIntLower16
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SI_SystemTimeUpper,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SI_SystemTimeUpper,
+                    RegisterType = ModbusInputRegisterType.StatusInformation,
+                    ValueType = ModbusRegisterValueType.PartalUIntUpper16
+                });
             // Standard Data Metric
             InputRegisters.Add((ushort)ModbusInputRegisterAddress.SDM_SnowHeightMillimeter_Current,
                 new ModbusInputRegister {
@@ -382,7 +479,124 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
                     ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 255 }
                 });
             // Distances
-            // ...
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.D_SnowHeight_Millimeter_Current,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.D_SnowHeight_Millimeter_Current,
+                    RegisterType = ModbusInputRegisterType.Distance,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -16000, MaximumValue = 16000 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.D_SnowHeight_Millimeter_Minimum,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.D_SnowHeight_Millimeter_Minimum,
+                    RegisterType = ModbusInputRegisterType.Distance,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -16000, MaximumValue = 16000 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.D_SnowHeight_Millimeter_Maximum,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.D_SnowHeight_Millimeter_Maximum,
+                    RegisterType = ModbusInputRegisterType.Distance,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -16000, MaximumValue = 16000 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.D_SnowHeight_Millimeter_Average,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.D_SnowHeight_Millimeter_Average,
+                    RegisterType = ModbusInputRegisterType.Distance,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -16000, MaximumValue = 16000 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.D_Calibrated_Millimeter_Current,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.D_Calibrated_Millimeter_Current,
+                    RegisterType = ModbusInputRegisterType.Distance,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -500, MaximumValue = 21000 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.D_Raw_Millimeter_Current,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.D_Raw_Millimeter_Current,
+                    RegisterType = ModbusInputRegisterType.Distance,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -500, MaximumValue = 21000 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.D_SnowHeight_Inches_Current,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.D_SnowHeight_Inches_Current,
+                    RegisterType = ModbusInputRegisterType.Distance,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 20,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -12598, MaximumValue = 12598 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.D_SnowHeight_Inches_Minimum,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.D_SnowHeight_Inches_Minimum,
+                    RegisterType = ModbusInputRegisterType.Distance,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 20,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -12598, MaximumValue = 12598 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.D_SnowHeight_Inches_Maximum,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.D_SnowHeight_Inches_Maximum,
+                    RegisterType = ModbusInputRegisterType.Distance,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 20,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -12598, MaximumValue = 12598 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.D_SnowHeight_Inches_Average,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.D_SnowHeight_Inches_Average,
+                    RegisterType = ModbusInputRegisterType.Distance,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 20,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -12598, MaximumValue = 12598 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.D_Calibrated_Inches_Current,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.D_Calibrated_Inches_Current,
+                    RegisterType = ModbusInputRegisterType.Distance,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 20,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -394, MaximumValue = 16536 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.D_Raw_Inches_Current,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.D_Raw_Inches_Current,
+                    RegisterType = ModbusInputRegisterType.Distance,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 20,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -394, MaximumValue = 16536 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.D_ReferenceHeight_millimeter,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.D_ReferenceHeight_millimeter,
+                    RegisterType = ModbusInputRegisterType.Distance,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 16000 } // FIXME: min value seems strange given the type.
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.D_SnowHeight_millimeter_HighRes,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.D_SnowHeight_millimeter_HighRes,
+                    RegisterType = ModbusInputRegisterType.Distance,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 64000 }
+                });
             // Temperatures Metric
             InputRegisters.Add((ushort)ModbusInputRegisterAddress.TM_BlockTemperatureDegC_Current,
                 new ModbusInputRegister
@@ -716,7 +930,7 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
                 {
                     RegisterAddress = ModbusInputRegisterAddress.SC_BlockHeatingState,
                     RegisterType = ModbusInputRegisterType.ServiceChannels,
-                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 7 } // FIXME: use max enum values
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 7 }  // FIXME: Max should be the count of HeatingModeState
                 });
             InputRegisters.Add((ushort)ModbusInputRegisterAddress.SC_InternalTemperatureDegC_NTC,
                 new ModbusInputRegister
@@ -739,7 +953,7 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
                 {
                     RegisterAddress = ModbusInputRegisterAddress.SC_WindowHeatingState,
                     RegisterType = ModbusInputRegisterType.ServiceChannels,
-                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 7 } // FIXME: use max enum values
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 7 }  // FIXME: Max should be the count of HeatingModeState
                 });
             InputRegisters.Add((ushort)ModbusInputRegisterAddress.SC_ExternalTemperatureDegC_NTC,
                 new ModbusInputRegister
