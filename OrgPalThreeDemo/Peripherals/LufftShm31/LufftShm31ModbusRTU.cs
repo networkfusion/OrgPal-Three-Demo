@@ -56,7 +56,7 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
 
         public bool PerformAction(ModbusSensorAction actionRegister)
         {
-            if ((ushort)actionRegister < 9)
+            if ((ushort)actionRegister < (ushort)ModbusSensorActionType.IsSettableValue)
             {
                 return client.WriteSingleRegister(DeviceId, (ushort)actionRegister, ACTION_APPLY);
             }
@@ -73,7 +73,7 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
                 return false;
             }
 
-            if ((ushort)actionRegister > 8) // make sure this is a settable register
+            if ((ushort)actionRegister >= (ushort)ModbusSensorActionType.IsSettableValue) // make sure this is a settable register
             {
                 var res = client.WriteSingleRegister(DeviceId, (ushort)actionRegister, (short)value);
                 if (!res)

@@ -1,9 +1,9 @@
 ﻿namespace OrgPalThreeDemo.Peripherals.LufftShm31
 {
-    public enum ModbusSensorActionType
+    public enum ModbusSensorActionType : ushort
     {
         ApplyOnly = 0,
-        SettableValue = 9
+        IsSettableValue = 9
     }
 
     public enum ModbusSensorAction : byte
