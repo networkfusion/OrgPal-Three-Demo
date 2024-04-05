@@ -381,9 +381,175 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
                     RegisterType = ModbusInputRegisterType.StandardImperial,
                     ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 255 }
                 });
+            // Distances
             // ...
+            // Temperatures Metric
+            // ...
+            // Temperatures Imperial
+            // ...
+            // Angles
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.A_AngleTilt_Current,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.A_AngleTilt_Current,
+                    RegisterType = ModbusInputRegisterType.Angles,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -1800, MaximumValue = 1800 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.A_AngleTilt_Minimum,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.A_AngleTilt_Minimum,
+                    RegisterType = ModbusInputRegisterType.Angles,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -1800, MaximumValue = 1800 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.A_AngleTilt_Maximum,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.A_AngleTilt_Maximum,
+                    RegisterType = ModbusInputRegisterType.Angles,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -1800, MaximumValue = 1800 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.A_AngleTilt_Average,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.A_AngleTilt_Average,
+                    RegisterType = ModbusInputRegisterType.Angles,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -1800, MaximumValue = 1800 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.A_AngleX_Current,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.A_AngleX_Current,
+                    RegisterType = ModbusInputRegisterType.Angles,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -1800, MaximumValue = 1800 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.A_AngleY_Current,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.A_AngleY_Current,
+                    RegisterType = ModbusInputRegisterType.Angles,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -1800, MaximumValue = 1800 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.A_AngleZ_Current,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.A_AngleZ_Current,
+                    RegisterType = ModbusInputRegisterType.Angles,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -1800, MaximumValue = 1800 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.A_TiltAngleReference,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.A_TiltAngleReference,
+                    RegisterType = ModbusInputRegisterType.Angles,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -1800, MaximumValue = 1800 }
+                });
+            // Logic and normalized Values
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.LNV_SnowFlag,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.LNV_SnowFlag,
+                    RegisterType = ModbusInputRegisterType.LogicAndNormalizedValues,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 1 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.LNV_NormalizedSignal_Current,
+                new ModbusInputRegister
+                {
+                RegisterAddress = ModbusInputRegisterAddress.LNV_NormalizedSignal_Current,
+                RegisterType = ModbusInputRegisterType.LogicAndNormalizedValues,
+                ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 255 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.LNV_NormalizedSignal_Minimum,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.LNV_NormalizedSignal_Minimum,
+                    RegisterType = ModbusInputRegisterType.LogicAndNormalizedValues,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 255 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.LNV_NormalizedSignal_Maximum,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.LNV_NormalizedSignal_Maximum,
+                    RegisterType = ModbusInputRegisterType.LogicAndNormalizedValues,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 255 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.LNV_NormalizedSignal_Average,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.LNV_NormalizedSignal_Average,
+                    RegisterType = ModbusInputRegisterType.LogicAndNormalizedValues,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 255 }
+                });
             // Service channels
-            // ...
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SC_BlockHeatingState,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SC_BlockHeatingState,
+                    RegisterType = ModbusInputRegisterType.ServiceChannels,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 7 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SC_InternalTemperatureDegC_NTC,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SC_InternalTemperatureDegC_NTC,
+                    RegisterType = ModbusInputRegisterType.ServiceChannels,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -400, MaximumValue = 1000 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SC_BlockHeatingDefrostTime_Seconds,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SC_BlockHeatingDefrostTime_Seconds,
+                    RegisterType = ModbusInputRegisterType.ServiceChannels,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 65535 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SC_WindowHeatingState,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SC_WindowHeatingState,
+                    RegisterType = ModbusInputRegisterType.ServiceChannels,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 7 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SC_ExternalTemperatureDegC_NTC,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SC_ExternalTemperatureDegC_NTC,
+                    RegisterType = ModbusInputRegisterType.ServiceChannels,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -500, MaximumValue = 1000 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SC_WindowHeatingDefrostTime_Seconds,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SC_WindowHeatingDefrostTime_Seconds,
+                    RegisterType = ModbusInputRegisterType.ServiceChannels,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 65535 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SC_LaserGainCode,
+                new ModbusInputRegister
+                {
+                RegisterAddress = ModbusInputRegisterAddress.SC_LaserGainCode,
+                RegisterType = ModbusInputRegisterType.ServiceChannels,
+                ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 255 }
+                });
             InputRegisters.Add((ushort)ModbusInputRegisterAddress.SC_LaserSignalIntensity_uV,
                 new ModbusInputRegister
                 {
@@ -393,7 +559,22 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
                     ValueScaleFactor = 0.1f
                     // FIXME: This register is not implicitly clear on values in the manual!
                 });
-            // ...
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SC_LaserDistance_Millimeter,
+                new ModbusInputRegister
+                {
+                RegisterAddress = ModbusInputRegisterAddress.SC_LaserDistance_Millimeter,
+                RegisterType = ModbusInputRegisterType.ServiceChannels,
+                ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 32000 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.SC_LaserTemperatureDegC,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.SC_LaserTemperatureDegC,
+                    RegisterType = ModbusInputRegisterType.ServiceChannels,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -600, MaximumValue = 8000 }
+                });
             InputRegisters.Add((ushort)ModbusInputRegisterAddress.SC_OperatingVoltage,
                 new ModbusInputRegister
                 {
