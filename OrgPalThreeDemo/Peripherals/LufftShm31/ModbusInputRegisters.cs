@@ -384,9 +384,223 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
             // Distances
             // ...
             // Temperatures Metric
-            // ...
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.TM_BlockTemperatureDegC_Current,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.TM_BlockTemperatureDegC_Current,
+                    RegisterType = ModbusInputRegisterType.TemperaturesMetric,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -400, MaximumValue = 1000 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.TM_BlockTemperatureDegC_Minimum,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.TM_BlockTemperatureDegC_Minimum,
+                    RegisterType = ModbusInputRegisterType.TemperaturesMetric,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -400, MaximumValue = 1000 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.TM_BlockTemperatureDegC_Maximum,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.TM_BlockTemperatureDegC_Maximum,
+                    RegisterType = ModbusInputRegisterType.TemperaturesMetric,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -400, MaximumValue = 1000 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.TM_BlockTemperatureDegC_Average,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.TM_BlockTemperatureDegC_Average,
+                    RegisterType = ModbusInputRegisterType.TemperaturesMetric,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -400, MaximumValue = 1000 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.TM_AmbientTemperatureDegC_Current,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.TM_AmbientTemperatureDegC_Current,
+                    RegisterType = ModbusInputRegisterType.TemperaturesMetric,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -500, MaximumValue = 1000 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.TM_AmbientTemperatureDegC_Minimum,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.TM_AmbientTemperatureDegC_Minimum,
+                    RegisterType = ModbusInputRegisterType.TemperaturesMetric,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -500, MaximumValue = 1000 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.TM_AmbientTemperatureDegC_Maximum,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.TM_AmbientTemperatureDegC_Maximum,
+                    RegisterType = ModbusInputRegisterType.TemperaturesMetric,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -500, MaximumValue = 1000 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.TM_AmbientTemperatureDegC_Average,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.TM_AmbientTemperatureDegC_Average,
+                    RegisterType = ModbusInputRegisterType.TemperaturesMetric,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -500, MaximumValue = 1000 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.TM_LaserTemperatureDegC_Current,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.TM_LaserTemperatureDegC_Current,
+                    RegisterType = ModbusInputRegisterType.TemperaturesMetric,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -600, MaximumValue = 800 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.TM_LaserTemperatureDegC_Minimum,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.TM_LaserTemperatureDegC_Minimum,
+                    RegisterType = ModbusInputRegisterType.TemperaturesMetric,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -600, MaximumValue = 800 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.TM_LaserTemperatureDegC_Maximum,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.TM_LaserTemperatureDegC_Maximum,
+                    RegisterType = ModbusInputRegisterType.TemperaturesMetric,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -600, MaximumValue = 800 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.TM_LaserTemperatureDegC_Average,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.TM_LaserTemperatureDegC_Average,
+                    RegisterType = ModbusInputRegisterType.TemperaturesMetric,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -600, MaximumValue = 800 }
+                });
             // Temperatures Imperial
-            // ...
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.TI_BlockTemperatureDegF_Current,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.TI_BlockTemperatureDegF_Current,
+                    RegisterType = ModbusInputRegisterType.TemperaturesImperial,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -400, MaximumValue = 2120 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.TI_BlockTemperatureDegF_Minimum,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.TI_BlockTemperatureDegF_Minimum,
+                    RegisterType = ModbusInputRegisterType.TemperaturesImperial,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -400, MaximumValue = 2120 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.TI_BlockTemperatureDegF_Maximum,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.TI_BlockTemperatureDegF_Maximum,
+                    RegisterType = ModbusInputRegisterType.TemperaturesImperial,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -400, MaximumValue = 2120 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.TI_BlockTemperatureDegF_Average,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.TI_BlockTemperatureDegF_Average,
+                    RegisterType = ModbusInputRegisterType.TemperaturesImperial,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -400, MaximumValue = 2120 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.TI_AmbientTemperatureDegF_Current,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.TI_AmbientTemperatureDegF_Current,
+                    RegisterType = ModbusInputRegisterType.TemperaturesImperial,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -580, MaximumValue = 2120 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.TI_AmbientTemperatureDegF_Minimum,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.TI_AmbientTemperatureDegF_Minimum,
+                    RegisterType = ModbusInputRegisterType.TemperaturesImperial,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -580, MaximumValue = 2120 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.TI_AmbientTemperatureDegF_Maximum,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.TI_AmbientTemperatureDegF_Maximum,
+                    RegisterType = ModbusInputRegisterType.TemperaturesImperial,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -580, MaximumValue = 2120 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.TI_AmbientTemperatureDegF_Average,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.TI_AmbientTemperatureDegF_Average,
+                    RegisterType = ModbusInputRegisterType.TemperaturesImperial,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -580, MaximumValue = 2120 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.TI_LaserTemperatureDegF_Current,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.TI_LaserTemperatureDegF_Current,
+                    RegisterType = ModbusInputRegisterType.TemperaturesImperial,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -760, MaximumValue = 1760 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.TI_LaserTemperatureDegF_Minimum,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.TI_LaserTemperatureDegF_Minimum,
+                    RegisterType = ModbusInputRegisterType.TemperaturesImperial,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -760, MaximumValue = 1760 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.TI_LaserTemperatureDegF_Maximum,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.TM_LaserTemperatureDegC_Maximum,
+                    RegisterType = ModbusInputRegisterType.TemperaturesImperial,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -760, MaximumValue = 1760 }
+                });
+            InputRegisters.Add((ushort)ModbusInputRegisterAddress.TI_LaserTemperatureDegF_Average,
+                new ModbusInputRegister
+                {
+                    RegisterAddress = ModbusInputRegisterAddress.TI_LaserTemperatureDegF_Average,
+                    RegisterType = ModbusInputRegisterType.TemperaturesImperial,
+                    ValueType = ModbusRegisterValueType.SignedShort,
+                    ValueScaleFactor = 10,
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = -760, MaximumValue = 1760 }
+                });
             // Angles
             InputRegisters.Add((ushort)ModbusInputRegisterAddress.A_AngleTilt_Current,
                 new ModbusInputRegister
@@ -502,7 +716,7 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
                 {
                     RegisterAddress = ModbusInputRegisterAddress.SC_BlockHeatingState,
                     RegisterType = ModbusInputRegisterType.ServiceChannels,
-                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 7 }
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 7 } // FIXME: use max enum values
                 });
             InputRegisters.Add((ushort)ModbusInputRegisterAddress.SC_InternalTemperatureDegC_NTC,
                 new ModbusInputRegister
@@ -525,7 +739,7 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
                 {
                     RegisterAddress = ModbusInputRegisterAddress.SC_WindowHeatingState,
                     RegisterType = ModbusInputRegisterType.ServiceChannels,
-                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 7 }
+                    ValueRange = new ModbusRegisterValueRange { MinimumValue = 0, MaximumValue = 7 } // FIXME: use max enum values
                 });
             InputRegisters.Add((ushort)ModbusInputRegisterAddress.SC_ExternalTemperatureDegC_NTC,
                 new ModbusInputRegister
