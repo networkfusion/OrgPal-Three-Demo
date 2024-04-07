@@ -3,6 +3,9 @@ using System.Collections;
 
 namespace OrgPalThreeDemo.Peripherals.LufftShm31
 {
+    /// <summary>
+    /// The input register type.
+    /// </summary>
     public enum ModbusInputRegisterType : byte
     {
         /// <summary>
@@ -68,9 +71,9 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
         /// <summary>
         /// The start address of the register type.
         /// </summary>
-        public ushort GetStartAddress()
+        public static ushort GetStartAddress(ModbusInputRegisterType registerType)
         {
-            switch (RegisterType)
+            switch (registerType)
             {
                 case ModbusInputRegisterType.StatusInformation:
                     return 0;
@@ -95,15 +98,15 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
                 default:
                     break;
             }
-            return ushort.MinValue;
+            return ushort.MaxValue;
         }
 
         /// <summary>
         /// The end address of the register type.
         /// </summary>
-        public ushort GetEndAddress()
+        public static ushort GetEndAddress(ModbusInputRegisterType registerType)
         {
-            switch (RegisterType)
+            switch (registerType)
             {
                 case ModbusInputRegisterType.StatusInformation:
                     return 19;
@@ -161,29 +164,32 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
         Unknown = 0xFF
     }
 
+    /// <summary>
+    /// The input register address.
+    /// </summary>
     public enum ModbusInputRegisterAddress : byte
     {
         // Status Information registers
         SI_DeviceIdentification = 0, // value = High byte: device subtype, Low byte: software version
-        SI_DeviceStatusLower,
-        SI_DeviceStatusUpper,
-        SI_BlockHeatingState, // value = HeatingModeState
-        SI_WindowHeatingState, // value = HeatingModeState
-        SI_BlockTemperatureStatus, // value = StatusCode
-        SI_AmbientTemperatureStatus, // value = StatusCode
-        SI_LaserTemperatureStatus, // value = StatusCode
-        SI_TiltAngleStatus, // value = StatusCode
-        SI_SnowHeightStatus, // value = StatusCode
-        SI_DistanceStatus, // value = StatusCode
-        SI_NormalizedSignalStatus, // value = StatusCode
-        SI_Reserved_12,
-        SI_Reserved_13,
+        SI_DeviceStatusLower = 1,
+        SI_DeviceStatusUpper = 2,
+        SI_BlockHeatingState = 3, // value = HeatingModeState
+        SI_WindowHeatingState = 4, // value = HeatingModeState
+        SI_BlockTemperatureStatus = 5, // value = StatusCode
+        SI_AmbientTemperatureStatus = 6, // value = StatusCode
+        SI_LaserTemperatureStatus = 7, // value = StatusCode
+        SI_TiltAngleStatus = 8, // value = StatusCode
+        SI_SnowHeightStatus = 9, // value = StatusCode
+        SI_DistanceStatus = 10, // value = StatusCode
+        SI_NormalizedSignalStatus = 11, // value = StatusCode
+        SI_Reserved_12 = 12,
+        SI_Reserved_13 = 13,
         SI_ErrorCode = 14, // value = DeviceErrorCode
-        SI_ErrorCode_Current, // value = DeviceErrorCode
-        SI_AccumulatedOpperatingTimeLower,
-        SI_AccumulatedOpperatingTimeUpper,
-        SI_SystemTimeLower,
-        SI_SystemTimeUpper,
+        SI_ErrorCode_Current = 15, // value = DeviceErrorCode
+        SI_AccumulatedOpperatingTimeLower = 16,
+        SI_AccumulatedOpperatingTimeUpper = 17,
+        SI_SystemTimeLower = 18,
+        SI_SystemTimeUpper = 19,
         // Standard data registers (metric units)
         SDM_SnowHeightMillimeter_Current = 20, // value = signed short
         SDM_BlockTemperatureDegC_Current, // value = signed short scaled by 10
@@ -278,20 +284,20 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
         LNV_Reserved_104,
         // Service Channel Registers
         SC_BlockHeatingState = 105, // value = HeatingModeState
-        SC_InternalTemperatureDegC_NTC, // value = signed short scaled by 10
-        SC_Reserved_107,
-        SC_BlockHeatingDefrostTime_Seconds,
-        SC_WindowHeatingState,
+        SC_InternalTemperatureDegC_NTC = 106, // value = signed short scaled by 10
+        SC_Reserved_107 = 107,
+        SC_BlockHeatingDefrostTime_Seconds = 108,
+        SC_WindowHeatingState = 109,
         SC_ExternalTemperatureDegC_NTC = 110, // value = signed short scaled by 10
-        SC_Reserved_111,
+        SC_Reserved_111 = 111,
         SC_WindowHeatingDefrostTime_Seconds = 112,
         SC_LaserGainCode = 113,
         SC_LaserSignalIntensity_uV = 114, // value = signed short scaled by 0.1
         SC_LaserDistance_Millimeter = 115,
         SC_LaserTemperatureDegC = 116, // value = signed short scaled by 10
         SC_OperatingVoltage = 117, // value = signed short scaled by 10
-        SC_Reserved_118,
-        SC_Reserved_119,
+        SC_Reserved_118 = 118,
+        SC_Reserved_119 = 119,
         /// <summary>
         /// The register is unknown or above the allowed value.
         /// </summary>
@@ -339,6 +345,7 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
     {
         public short RawValue { get; set; } = short.MaxValue;
         public float AdjustedValue { get; set; } = float.NaN;
+
     }
 
     public class ModbusInputRegisters

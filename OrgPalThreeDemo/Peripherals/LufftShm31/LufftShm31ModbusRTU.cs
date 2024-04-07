@@ -49,7 +49,11 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
         {
             // TODO: is there a way to check if the read has happened successfully!? probably returns null...
             // read and return the info and standard measurements
-            return client.ReadInputRegisters(DeviceId, 0, 27);
+            return client.ReadInputRegisters(
+                DeviceId, 
+                ModbusInputRegisterTypes.GetStartAddress(ModbusInputRegisterType.StatusInformation),
+                ModbusInputRegisterTypes.GetEndAddress(ModbusInputRegisterType.StandardMetric)
+                );
             // TODO: add the snow flag:
             //short[] regsRead = client.ReadInputRegisters(DeviceId, 95, 1);
         }
@@ -85,14 +89,14 @@ namespace OrgPalThreeDemo.Peripherals.LufftShm31
             return false;
         }
 
-        public float AdjustValue_ScaleFactor(short regValue, short scaleFactor)
+        public static float AdjustValue_ScaleFactor(short regValue, short scaleFactor)
         {
             return regValue / scaleFactor;
         }
 
-        // convert short to ushort for most regs.
+        // TODO: convert short to ushort for most regs.
 
-        public uint GetValueAsUInt32(ushort lowerValue, ushort upperValue)
+        public static uint GetValueAsUInt32(ushort lowerValue, ushort upperValue)
         {
             // TODO: switch to Iot.Device.Modbus.Util
             uint value = upperValue;
