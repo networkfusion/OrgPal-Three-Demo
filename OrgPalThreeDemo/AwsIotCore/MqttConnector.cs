@@ -9,26 +9,34 @@ namespace OrgPalThreeDemo.AwsIotCore
         public static int Port { get; set; } = 8883; //add your port if different from the default e.g. 8883 // TODO: not going to change really!
         public static string ThingName { get; set; } = string.Empty; //add your "thing"
 
-        public static string ClientRsaSha256Crt { get; set; } = string.Empty; //Device Certificate copied from AWS
-        public static string ClientRsaKey { get; set; } = string.Empty; //Device private key copied from AWS
-        public static byte[] RootCA { get; set; } //AWS root CA
+        public class ConnectionCertificates
+        {
+            public string ClientRsaSha256Crt { get; set; } = string.Empty; //Device Certificate copied from AWS
+            public string ClientRsaKey { get; set; } = string.Empty; //Device private key copied from AWS
+            public byte[] RootCA { get; set; } //AWS root CA
+        }
+
+        public static ConnectionCertificates ProvisioningConnectionCertificates { get; set; } = new ConnectionCertificates();
+        public static ConnectionCertificates PrimaryConnectionCertificates { get; set; } = new ConnectionCertificates();
+        public static ConnectionCertificates RotationConnectionCertificates { get; set; } = new ConnectionCertificates();
+
         public static MqttConnectionClient Client { get; set; }
 
-        public static bool CheckConfigValid()
+        public static bool CheckConfigValid(ConnectionCertificates connectionCertificates)
         {
-            if (string.IsNullOrEmpty(AwsIotCore.MqttConnector.ClientRsaSha256Crt))
+            if (string.IsNullOrEmpty(connectionCertificates.ClientRsaSha256Crt))
             {
                 return false;
             }
-            if (AwsIotCore.MqttConnector.RootCA.Length < 100) // we will presume that it has to be greater...
+            if (connectionCertificates.RootCA.Length < 100) // we will presume that it has to be greater...
             {
                 return false;
             }
-            if (string.IsNullOrEmpty(AwsIotCore.MqttConnector.ClientRsaKey))
+            if (string.IsNullOrEmpty(connectionCertificates.ClientRsaKey))
             {
                 return false;
             }
-            if (string.IsNullOrEmpty(AwsIotCore.MqttConnector.Host))
+            if (string.IsNullOrEmpty(Host))
             {
                 return false;
             }

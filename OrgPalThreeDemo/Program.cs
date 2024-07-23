@@ -195,7 +195,7 @@ namespace OrgPalThreeDemo
 
             Thread.Sleep(1000);
             var storageReadCount = 0;
-            while (!AwsIotCore.MqttConnector.CheckConfigValid())
+            while (!AwsIotCore.MqttConnector.CheckConfigValid(AwsIotCore.MqttConnector.PrimaryConnectionCertificates))
             {
                 storageReadCount += 1;
                 try
@@ -373,9 +373,9 @@ namespace OrgPalThreeDemo
                 //    AwsIotCore.MqttConnector.Client.Dispose();
                 //}
 
-                X509Certificate caCert = new(AwsIotCore.MqttConnector.RootCA); //commented out as alternative: //Resources.GetBytes(Resources.BinaryResources.AwsCAroot)); //should this be in secure storage, or is it fine where it is?
+                X509Certificate caCert = new(AwsIotCore.MqttConnector.PrimaryConnectionCertificates.RootCA); //commented out as alternative: //Resources.GetBytes(Resources.BinaryResources.AwsCAroot)); //should this be in secure storage, or is it fine where it is?
                 Thread.Sleep(1000);
-                X509Certificate2 clientCert = new(AwsIotCore.MqttConnector.ClientRsaSha256Crt, AwsIotCore.MqttConnector.ClientRsaKey, ""); //make sure to add a correct pfx certificate
+                X509Certificate2 clientCert = new(AwsIotCore.MqttConnector.PrimaryConnectionCertificates.ClientRsaSha256Crt, AwsIotCore.MqttConnector.PrimaryConnectionCertificates.ClientRsaKey, ""); //make sure to add a correct pfx certificate
                 Thread.Sleep(1000);
                 AwsIotCore.MqttConnector.Client = new MqttConnectionClient(AwsIotCore.MqttConnector.Host, AwsIotCore.MqttConnector.ThingName, clientCert, MqttConnectionClient.QoSLevel.AtLeastOnce, caCert);
 
@@ -647,7 +647,7 @@ namespace OrgPalThreeDemo
                             try
                             {
 
-                                AwsIotCore.MqttConnector.ClientRsaSha256Crt = File.ReadAllText(file);
+                                AwsIotCore.MqttConnector.PrimaryConnectionCertificates.ClientRsaSha256Crt = File.ReadAllText(file);
                                 success = true;
                             }
                             catch (Exception)
@@ -666,7 +666,7 @@ namespace OrgPalThreeDemo
                         {
                             try
                             {
-                                AwsIotCore.MqttConnector.RootCA = File.ReadAllBytes(file);
+                                AwsIotCore.MqttConnector.PrimaryConnectionCertificates.RootCA = File.ReadAllBytes(file);
                                 success = true;
                             }
                             catch (Exception)
@@ -687,7 +687,7 @@ namespace OrgPalThreeDemo
                         {
                             try
                             {
-                                AwsIotCore.MqttConnector.ClientRsaKey = File.ReadAllText(file);
+                                AwsIotCore.MqttConnector.PrimaryConnectionCertificates.ClientRsaKey = File.ReadAllText(file);
                                 success = true;
                             }
                             catch (Exception)
