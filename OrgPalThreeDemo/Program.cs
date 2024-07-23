@@ -191,8 +191,8 @@ namespace OrgPalThreeDemo
             //}
 
             // add event handlers for Removable Device insertion and removal
-            StorageEventManager.RemovableDeviceInserted += StorageEventManager_RemovableDriveInserted;
-            StorageEventManager.RemovableDeviceRemoved += StorageEventManager_RemovableDriveRemoved;
+            StorageEventManager.RemovableDeviceInserted += StorageEventManager_RemovableDeviceInserted;
+            StorageEventManager.RemovableDeviceRemoved += StorageEventManager_RemovableDeviceRemoved;
 
             Thread.Sleep(1000);
             var storageReadCount = 0;
@@ -776,12 +776,12 @@ namespace OrgPalThreeDemo
         }
 
 
-        private static void StorageEventManager_RemovableDriveRemoved(object sender, RemovableDriveEventArgs e)
+        private static void StorageEventManager_RemovableDeviceRemoved(object sender, RemovableDriveEventArgs e)
         {
             _logger.LogInformation($"Removable Device Event: @ \"{e.Drive}\" was removed.");
         }
 
-        private static void StorageEventManager_RemovableDriveInserted(object sender, RemovableDriveEventArgs e)
+        private static void StorageEventManager_RemovableDeviceInserted(object sender, RemovableDriveEventArgs e)
         {
             _logger.LogInformation($"Removable Device Event: @ \"{e.Drive}\" was inserted.");
 
@@ -812,8 +812,8 @@ namespace OrgPalThreeDemo
                 palthreeButtons.Dispose();
 #endif
                 //System.IO.FileStream -- Dispose?? (we are already (using))!
-                StorageEventManager.RemovableDeviceInserted -= StorageEventManager_RemovableDriveInserted;
-                StorageEventManager.RemovableDeviceRemoved -= StorageEventManager_RemovableDriveRemoved;
+                StorageEventManager.RemovableDeviceInserted -= StorageEventManager_RemovableDeviceInserted;
+                StorageEventManager.RemovableDeviceRemoved -= StorageEventManager_RemovableDeviceRemoved;
 
                 sendTelemetryTimer.Dispose();
 
