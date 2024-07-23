@@ -25,13 +25,12 @@ using System;
 using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
-using nanoFramework.System.IO; //used for removable device events.
+using nanoFramework.System.IO; //used for removable drive events.
 using System.IO;
 using nanoFramework.Aws.IoTCore.Devices;
 using OrgPalThreeDemo.TempDebugHelpers;
 using OrgPalThreeDemo.Networking;
 using nanoFramework.Aws.IoTCore.Devices.Shadows;
-using System.Text;
 using Microsoft.Extensions.Logging;
 using nanoFramework.Logging;
 using nanoFramework.Logging.Debug;
@@ -159,14 +158,11 @@ namespace OrgPalThreeDemo
 
             netConnected = SetupNetwork();
 
-            if (!netConnected)
+            if (!netConnected || DateTime.UtcNow.Year < 2024)
             {
                 // We cannot get an IP or valid time so the only thing we can do is reboot to try again!
-                if (DateTime.UtcNow.Year < 2024)
-                {
-                    Thread.Sleep(10_000);
-                    nanoFramework.Runtime.Native.Power.RebootDevice();
-                }
+                Thread.Sleep(10_000);
+                nanoFramework.Runtime.Native.Power.RebootDevice();
                 // FIXME: Actually, we "should" use an event to wait for a valid IP?!
             }
 
@@ -329,14 +325,14 @@ namespace OrgPalThreeDemo
 
                     Thread.Sleep(500);
 
-                    //if (DateTime.UtcNow.Year < 2023)
+                    //if (DateTime.UtcNow.Year < 2024)
                     //{
                     //    _logger.LogInformation("Retriving DateTime using Managed NTP Helper class (DHCP...");
                     //    Rtc.SetSystemTime(ManagedNtpClient.GetNetworkTimeDhcp("10.0.0.1"));
                     //    Thread.Sleep(500);
                     //}
 
-                    if (DateTime.UtcNow.Year < 2023)
+                    if (DateTime.UtcNow.Year < 2024)
                     {
                         _logger.LogInformation("Retriving DateTime using Managed NTP Helper class (NTP)...");
                         Rtc.SetSystemTime(ManagedNtpClient.GetNetworkTimeDefaultNtp());
