@@ -708,10 +708,7 @@ namespace OrgPalThreeDemo
                         {
                             try
                             {
-                                var strbuffer = File.ReadAllText(file);
-                                Debug.WriteLine($"mqttconfig content = {strbuffer}");
-
-                                MqttConfigFileSchema config = (MqttConfigFileSchema)JsonConvert.DeserializeObject(strbuffer, typeof(MqttConfigFileSchema));
+                                MqttConfigFileSchema config = (MqttConfigFileSchema)JsonConvert.DeserializeObject(File.ReadAllText(file), typeof(MqttConfigFileSchema));
 
                                 AwsIotCore.MqttConnector.Host = config.Url;
                                 if (config.Port != null)
