@@ -2,8 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 /*
-    This program targets (and is tested against) firmware  ORGPAL_PALTHREE-1.9.0.888
-    `nanoff --masserase --update --target ORGPAL_PALTHREE --fwversion 1.9.0.888`
+    This program targets (and is tested against) firmware  ORGPAL_PALTHREE-1.10.0.44
+    `nanoff --masserase --update --target ORGPAL_PALTHREE --fwversion 1.10.0.44`
     Future firmware (or nuget updates) might break it!!!
 */
 
@@ -25,7 +25,7 @@ using System;
 using System.Diagnostics;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
-using nanoFramework.System.IO.FileSystem; //used for removable device events.
+using nanoFramework.System.IO; //used for removable device events.
 using System.IO;
 using nanoFramework.Aws.IoTCore.Devices;
 using OrgPalThreeDemo.TempDebugHelpers;
@@ -589,7 +589,7 @@ namespace OrgPalThreeDemo
             // I: Internal
 
             // list all removable drives
-            var removableDrives = Directory.GetLogicalDrives(); //TODO: FEEDBACK... I Cannot help but feel (since we are no longer attached to UWP, that this should be `SD:` and `USB:`
+            var removableDrives = DriveInfo.GetDrives(); //Directory.GetLogicalDrives(); //TODO: FEEDBACK... I Cannot help but feel (since we are no longer attached to UWP, that this should be `SD:` and `USB:`
 
             //TODO: Better handle no removable MSD avaliable?!
             if (removableDrives.Length == 0) // Arrays are counted by Length. (not a collection!)
@@ -602,8 +602,8 @@ namespace OrgPalThreeDemo
             foreach (var drive in removableDrives)
             {
                 _logger.LogInformation($"Found logical drive {drive}");
-                rootPath = drive;
-                if (drive.StartsWith("D:")) break; // Always use the SDcard as the default device.
+                rootPath = drive.Name;
+                if (drive.Name.StartsWith("D:")) break; // Always use the SDcard as the default device.
             }
 
             if (string.IsNullOrEmpty(rootPath))
@@ -776,14 +776,14 @@ namespace OrgPalThreeDemo
         }
 
 
-        private static void StorageEventManager_RemovableDeviceRemoved(object sender, RemovableDeviceEventArgs e)
+        private static void StorageEventManager_RemovableDeviceRemoved(object sender, RemovableDriveEventArgs e)
         {
-            _logger.LogInformation($"Removable Device Event: @ \"{e.Path}\" was removed.");
+            _logger.LogInformation($"Removable Device Event: @ \"{e.Drive}\" was removed.");
         }
 
-        private static void StorageEventManager_RemovableDeviceInserted(object sender, RemovableDeviceEventArgs e)
+        private static void StorageEventManager_RemovableDeviceInserted(object sender, RemovableDriveEventArgs e)
         {
-            _logger.LogInformation($"Removable Device Event: @ \"{e.Path}\" was inserted.");
+            _logger.LogInformation($"Removable Device Event: @ \"{e.Drive}\" was inserted.");
 
             // var mqttConfigChange = ReadStorage(e.Path);
             //if (mqttConfigChange)
