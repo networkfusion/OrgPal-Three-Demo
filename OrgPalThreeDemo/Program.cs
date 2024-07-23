@@ -53,7 +53,6 @@ namespace OrgPalThreeDemo
         private static AdcExpansionBoard palAdcExpBoard;
 #endif
 
-        private static readonly object monitor = new();
         private bool _disposed;
         private static string _serialNumber = string.Empty;
 
@@ -163,9 +162,9 @@ namespace OrgPalThreeDemo
             if (!netConnected)
             {
                 // We cannot get an IP or valid time so the only thing we can do is reboot to try again!
-                if (DateTime.UtcNow.Year < 2023)
+                if (DateTime.UtcNow.Year < 2024)
                 {
-                    Thread.Sleep(10000);
+                    Thread.Sleep(10_000);
                     nanoFramework.Runtime.Native.Power.RebootDevice();
                 }
                 // FIXME: Actually, we "should" use an event to wait for a valid IP?!
@@ -230,7 +229,7 @@ namespace OrgPalThreeDemo
                 if (!mqttConnected)
                 {
                     mqttConnectionAttempt += 1;
-                    Thread.Sleep(10000);
+                    Thread.Sleep(10_000);
                 }
             }
 
@@ -302,7 +301,7 @@ namespace OrgPalThreeDemo
         private static bool SetupNetwork()
         {
             
-            CancellationTokenSource cs = new(60000); // 60 seconds.
+            CancellationTokenSource cs = new(60_000); // 60 seconds.
                                                      // We are using TLS and it requires valid date & time (so we should set the option to true, but SNTP is run in the background, and setting it manually causes issues for the moment!!!)
 
             try
