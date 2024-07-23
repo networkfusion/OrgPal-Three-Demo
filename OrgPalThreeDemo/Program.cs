@@ -639,7 +639,8 @@ namespace OrgPalThreeDemo
                 {
                     _logger.LogInformation($"Found file: {file}");
                     //TODO: we should really check if certs are in the mcu flash before retreiving them from the filesystem (SD).
-                    if (file.EndsWith(".crt"))
+                    FileInfo fileInfo = new(file);
+                    if (fileInfo.Extension == ".crt")
                     {
 
                         using (FileStream fs = new(file, FileMode.Open, FileAccess.Read))
@@ -669,7 +670,7 @@ namespace OrgPalThreeDemo
                         
                         //Should load into secure storage (somewhere) and delete file on removable device?
                     }
-                    if (file.EndsWith(".der"))
+                    if (fileInfo.Extension == ".der")
                     {
                         using (FileStream fs = new(file, FileMode.Open, FileAccess.Read))
                         {
@@ -695,7 +696,7 @@ namespace OrgPalThreeDemo
 
                         //Should load into secure storage (somewhere) and delete file on removable device?
                     }
-                    if (file.EndsWith(".key"))
+                    if (fileInfo.Extension == ".key")
                     {
                         using (FileStream fs = new(file, FileMode.Open, FileAccess.Read))
                         {
